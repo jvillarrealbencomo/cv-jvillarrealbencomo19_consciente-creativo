@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_title }} - CV Profile{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-user-tie"></i> {{ profile_title }} Profile
+                </h3>
+                <a href="{{ url_for('profiles.' + profile_name + '_pdf') }}" 
+                   class="btn btn-light">
+                    <i class="fas fa-download"></i> Download PDF
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Personal Info -->
+                {% if personal_data %}
+                <div class="text-center mb-4">
+                    <h2>{{ personal_data.full_name }}</h2>
+                    <p class="lead">{{ personal_data.professional_title }}</p>
+                    <p>
+                        <i class="fas fa-envelope"></i> {{ personal_data.email }}
+                        {% if personal_data.phone %}
+                        | <i class="fas fa-phone"></i> {{ personal_data.phone }}
+                        {% endif %}
+                        {% if personal_data.location %}
+                        | <i class="fas fa-map-marker-alt"></i> {{ personal_data.location }}
+                        {% endif %}
+                    </p>
+                    
+                    <!-- Summary -->
+                    {% if personal_data.summary_short %}
+                    <p class="text-muted">{{ personal_data.summary_short }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Work Experience -->
+                {% if experience %}
+                <h4 class="border-bottom pb-2 mb-3">
+                    <i class="fas fa-briefcase"></i> Work Experience
+                </h4>
+                {% for exp in experience %}
+                <div class="mb-3">
+                    <h5>{{ exp.job_title }} <span class="text-muted">@ {{ exp.company }}</span></h5>
+                    <p class="text-muted small">
+                        {{ exp.start_date.strftime('%B %Y') if exp.start_date else 'N/A' }} - 
+                        {{ exp.end_date.strftime('%B %Y') if exp.end_date else 'Present' }}
+                        {% if exp.location %}| {{ exp.location }}{% endif %}
+                    </p>
+                    {% set display_content = exp.get_display_content() %}
+                    {% if display_content.highlighted_aspect %}
+                    <p><strong>Key Achievement:</strong> {{ display_content.highlighted_aspect }}</p>
+                    {% endif %}
+                    {% if display_content.functions %}
+                    <p>{{ display_content.functions }}</p>
+                    {% endif %}
+                    {% if exp.technologies %}
+                    <p class="small"><strong>Technologies:</strong> {{ exp.technologies }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Education -->
+                {% if education %}
+                <h4 class="border-bottom pb-2 mb-3 mt-4">
+                    <i class="fas fa-graduation-cap"></i> Education
+                </h4>
+                {% for edu in education %}
+                <div class="mb-3">
+                    <h5>{{ edu.degree }}</h5>
+                    <p class="text-muted">{{ edu.institution }}{% if edu.location %}, {{ edu.location }}{% endif %}</p>
+                    {% if edu.start_date or edu.end_date %}
+                    <p class="small text-muted">
+                        {{ edu.start_date.strftime('%Y') if edu.start_date else '' }}
+                        {% if edu.end_date %} - {{ edu.end_date.strftime('%Y') }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Skills -->
+                {% if tools_by_category %}
+                <h4 class="border-bottom pb-2 mb-3 mt-4">
+                    <i class="fas fa-code"></i> Technical Skills
+                </h4>
+                <div class="row">
+                    {% for category, tools in tools_by_category.items() %}
+                    <div class="col-md-6 mb-3">
+                        <h6>{{ category }}</h6>
+                        <p class="small">
+                            {% for tool in tools %}
+                                {{ tool.name }}{% if tool.proficiency_level %} ({{ tool.proficiency_level }}){% endif %}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Certifications -->
+                {% if certifications %}
+                <h4 class="border-bottom pb-2 mb-3 mt-4">
+                    <i class="fas fa-certificate"></i> Certifications
+                </h4>
+                {% for cert in certifications %}
+                <div class="mb-2">
+                    <strong>{{ cert.name }}</strong> - {{ cert.issuing_organization }}
+                    {% if cert.issue_date %}({{ cert.issue_date.strftime('%Y') }}){% endif %}
+                    {% if cert.visible_comment and cert.comment %}
+                    <p class="small text-muted">{{ cert.comment }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Languages -->
+                {% if languages %}
+                <h4 class="border-bottom pb-2 mb-3 mt-4">
+                    <i class="fas fa-language"></i> Languages
+                </h4>
+                <p>
+                    {% for lang in languages %}
+                        {{ lang.name }}: {{ lang.level }}{% if not loop.last %} | {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

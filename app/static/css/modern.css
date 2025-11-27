@@ -1,0 +1,227 @@
+# Custom CSS for CV Application
+# Modernized version for 2025
+
+/* Main styling */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navigation enhancements */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+/* Cards */
+.card {
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Tables */
+.table {
+    background-color: white;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Utilities */
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0,0,0,0.175)!important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar, footer, .btn {
+        display: none;
+    }
+    
+    .card {
+        border: 1px solid #ddd;
+        box-shadow: none;
+    }
+}
+
+/* Admin panel specific */
+.admin-sidebar {
+    background-color: #343a40;
+    min-height: 100vh;
+}
+
+.admin-sidebar .nav-link {
+    color: #adb5bd;
+}
+
+.admin-sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.admin-sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Dashboard cards */
+.stat-card {
+    border-left: 4px solid #007bff;
+}
+
+.stat-card.success {
+    border-left-color: #28a745;
+}
+
+.stat-card.warning {
+    border-left-color: #ffc107;
+}
+
+.stat-card.danger {
+    border-left-color: #dc3545;
+}
+
+/* Toggle switches */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #28a745;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* Profile badges */
+.profile-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.profile-badge.qa-analyst {
+    background-color: #007bff;
+    color: white;
+}
+
+.profile-badge.qa-engineer {
+    background-color: #28a745;
+    color: white;
+}
+
+.profile-badge.data-scientist {
+    background-color: #17a2b8;
+    color: white;
+}
