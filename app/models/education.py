@@ -1,28 +1,30 @@
 """
 Education Model
-Academic background and degrees
+Version 2025 - Degree, Institution, Country, Year
 """
 from app import db
-from app.models.base import BaseModel
+from app.models.base import BaseModel, ProfileVisibilityMixin
 
 
-class Education(BaseModel):
+class Education(BaseModel, ProfileVisibilityMixin):
     """
-    Education records with degree information
+    Academic education records
     """
     __tablename__ = 'education'
     
+    # Degree information
     degree = db.Column(db.String(200), nullable=False)
     institution = db.Column(db.String(200), nullable=False)
-    location = db.Column(db.String(200))
-    start_date = db.Column(db.Date)
-    end_date = db.Column(db.Date)
+    country = db.Column(db.String(100))
+    
+    # Year (can use start_date/end_date for more detail if needed)
+    year_obtained = db.Column(db.Integer, comment="Graduation year")
+    start_year = db.Column(db.Integer)
+    end_year = db.Column(db.Integer)
     is_current = db.Column(db.Boolean, default=False)
     
-    # Academic details
-    gpa = db.Column(db.String(20))
-    honors = db.Column(db.String(200))
-    description = db.Column(db.Text)
+    # Additional details
+    details = db.Column(db.Text, comment="Additional details, honors, GPA, etc.")
     
     # Document reference
     document_url = db.Column(db.String(500))
@@ -36,15 +38,17 @@ class Education(BaseModel):
         data.update({
             'degree': self.degree,
             'institution': self.institution,
-            'location': self.location,
-            'start_date': self.start_date.isoformat() if self.start_date else None,
-            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'country': self.country,
+            'year_obtained': self.year_obtained,
+            'start_year': self.start_year,
+            'end_year': self.end_year,
             'is_current': self.is_current,
-            'gpa': self.gpa,
-            'honors': self.honors,
-            'description': self.description,
+            'details': self.details,
             'document_url': self.document_url,
-            'display_order': self.display_order
+            'display_order': self.display_order,
+            'visible_qa_analyst': self.visible_qa_analyst,
+            'visible_qa_engineer': self.visible_qa_engineer,
+            'visible_data_scientist': self.visible_data_scientist
         })
         return data
     

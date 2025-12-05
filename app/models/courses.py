@@ -1,14 +1,14 @@
 """
-Courses Model
-Training courses and workshops with optional comments
+Course Model
+Version 2025 - Training courses
 """
 from app import db
-from app.models.base import BaseModel
+from app.models.base import BaseModel, ProfileVisibilityMixin
 
 
-class Course(BaseModel):
+class Course(BaseModel, ProfileVisibilityMixin):
     """
-    Training courses with configurable comment visibility
+    Training courses with visibility control
     """
     __tablename__ = 'courses'
     
@@ -20,11 +20,7 @@ class Course(BaseModel):
     
     # Course details
     description = db.Column(db.Text)
-    skills_acquired = db.Column(db.Text)  # Comma-separated skills
-    
-    # NEW 2025: Comment system
-    comment = db.Column(db.Text)  # Additional context or application notes
-    visible_comment = db.Column(db.Boolean, default=False, nullable=False)
+    skills_acquired = db.Column(db.Text, comment="Comma-separated skills")
     
     # Document reference
     document_url = db.Column(db.String(500))
@@ -50,12 +46,13 @@ class Course(BaseModel):
             'description': self.description,
             'skills_acquired': self.skills_acquired,
             'skills_list': self.get_skills_list(),
-            'comment': self.comment if self.visible_comment else None,
-            'visible_comment': self.visible_comment,
             'document_url': self.document_url,
-            'display_order': self.display_order
+            'display_order': self.display_order,
+            'visible_qa_analyst': self.visible_qa_analyst,
+            'visible_qa_engineer': self.visible_qa_engineer,
+            'visible_data_scientist': self.visible_data_scientist
         })
         return data
     
     def __repr__(self):
-        return f'<Course {self.name} - {self.provider}>'
+        return f'<Course {self.name}>'

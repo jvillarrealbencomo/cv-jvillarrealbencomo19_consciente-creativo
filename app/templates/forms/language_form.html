@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Language - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-translate"></i> Language Skills
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="languageForm">
+                        <input type="hidden" id="languageId" name="id" value="{{ language.id if language else '' }}">
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Language Details</h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Language <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ language.name if language else '' }}" required
+                                       placeholder="e.g., English, Spanish, French">
+                            </div>
+                        </div>
+
+                        <!-- Proficiency Levels -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Proficiency Levels</h5>
+                                <p class="text-muted small">
+                                    <i class="bi bi-info-circle"></i> Use CEFR levels (A1, A2, B1, B2, C1, C2) or descriptive terms (Native, Fluent, Advanced, Intermediate, Basic)
+                                </p>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="levelConversation" class="form-label">Conversation <span class="text-danger">*</span></label>
+                                <select class="form-select" id="levelConversation" name="level_conversation" required>
+                                    <option value="">Select level...</option>
+                                    <option value="Native" {{ 'selected' if language and language.level_conversation == 'Native' else '' }}>Native</option>
+                                    <option value="C2" {{ 'selected' if language and language.level_conversation == 'C2' else '' }}>C2 - Mastery</option>
+                                    <option value="C1" {{ 'selected' if language and language.level_conversation == 'C1' else '' }}>C1 - Advanced</option>
+                                    <option value="B2" {{ 'selected' if language and language.level_conversation == 'B2' else '' }}>B2 - Upper Intermediate</option>
+                                    <option value="B1" {{ 'selected' if language and language.level_conversation == 'B1' else '' }}>B1 - Intermediate</option>
+                                    <option value="A2" {{ 'selected' if language and language.level_conversation == 'A2' else '' }}>A2 - Elementary</option>
+                                    <option value="A1" {{ 'selected' if language and language.level_conversation == 'A1' else '' }}>A1 - Beginner</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="levelReading" class="form-label">Reading <span class="text-danger">*</span></label>
+                                <select class="form-select" id="levelReading" name="level_reading" required>
+                                    <option value="">Select level...</option>
+                                    <option value="Native" {{ 'selected' if language and language.level_reading == 'Native' else '' }}>Native</option>
+                                    <option value="C2" {{ 'selected' if language and language.level_reading == 'C2' else '' }}>C2 - Mastery</option>
+                                    <option value="C1" {{ 'selected' if language and language.level_reading == 'C1' else '' }}>C1 - Advanced</option>
+                                    <option value="B2" {{ 'selected' if language and language.level_reading == 'B2' else '' }}>B2 - Upper Intermediate</option>
+                                    <option value="B1" {{ 'selected' if language and language.level_reading == 'B1' else '' }}>B1 - Intermediate</option>
+                                    <option value="A2" {{ 'selected' if language and language.level_reading == 'A2' else '' }}>A2 - Elementary</option>
+                                    <option value="A1" {{ 'selected' if language and language.level_reading == 'A1' else '' }}>A1 - Beginner</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="levelWriting" class="form-label">Writing <span class="text-danger">*</span></label>
+                                <select class="form-select" id="levelWriting" name="level_writing" required>
+                                    <option value="">Select level...</option>
+                                    <option value="Native" {{ 'selected' if language and language.level_writing == 'Native' else '' }}>Native</option>
+                                    <option value="C2" {{ 'selected' if language and language.level_writing == 'C2' else '' }}>C2 - Mastery</option>
+                                    <option value="C1" {{ 'selected' if language and language.level_writing == 'C1' else '' }}>C1 - Advanced</option>
+                                    <option value="B2" {{ 'selected' if language and language.level_writing == 'B2' else '' }}>B2 - Upper Intermediate</option>
+                                    <option value="B1" {{ 'selected' if language and language.level_writing == 'B1' else '' }}>B1 - Intermediate</option>
+                                    <option value="A2" {{ 'selected' if language and language.level_writing == 'A2' else '' }}>A2 - Elementary</option>
+                                    <option value="A1" {{ 'selected' if language and language.level_writing == 'A1' else '' }}>A1 - Beginner</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Optional Certification -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Certification (Optional)</h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="certificationName" class="form-label">Certification Name</label>
+                                <input type="text" class="form-control" id="certificationName" name="certification_name" 
+                                       value="{{ language.certification_name if language else '' }}"
+                                       placeholder="e.g., TOEFL, IELTS, DELE">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="certificationScore" class="form-label">Score</label>
+                                <input type="text" class="form-control" id="certificationScore" name="certification_score" 
+                                       value="{{ language.certification_score if language else '' }}"
+                                       placeholder="e.g., 110/120">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="certificationDate" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="certificationDate" name="certification_date" 
+                                       value="{{ language.certification_date.isoformat() if language and language.certification_date else '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Profile Visibility -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Profile Visibility</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaAnalyst" name="visible_qa_analyst" 
+                                           {{ 'checked' if not language or language.visible_qa_analyst else '' }}>
+                                    <label class="form-check-label" for="visibleQaAnalyst">
+                                        <i class="bi bi-briefcase"></i> QA Analyst
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaEngineer" name="visible_qa_engineer" 
+                                           {{ 'checked' if not language or language.visible_qa_engineer else '' }}>
+                                    <label class="form-check-label" for="visibleQaEngineer">
+                                        <i class="bi bi-code-slash"></i> QA Engineer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleDataScientist" name="visible_data_scientist" 
+                                           {{ 'checked' if not language or language.visible_data_scientist else '' }}>
+                                    <label class="form-check-label" for="visibleDataScientist">
+                                        <i class="bi bi-graph-up"></i> Data Scientist
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                        <i class="bi bi-arrow-left"></i> Back
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('languageForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Convert checkboxes to boolean
+        data.visible_qa_analyst = document.getElementById('visibleQaAnalyst').checked;
+        data.visible_qa_engineer = document.getElementById('visibleQaEngineer').checked;
+        data.visible_data_scientist = document.getElementById('visibleDataScientist').checked;
+        
+        const languageId = document.getElementById('languageId').value;
+        const url = languageId ? `/api/language/${languageId}` : '/api/language';
+        const method = languageId ? 'PUT' : 'POST';
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (!languageId) {
+                    document.getElementById('languageId').value = result.id;
+                }
+                const addAnother = confirm('Saved successfully!\n\nWould you like to add another language?');
+                if (addAnother) {
+                    form.reset();
+                    document.getElementById('languageId').value = '';
+                }
+            } else {
+                const err = await response.json().catch(() => null);
+                alert('Failed to save' + (err && err.details ? `: ${err.details}` : ''));
+            }
+        } catch (error) {
+            console.error('Error saving:', error);
+            alert('Error saving data');
+        }
+    });
+});
+</script>
+{% endblock %}

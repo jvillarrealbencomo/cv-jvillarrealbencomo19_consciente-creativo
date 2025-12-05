@@ -1,12 +1,12 @@
 """
-IT Products Model
-Software products and projects developed
+IT Product Model
+Version 2025 - Software products and projects
 """
 from app import db
-from app.models.base import BaseModel
+from app.models.base import BaseModel, ProfileVisibilityMixin
 
 
-class ITProduct(BaseModel):
+class ITProduct(BaseModel, ProfileVisibilityMixin):
     """
     IT products and projects portfolio
     """
@@ -14,10 +14,10 @@ class ITProduct(BaseModel):
     
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    role = db.Column(db.String(200))  # Developer, Lead, Architect, etc.
+    role = db.Column(db.String(200), comment="Developer, Lead, Architect, etc.")
     
     # Project details
-    technologies = db.Column(db.Text)  # Comma-separated technologies
+    technologies = db.Column(db.Text, comment="Comma-separated technologies")
     start_date = db.Column(db.Date)
     end_date = db.Column(db.Date)
     is_current = db.Column(db.Boolean, default=False)
@@ -55,7 +55,10 @@ class ITProduct(BaseModel):
             'github_url': self.github_url,
             'demo_url': self.demo_url,
             'impact_description': self.impact_description,
-            'display_order': self.display_order
+            'display_order': self.display_order,
+            'visible_qa_analyst': self.visible_qa_analyst,
+            'visible_qa_engineer': self.visible_qa_engineer,
+            'visible_data_scientist': self.visible_data_scientist
         })
         return data
     

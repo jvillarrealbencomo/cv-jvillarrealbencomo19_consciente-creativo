@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}Personal Information - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Form Section -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-circle"></i> Personal Information
+                    </h4>
+                    <div class="btn-group">
+                        <select id="profileSelector" class="form-select form-select-sm" style="width: 200px;">
+                            <option value="qa_analyst">QA Analyst</option>
+                            <option value="qa_engineer" selected>QA Engineer</option>
+                            <option value="data_scientist">Data Scientist</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-light" id="applyPresetBtn">
+                            <i class="bi bi-magic"></i> Apply Preset
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="personForm">
+                        <input type="hidden" id="personId" name="id" value="{{ person.id if person else '' }}">
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Basic Information</h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" 
+                                       value="{{ person.first_name if person else '' }}" required placeholder="Javier">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" 
+                                       value="{{ person.last_name if person else '' }}" required placeholder="Villarreal Bencomo">
+                            </div>
+                        </div>
+
+                        <!-- Profile-Specific Titles -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Professional Titles (per Profile)</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="titleQaAnalyst" class="form-label">
+                                    <i class="bi bi-briefcase"></i> QA Analyst Title
+                                </label>
+                                <input type="text" class="form-control" id="titleQaAnalyst" name="title_qa_analyst" 
+                                       value="{{ person.title_qa_analyst if person else '' }}" 
+                                       placeholder="e.g., Senior QA Analyst">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="titleQaEngineer" class="form-label">
+                                    <i class="bi bi-code-slash"></i> QA Engineer Title
+                                </label>
+                                <input type="text" class="form-control" id="titleQaEngineer" name="title_qa_engineer" 
+                                       value="{{ person.title_qa_engineer if person else '' }}" 
+                                       placeholder="e.g., Senior QA Engineer">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="titleDataScientist" class="form-label">
+                                    <i class="bi bi-graph-up"></i> Data Scientist Title
+                                </label>
+                                <input type="text" class="form-control" id="titleDataScientist" name="title_data_scientist" 
+                                       value="{{ person.title_data_scientist if person else '' }}" 
+                                       placeholder="e.g., Senior Data Scientist">
+                            </div>
+                        </div>
+
+                        <!-- Contact Information with Visibility Controls -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Contact Information</h5>
+                                <p class="text-muted small">
+                                    <i class="bi bi-info-circle"></i> Use the toggle to control visibility in each CV profile
+                                </p>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="email" class="form-label mb-0">Email <span class="text-danger">*</span></label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showEmail" name="show_email" 
+                                               {{ 'checked' if not person or person.show_email else '' }}>
+                                        <label class="form-check-label small" for="showEmail">
+                                            <i class="bi bi-eye"></i> Visible
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ person.email if person else '' }}" required>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="phone" class="form-label mb-0">Phone</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showPhone" name="show_phone" 
+                                               {{ 'checked' if not person or person.show_phone else '' }}>
+                                        <label class="form-check-label small" for="showPhone">
+                                            <i class="bi bi-eye"></i> Visible
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{{ person.phone if person else '' }}">
+                            </div>
+
+                            <!-- LinkedIn -->
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="linkedin" class="form-label mb-0">
+                                        <i class="bi bi-linkedin"></i> LinkedIn URL
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showLinkedin" name="show_linkedin" 
+                                               {{ 'checked' if not person or person.show_linkedin else '' }}>
+                                        <label class="form-check-label small" for="showLinkedin">
+                                            <i class="bi bi-eye"></i> Visible
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="url" class="form-control" id="linkedin" name="linkedin_url" 
+                                       value="{{ person.linkedin_url if person else '' }}" 
+                                       placeholder="https://linkedin.com/in/yourprofile">
+                            </div>
+
+                            <!-- GitHub -->
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="github" class="form-label mb-0">
+                                        <i class="bi bi-github"></i> GitHub URL
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showGithub" name="show_github" 
+                                               {{ 'checked' if person and person.show_github else '' }}>
+                                        <label class="form-check-label small" for="showGithub">
+                                            <i class="bi bi-eye"></i> Visible
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="url" class="form-control" id="github" name="github_url" 
+                                       value="{{ person.github_url if person else '' }}" 
+                                       placeholder="https://github.com/yourusername">
+                            </div>
+
+                            <!-- Personal URL -->
+                            <div class="col-md-12 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label for="personalUrl" class="form-label mb-0">
+                                        <i class="bi bi-globe"></i> Personal Website
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showPersonalUrl" name="show_personal_url" 
+                                               {{ 'checked' if not person or person.show_personal_url else '' }}>
+                                        <label class="form-check-label small" for="showPersonalUrl">
+                                            <i class="bi bi-eye"></i> Visible
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="url" class="form-control" id="personalUrl" name="personal_url" 
+                                       value="{{ person.personal_url if person else '' }}" 
+                                       placeholder="https://yourwebsite.com">
+                            </div>
+                        </div>
+
+                        <!-- Professional Reference -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-person-check"></i> Professional Reference
+                                </h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="referenceName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="referenceName" name="reference_name" 
+                                       value="{{ person.reference_name if person else '' }}" 
+                                       placeholder="Annekelys González">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="referenceCompany" class="form-label">Company</label>
+                                <input type="text" class="form-control" id="referenceCompany" name="reference_company" 
+                                       value="{{ person.reference_company if person else '' }}" 
+                                       placeholder="Banco de Chile">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="referencePhone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="referencePhone" name="reference_phone" 
+                                       value="{{ person.reference_phone if person else '' }}" 
+                                       placeholder="+56 9 xxxx xxxx">
+                            </div>
+                        </div>
+
+                        <!-- Profile Summaries -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Professional Summaries (per Profile)</h5>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="summaryQaAnalyst" class="form-label">
+                                    <i class="bi bi-briefcase"></i> QA Analyst Summary
+                                </label>
+                                <textarea class="form-control" id="summaryQaAnalyst" name="summary_qa_analyst" rows="3"
+                                          placeholder="Professional summary for QA Analyst profile...">{{ person.summary_qa_analyst if person else '' }}</textarea>
+                                <small class="form-text text-muted">Focus on manual testing, test planning, quality processes</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="summaryQaEngineer" class="form-label">
+                                    <i class="bi bi-code-slash"></i> QA Engineer Summary
+                                </label>
+                                <textarea class="form-control" id="summaryQaEngineer" name="summary_qa_engineer" rows="3"
+                                          placeholder="Professional summary for QA Engineer profile...">{{ person.summary_qa_engineer if person else '' }}</textarea>
+                                <small class="form-text text-muted">Focus on test automation, CI/CD, technical testing</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="summaryDataScientist" class="form-label">
+                                    <i class="bi bi-graph-up"></i> Data Scientist Summary
+                                </label>
+                                <textarea class="form-control" id="summaryDataScientist" name="summary_data_scientist" rows="3"
+                                          placeholder="Professional summary for Data Scientist profile...">{{ person.summary_data_scientist if person else '' }}</textarea>
+                                <small class="form-text text-muted">Focus on ML, statistical analysis, data engineering</small>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save Changes
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" id="previewBtn">
+                                        <i class="bi bi-eye"></i> Preview CV
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" id="resetBtn">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-eye"></i> Visibility Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle"></i> This shows which contacts will be visible in the selected profile
+                    </div>
+                    <div id="visibilityPreview">
+                        <h6 class="fw-bold" id="previewName"></h6>
+                        <p class="small text-muted mb-2" id="previewTitle">Professional</p>
+                        <div id="visibleContacts" class="mb-3">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                        <hr>
+                        <small class="text-muted">
+                            <i class="bi bi-lightbulb"></i> Toggle visibility switches to customize what appears in each CV
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('personForm');
+    const profileSelector = document.getElementById('profileSelector');
+    const applyPresetBtn = document.getElementById('applyPresetBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    // Update preview when visibility toggles change
+    const visibilityToggles = ['showEmail', 'showPhone', 'showLinkedin', 'showGithub', 'showPersonalUrl'];
+    visibilityToggles.forEach(id => {
+        document.getElementById(id).addEventListener('change', updateVisibilityPreview);
+    });
+    
+    // Update preview when contact fields change
+    ['email', 'phone', 'linkedin', 'github', 'personalUrl'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateVisibilityPreview);
+    });
+    
+    function updatePreviewTitle() {
+        const profile = profileSelector.value;
+        const titleMap = {
+            'qa_analyst': document.getElementById('titleQaAnalyst').value,
+            'qa_engineer': document.getElementById('titleQaEngineer').value,
+            'data_scientist': document.getElementById('titleDataScientist').value
+        };
+        document.getElementById('previewTitle').textContent = titleMap[profile] || 'Professional';
+    }
+
+    function updatePreviewName() {
+        const first = document.getElementById('firstName').value.trim();
+        const last = document.getElementById('lastName').value.trim();
+        const full = (first + ' ' + last).trim();
+        document.getElementById('previewName').textContent = full || '—';
+    }
+
+    // Update title when profile changes
+    profileSelector.addEventListener('change', updatePreviewTitle);
+
+    // Update preview when title fields change
+    ;['titleQaAnalyst','titleQaEngineer','titleDataScientist'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreviewTitle);
+    });
+
+    // Update name when first/last name change
+    document.getElementById('firstName').addEventListener('input', updatePreviewName);
+    document.getElementById('lastName').addEventListener('input', updatePreviewName);
+    
+    function updateVisibilityPreview() {
+        const contacts = [];
+        const profile = profileSelector.value;
+        
+        if (document.getElementById('showEmail').checked && document.getElementById('email').value) {
+            contacts.push(`<div><i class="bi bi-envelope"></i> ${document.getElementById('email').value}</div>`);
+        }
+        if (document.getElementById('showPhone').checked && document.getElementById('phone').value) {
+            contacts.push(`<div><i class="bi bi-telephone"></i> ${document.getElementById('phone').value}</div>`);
+        }
+        if (document.getElementById('showLinkedin').checked && document.getElementById('linkedin').value) {
+            contacts.push(`<div><i class="bi bi-linkedin"></i> LinkedIn Profile</div>`);
+        }
+        if (document.getElementById('showGithub').checked && document.getElementById('github').value) {
+            contacts.push(`<div><i class="bi bi-github"></i> GitHub Profile</div>`);
+        }
+        if (document.getElementById('showPersonalUrl').checked && document.getElementById('personalUrl').value) {
+            contacts.push(`<div><i class="bi bi-globe"></i> Personal Website</div>`);
+        }
+        
+        document.getElementById('visibleContacts').innerHTML = contacts.length > 0 
+            ? contacts.join('') 
+            : '<div class="text-muted small">No contacts visible</div>';
+    }
+    
+    // Apply preset
+    applyPresetBtn.addEventListener('click', async function() {
+        const profile = profileSelector.value;
+        const personId = document.getElementById('personId').value;
+        
+        if (!personId) {
+            alert('Please save the person first before applying presets');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/presets/person/${personId}/apply/${profile}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                // Update form with preset values
+                location.reload();
+            } else {
+                alert('Failed to apply preset');
+            }
+        } catch (error) {
+            console.error('Error applying preset:', error);
+            alert('Error applying preset');
+        }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Convert checkboxes to boolean
+        visibilityToggles.forEach(id => {
+            data[id.replace(/([A-Z])/g, '_$1').toLowerCase()] = document.getElementById(id).checked;
+        });
+        
+        const personId = document.getElementById('personId').value;
+        const url = personId ? `/api/person/${personId}` : '/api/person';
+        const method = personId ? 'PUT' : 'POST';
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (!personId) {
+                    document.getElementById('personId').value = result.id;
+                }
+                alert('Saved successfully!');
+                updateVisibilityPreview();
+                updatePreviewName();
+                updatePreviewTitle();
+            } else {
+                const err = await response.json().catch(() => null);
+                alert('Failed to save' + (err && err.details ? `: ${err.details}` : ''));
+            }
+        } catch (error) {
+            console.error('Error saving:', error);
+            alert('Error saving data');
+        }
+    });
+    
+    // Preview button
+    previewBtn.addEventListener('click', function() {
+        const personId = document.getElementById('personId').value;
+        const profile = profileSelector.value;
+        if (personId) {
+            window.open(`/profile/${personId}?profile=${profile}`, '_blank');
+        } else {
+            alert('Please save the person first');
+        }
+    });
+    
+    // Reset button
+    resetBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to reset the form?')) {
+            form.reset();
+            updateVisibilityPreview();
+        }
+    });
+    
+    // Initial preview update
+    updateVisibilityPreview();
+    updatePreviewName();
+    updatePreviewTitle();
+});
+</script>
+{% endblock %}

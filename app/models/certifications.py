@@ -1,14 +1,14 @@
 """
-Certifications Model
-Professional certifications with optional comments
+Certification Model
+Version 2025 - Professional certifications
 """
 from app import db
-from app.models.base import BaseModel
+from app.models.base import BaseModel, ProfileVisibilityMixin
 
 
-class Certification(BaseModel):
+class Certification(BaseModel, ProfileVisibilityMixin):
     """
-    Professional certifications with configurable comment visibility
+    Professional certifications with visibility control
     """
     __tablename__ = 'certifications'
     
@@ -19,9 +19,8 @@ class Certification(BaseModel):
     credential_id = db.Column(db.String(200))
     credential_url = db.Column(db.String(500))
     
-    # NEW 2025: Comment system
-    comment = db.Column(db.Text)  # Additional context or relevance note
-    visible_comment = db.Column(db.Boolean, default=False, nullable=False)
+    # Description/notes
+    description = db.Column(db.Text)
     
     # Document reference
     document_url = db.Column(db.String(500))
@@ -46,13 +45,15 @@ class Certification(BaseModel):
             'expiration_date': self.expiration_date.isoformat() if self.expiration_date else None,
             'credential_id': self.credential_id,
             'credential_url': self.credential_url,
-            'comment': self.comment if self.visible_comment else None,
-            'visible_comment': self.visible_comment,
+            'description': self.description,
             'document_url': self.document_url,
             'display_order': self.display_order,
-            'is_expired': self.is_expired()
+            'is_expired': self.is_expired(),
+            'visible_qa_analyst': self.visible_qa_analyst,
+            'visible_qa_engineer': self.visible_qa_engineer,
+            'visible_data_scientist': self.visible_data_scientist
         })
         return data
     
     def __repr__(self):
-        return f'<Certification {self.name} - {self.issuing_organization}>'
+        return f'<Certification {self.name}>'

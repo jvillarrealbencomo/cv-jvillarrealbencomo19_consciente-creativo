@@ -1,72 +1,138 @@
 """
-Work Experience Model
-Professional experience with intelligent detail management
+Work Experience Model with Three-Level Visibility Control
+Version 2025 - Separate visibility for summary, detailed responsibilities, and achievements
 """
 from app import db
-from app.models.base import BaseModel
+from app.models.base import BaseModel, ProfileVisibilityMixin
 
 
-class WorkExperience(BaseModel):
+class WorkExperience(BaseModel, ProfileVisibilityMixin):
     """
-    Work experience with configurable detail display
+    Work experience with granular visibility control
+    Three independent visibility flags:
+    - show_responsibilities_summary
+    - show_responsibilities_detailed
+    - show_achievements
     """
     __tablename__ = 'work_experience'
     
-    # Job details
+    # Job Details
     job_title = db.Column(db.String(200), nullable=False)
     company = db.Column(db.String(200), nullable=False)
     location = db.Column(db.String(200))
+    
+    # Time Period (supporting chronological blocks: 2021-2025, 2015-2020, 1985-2009)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date)
     is_current = db.Column(db.Boolean, default=False)
     
-    # Job description
-    description = db.Column(db.Text)
+    # Time block classification for organizational purposes
+    time_block = db.Column(db.String(50), comment="e.g., '2021-2025', '2015-2020', '1985-2009'")
     
-    # NEW 2025: Configurable details
-    functions = db.Column(db.Text)  # Daily functions and responsibilities
-    highlighted_aspect = db.Column(db.Text)  # Key achievement or aspect to highlight
+    # Three Types of Content with Independent Visibility
     
-    # Control what to show: 'functions', 'aspect', 'both'
-    show_detail = db.Column(db.String(50), default='both', nullable=False)
+    # 1. Summary (brief, one-line description)
+    responsibilities_summary = db.Column(db.Text)
+    show_responsibilities_summary = db.Column(db.Boolean, default=True, nullable=False)
     
-    # Technologies used (comma-separated for simple querying)
-    technologies = db.Column(db.Text)
+    # 2. Detailed responsibilities (comprehensive list)
+    responsibilities_detailed = db.Column(db.Text)
+    show_responsibilities_detailed = db.Column(db.Boolean, default=False, nullable=False)
     
-    # Document reference
-    document_url = db.Column(db.String(500))
+    # 3. Key achievements/highlights
+    achievements = db.Column(db.Text)
+    show_achievements = db.Column(db.Boolean, default=True, nullable=False)
     
-    # Display order
+    # Additional metadata
+    technologies = db.Column(db.Text, comment="Comma-separated technologies used")
+    
+    # Display order within time block
     display_order = db.Column(db.Integer, default=0)
     
-    def get_display_content(self):
+    def get_visible_content(self):
         """
-        Returns the content to display based on show_detail setting
-        
-        Returns:
-            dict: Content to display
+        Returns dictionary of content sections that should be displayed
+        Based on visibility flags
         """
-        content = {
-            'description': self.description,
-            'functions': None,
-            'highlighted_aspect': None
-        }
+        content = {}
         
-        if self.show_detail == 'functions':
-            content['functions'] = self.functions
-        elif self.show_detail == 'aspect':
-            content['highlighted_aspect'] = self.highlighted_aspect
-        elif self.show_detail == 'both':
-            content['functions'] = self.functions
-            content['highlighted_aspect'] = self.highlighted_aspect
+        if self.show_responsibilities_summary and self.responsibilities_summary:
+            content['responsibilities_summary'] = self.responsibilities_summary
+        
+        if self.show_responsibilities_detailed and self.responsibilities_detailed:
+            content['responsibilities_detailed'] = self.responsibilities_detailed
+        
+        if self.show_achievements and self.achievements:
+            content['achievements'] = self.achievements
         
         return content
+    
+    def get_content_level(self):
+        """
+        Determine content detail level: 'none', 'minimal', 'summary', 'detailed', 'complete'
+        """
+        if not any([self.show_responsibilities_summary, 
+                   self.show_responsibilities_detailed, 
+                   self.show_achievements]):
+            return 'none'
+        
+        if self.show_responsibilities_detailed and self.show_achievements:
+            return 'complete'
+        elif self.show_responsibilities_detailed:
+            return 'detailed'
+        elif self.show_achievements:
+            return 'summary'
+        elif self.show_responsibilities_summary:
+            return 'minimal'
+        
+        return 'none'
+    
+    def set_content_level(self, level):
+        """
+        Set all visibility flags based on desired detail level
+        Levels: 'none', 'minimal', 'summary', 'detailed', 'complete'
+        """
+        if level == 'none':
+            self.show_responsibilities_summary = False
+            self.show_responsibilities_detailed = False
+            self.show_achievements = False
+        elif level == 'minimal':
+            self.show_responsibilities_summary = True
+            self.show_responsibilities_detailed = False
+            self.show_achievements = False
+        elif level == 'summary':
+            self.show_responsibilities_summary = True
+            self.show_responsibilities_detailed = False
+            self.show_achievements = True
+        elif level == 'detailed':
+            self.show_responsibilities_summary = True
+            self.show_responsibilities_detailed = True
+            self.show_achievements = False
+        elif level == 'complete':
+            self.show_responsibilities_summary = True
+            self.show_responsibilities_detailed = True
+            self.show_achievements = True
     
     def get_technologies_list(self):
         """Parse technologies string into list"""
         if not self.technologies:
             return []
         return [tech.strip() for tech in self.technologies.split(',')]
+    
+    def apply_profile_preset(self, profile_name):
+        """Apply predefined visibility preset based on profile"""
+        super().apply_profile_preset(profile_name)
+        
+        # Profile-specific content level defaults
+        if profile_name == 'qa_analyst':
+            # QA Analyst: focus on achievements
+            self.set_content_level('summary')
+        elif profile_name == 'qa_engineer':
+            # QA Engineer: show detailed work
+            self.set_content_level('complete')
+        elif profile_name == 'data_scientist':
+            # Data Scientist: achievements-focused
+            self.set_content_level('summary')
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -78,17 +144,23 @@ class WorkExperience(BaseModel):
             'start_date': self.start_date.isoformat() if self.start_date else None,
             'end_date': self.end_date.isoformat() if self.end_date else None,
             'is_current': self.is_current,
-            'description': self.description,
-            'functions': self.functions,
-            'highlighted_aspect': self.highlighted_aspect,
-            'show_detail': self.show_detail,
+            'time_block': self.time_block,
+            'responsibilities_summary': self.responsibilities_summary,
+            'show_responsibilities_summary': self.show_responsibilities_summary,
+            'responsibilities_detailed': self.responsibilities_detailed,
+            'show_responsibilities_detailed': self.show_responsibilities_detailed,
+            'achievements': self.achievements,
+            'show_achievements': self.show_achievements,
             'technologies': self.technologies,
             'technologies_list': self.get_technologies_list(),
-            'document_url': self.document_url,
             'display_order': self.display_order,
-            'display_content': self.get_display_content()
+            'visible_content': self.get_visible_content(),
+            'content_level': self.get_content_level(),
+            'visible_qa_analyst': self.visible_qa_analyst,
+            'visible_qa_engineer': self.visible_qa_engineer,
+            'visible_data_scientist': self.visible_data_scientist
         })
         return data
     
     def __repr__(self):
-        return f'<WorkExperience {self.job_title} at {self.company}>'
+        return f'<WorkExperience {self.job_title} at {self.company} ({self.time_block})>'
