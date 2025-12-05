@@ -36,8 +36,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="completionDate" class="form-label">Completion Date</label>
                                 <input type="date" class="form-control" id="completionDate" name="completion_date" 
-                                       value="{{ course.completion_date.isoformat() if course and course.completion_date else '' }}"
-                                       max="">
+                                       value="{{ course.completion_date.isoformat() if course and course.completion_date else '' }}">
                                 <small class="form-text text-muted">Cannot be a future date</small>
                                 <div class="invalid-feedback" id="completionDateError">
                                     Completion date cannot be in the future
@@ -129,13 +128,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const completionDateInput = document.getElementById('completionDate');
     const completionDateError = document.getElementById('completionDateError');
     
+    // Helper function to get today's date in YYYY-MM-DD format
+    function getTodayDateString() {
+        return new Date().toISOString().split('T')[0];
+    }
+    
+    // Helper function to validate if date is in the future
+    function isFutureDate(dateString) {
+        if (!dateString) return false;
+        const inputDate = new Date(dateString + 'T00:00:00');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return inputDate > today;
+    }
+    
     // Set max date to today
-    const today = new Date().toISOString().split('T')[0];
-    completionDateInput.setAttribute('max', today);
+    completionDateInput.setAttribute('max', getTodayDateString());
     
     // Validate completion date on change
     completionDateInput.addEventListener('change', function() {
-        if (this.value && this.value > today) {
+        if (isFutureDate(this.value)) {
             this.classList.add('is-invalid');
             completionDateError.style.display = 'block';
         } else {
@@ -147,9 +159,9 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Validate completion date before submission
+        // Validate completion date before submission (recalculate today to handle edge cases)
         const completionDate = completionDateInput.value;
-        if (completionDate && completionDate > today) {
+        if (isFutureDate(completionDate)) {
             completionDateInput.classList.add('is-invalid');
             completionDateError.style.display = 'block';
             alert('Completion date cannot be in the future');
@@ -184,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (addAnother) {
                     form.reset();
                     document.getElementById('courseId').value = '';
-                    completionDateInput.setAttribute('max', today);
+                    completionDateInput.setAttribute('max', getTodayDateString());
                 }
             } else {
                 const err = await response.json().catch(() => null);
