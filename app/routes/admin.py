@@ -20,7 +20,9 @@ def database_consulta():
         ('Education', Education),
         ('AdvancedTraining', AdvancedTraining),
         ('Language', Language),
-        ('ITProduct', ITProduct)
+        ('ITProduct', ITProduct),
+        ('Certification', Certification),
+        ('Course', Course)
     ]
     html = ['<h2>Database Table Records</h2>']
     for name, model in tables:
