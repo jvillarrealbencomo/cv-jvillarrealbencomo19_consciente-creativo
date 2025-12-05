@@ -36,7 +36,12 @@
                             <div class="col-md-6 mb-3">
                                 <label for="completionDate" class="form-label">Completion Date</label>
                                 <input type="date" class="form-control" id="completionDate" name="completion_date" 
-                                       value="{{ course.completion_date.isoformat() if course and course.completion_date else '' }}">
+                                       value="{{ course.completion_date.isoformat() if course and course.completion_date else '' }}"
+                                       max="">
+                                <small class="form-text text-muted">Cannot be a future date</small>
+                                <div class="invalid-feedback" id="completionDateError">
+                                    Completion date cannot be in the future
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="durationHours" class="form-label">Duration (hours)</label>
@@ -121,9 +126,35 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('courseForm');
+    const completionDateInput = document.getElementById('completionDate');
+    const completionDateError = document.getElementById('completionDateError');
+    
+    // Set max date to today
+    const today = new Date().toISOString().split('T')[0];
+    completionDateInput.setAttribute('max', today);
+    
+    // Validate completion date on change
+    completionDateInput.addEventListener('change', function() {
+        if (this.value && this.value > today) {
+            this.classList.add('is-invalid');
+            completionDateError.style.display = 'block';
+        } else {
+            this.classList.remove('is-invalid');
+            completionDateError.style.display = 'none';
+        }
+    });
     
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // Validate completion date before submission
+        const completionDate = completionDateInput.value;
+        if (completionDate && completionDate > today) {
+            completionDateInput.classList.add('is-invalid');
+            completionDateError.style.display = 'block';
+            alert('Completion date cannot be in the future');
+            return;
+        }
         
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
@@ -153,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (addAnother) {
                     form.reset();
                     document.getElementById('courseId').value = '';
+                    completionDateInput.setAttribute('max', today);
                 }
             } else {
                 const err = await response.json().catch(() => null);

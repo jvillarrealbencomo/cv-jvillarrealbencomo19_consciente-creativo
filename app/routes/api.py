@@ -264,7 +264,7 @@ def register_model_endpoints(model_class, endpoint_prefix):
                 data.pop('id', None)
             
             # Convert date strings to date objects (handle empty strings)
-            from datetime import datetime
+            from datetime import datetime, date
             for field in ['issue_date', 'expiration_date', 'completion_date', 'certification_date']:
                 if field in data:
                     if data[field] == '' or data[field] is None:
@@ -274,6 +274,11 @@ def register_model_endpoints(model_class, endpoint_prefix):
                             data[field] = datetime.strptime(data[field], '%Y-%m-%d').date()
                         except ValueError:
                             data[field] = None
+            
+            # Validate completion_date is not in the future (for Course model)
+            if model_class.__name__ == 'Course' and 'completion_date' in data and data['completion_date']:
+                if data['completion_date'] > date.today():
+                    return jsonify({'error': 'Validation failed', 'details': 'Completion date cannot be in the future'}), 400
             
             # Convert empty strings to None for optional text fields
             optional_text_fields = ['credential_id', 'credential_url', 'description', 'document_url', 
@@ -319,7 +324,7 @@ def register_model_endpoints(model_class, endpoint_prefix):
                 data.pop('id', None)
             
             # Convert date strings (handle empty strings)
-            from datetime import datetime
+            from datetime import datetime, date
             for field in ['issue_date', 'expiration_date', 'completion_date', 'certification_date']:
                 if field in data:
                     if data[field] == '' or data[field] is None:
@@ -329,6 +334,11 @@ def register_model_endpoints(model_class, endpoint_prefix):
                             data[field] = datetime.strptime(data[field], '%Y-%m-%d').date()
                         except ValueError:
                             data[field] = None
+            
+            # Validate completion_date is not in the future (for Course model)
+            if model_class.__name__ == 'Course' and 'completion_date' in data and data['completion_date']:
+                if data['completion_date'] > date.today():
+                    return jsonify({'error': 'Validation failed', 'details': 'Completion date cannot be in the future'}), 400
             
             # Convert empty strings to None for optional text fields
             optional_text_fields = ['credential_id', 'credential_url', 'description', 'document_url', 
