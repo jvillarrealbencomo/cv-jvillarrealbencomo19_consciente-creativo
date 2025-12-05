@@ -255,6 +255,14 @@ def tool_detail(tool_id):
 # Generic CRUD endpoints for other models
 def register_model_endpoints(model_class, endpoint_prefix):
     """Register standard CRUD endpoints with unique endpoint names."""
+    
+    def validate_course_completion_date(data):
+        """Validate that course completion date is not in the future."""
+        from datetime import date
+        if model_class.__name__ == 'Course' and 'completion_date' in data and data['completion_date']:
+            if data['completion_date'] > date.today():
+                return jsonify({'error': 'Validation failed', 'details': 'Completion date cannot be in the future'}), 400
+        return None
 
     def list_create():
         if request.method == 'POST':
@@ -276,9 +284,9 @@ def register_model_endpoints(model_class, endpoint_prefix):
                             data[field] = None
             
             # Validate completion_date is not in the future (for Course model)
-            if model_class.__name__ == 'Course' and 'completion_date' in data and data['completion_date']:
-                if data['completion_date'] > date.today():
-                    return jsonify({'error': 'Validation failed', 'details': 'Completion date cannot be in the future'}), 400
+            validation_error = validate_course_completion_date(data)
+            if validation_error:
+                return validation_error
             
             # Convert empty strings to None for optional text fields
             optional_text_fields = ['credential_id', 'credential_url', 'description', 'document_url', 
@@ -336,9 +344,9 @@ def register_model_endpoints(model_class, endpoint_prefix):
                             data[field] = None
             
             # Validate completion_date is not in the future (for Course model)
-            if model_class.__name__ == 'Course' and 'completion_date' in data and data['completion_date']:
-                if data['completion_date'] > date.today():
-                    return jsonify({'error': 'Validation failed', 'details': 'Completion date cannot be in the future'}), 400
+            validation_error = validate_course_completion_date(data)
+            if validation_error:
+                return validation_error
             
             # Convert empty strings to None for optional text fields
             optional_text_fields = ['credential_id', 'credential_url', 'description', 'document_url', 
