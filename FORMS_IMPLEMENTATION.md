@@ -99,6 +99,82 @@ Created comprehensive, LinkedIn-style data entry forms with granular visibility 
 
 ---
 
+### 4. Education Form (`education_form.html`)
+**Route:** `/forms/education` or `/forms/education/<edu_id>`
+
+**Features:**
+- Degree, institution, country fields
+- Year obtained (or start/end years)
+- Is current checkbox
+- Additional details text area
+- Document URL field
+- **Display Order** field (for sorting education records in CV)
+- Profile visibility checkboxes (QA Analyst, QA Engineer, Data Scientist)
+- Historical data flag
+
+---
+
+### 5. Advanced Training & Certifications Form (`advanced_training_form.html`) ✅ NEW UNIFIED FORM
+**Route:** `/forms/advanced-training` or `/forms/advanced-training/<training_id>`
+
+**Purpose:** Unified form for both **courses** and **certifications** (replaces separate Certification and Course forms)
+
+**Features:**
+- **Type selector** (Course or Certification dropdown) - Required field
+- **Display Order** field (unified 1-6 for entire Advanced Training section)
+- **Common fields** for both types:
+  - Name/Title (e.g., "AWS Solutions Architect", "Advanced English")
+  - Provider/Organization (e.g., "AWS Academy", "Open English")
+  - Completion/Issue Date
+  - Description (topics covered, achievements, key learnings)
+  
+- **Course-specific fields** (shown only when type="Course"):
+  - Duration (hours) - for tracking course length
+  
+- **Certification-specific fields** (shown only when type="Certification"):
+  - Expiration Date - for certifications that expire
+  - Credential ID - certificate/credential number
+  - Credential URL - verification/badge link
+  
+- Profile visibility checkboxes (QA Analyst, QA Engineer, Data Scientist)
+- Historical data flag
+
+**Key Interactions:**
+- Selecting "Course" shows `duration_hours` field; hides certification fields
+- Selecting "Certification" shows expiration_date, credential_id, credential_url; hides course fields
+- Display order determines position in PDF (lower numbers appear first)
+- Form remembers selected type when editing existing records
+- Dynamic field visibility provides clean, focused interface
+
+**Benefits:**
+- Single form for both courses and certifications
+- Cleaner data model (unified AdvancedTraining table)
+- Mixed course/certification sections with unified display_order
+- Type field stored to distinguish rendering in CV/PDF
+- Reduced menu clutter (one menu item instead of two)
+
+---
+
+### 6. Language Form (`language_form.html`)
+**Route:** `/forms/language` or `/forms/language/<lang_id>`
+
+**Features:**
+- Language name field (e.g., "English", "Spanish", "French")
+- **Proficiency levels** (with CEFR options):
+  - Conversation level dropdown
+  - Reading level dropdown
+  - Writing level dropdown
+  - Options include: Native, C2, C1, B2, B1, A2, A1
+- Optional certification details:
+  - Certification name (e.g., "TOEFL", "IELTS")
+  - Score (e.g., "120/120" or "8.5/9")
+  - Certification date
+- Display order
+- Profile visibility checkboxes (QA Analyst, QA Engineer, Data Scientist)
+- Historical data flag
+
+---
+
 ## 🎨 Design Features
 
 ### Visual Design
@@ -177,13 +253,23 @@ Blueprint for rendering all form pages:
 - `/forms/experience` - Work experience
 - `/forms/tool` - Technical tools
 - `/forms/education` - Education records
-- `/forms/certification` - Certifications
-- `/forms/course` - Courses
+- `/forms/advanced-training` - **Advanced Training & Certifications** (NEW - unified form)
+- ~~`/forms/certification`~~ - (DEPRECATED - merged into advanced-training)
+- ~~`/forms/course`~~ - (DEPRECATED - merged into advanced-training)
 - `/forms/language` - Languages
 
 ### 2. Base Template (`app/templates/base.html`)
 Master template with:
 - Navigation bar with dropdown menus
+- **Updated Data Entry Menu** showing unified forms:
+  - Personal Info
+  - Work Experience
+  - Technical Tools
+  - (separator)
+  - Education
+  - **Advanced Training & Certifications** (NEW - replaces separate Certification/Course)
+  - Languages
+- Admin link
 - Flash message display
 - Footer with copyright for Javier Villarreal Bencomo
 - Bootstrap 5 and Bootstrap Icons integration
@@ -277,21 +363,32 @@ Custom styling with:
 
 ## 📁 Files Created/Modified
 
-### New Files (8):
-1. `app/templates/forms/person_form.html` (355 lines)
-2. `app/templates/forms/experience_form.html` (415 lines)
-3. `app/templates/forms/tool_form.html` (385 lines)
-4. `app/templates/base.html` (82 lines)
-5. `app/templates/index.html` (145 lines)
-6. `app/routes/forms.py` (63 lines)
-7. `app/static/css/modern.css` (295 lines)
-8. `FORMS_IMPLEMENTATION.md` (this file)
+### New Files (9):
+1. `app/templates/forms/person_form.html` (453 lines)
+2. `app/templates/forms/experience_form.html` (473 lines)
+3. `app/templates/forms/tool_form.html` (372 lines)
+4. `app/templates/forms/education_form.html` (164 lines)
+5. `app/templates/forms/advanced_training_form.html` (233 lines) ✅ NEW UNIFIED FORM
+6. `app/templates/forms/language_form.html` (207 lines)
+7. `app/templates/base.html` (110 lines) - Updated with new menu
+8. `app/templates/index.html` (145 lines)
+9. `app/routes/forms.py` (97 lines) - Updated with advanced_training route
+10. `app/static/css/modern.css` (295 lines)
 
-### Modified Files (2):
+### New Models/Migrations (3):
+1. `app/models/advanced_training.py` (68 lines) - Unified Courses & Certifications
+2. `migrate_to_advanced_training.py` - Migration script to merge Certification/Course data
+3. `migrate_add_reference.py` - Migration script to add 3 reference fields to Person
+
+### Modified Files (4):
 1. `app/__init__.py` - Added forms blueprint registration
 2. `app/routes/__init__.py` - Added forms to package exports
+3. `app/routes/api.py` - Added AdvancedTraining API endpoint
+4. `app/routes/profiles.py` - Updated to use AdvancedTraining instead of separate tables
+5. `app/services/pdf_generator.py` - Updated to render AdvancedTraining section
+6. `app/models/__init__.py` - Added AdvancedTraining import
 
-**Total:** 8 new files, 2 modified, ~1,740 lines of code + documentation
+**Total:** 13 new files/models, 6 modified, ~2,500 lines of code + documentation
 
 ---
 

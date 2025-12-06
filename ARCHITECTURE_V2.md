@@ -156,6 +156,9 @@ language = Language(
 - location
 - summary_qa_analyst, summary_qa_engineer, summary_data_scientist
 - profile_image_url
+- reference_name (Professional Reference)
+- reference_company (Professional Reference)
+- reference_phone (Professional Reference)
 ```
 
 ### WorkExperience (Many records)
@@ -194,31 +197,48 @@ language = Language(
 ```python
 - degree, institution, country
 - year_obtained (or start_year/end_year)
+- is_current
 - details
 - document_url
+- display_order (sort order in CV)
 - visible_qa_analyst, visible_qa_engineer, visible_data_scientist
 - is_historical
 ```
 
-### Certification (Many records)
+### Certification (DEPRECATED - Merged into AdvancedTraining)
 ```python
-- name, issuing_organization
-- issue_date, expiration_date
-- credential_id, credential_url
-- description, document_url
+# OLD MODEL - No longer used
+# Data migrated to AdvancedTraining with type="Certification"
+```
+
+### Course (DEPRECATED - Merged into AdvancedTraining)
+```python
+# OLD MODEL - No longer used
+# Data migrated to AdvancedTraining with type="Course"
+```
+
+### AdvancedTraining (Many records) ✅ NEW UNIFIED MODEL
+```python
+- type ("Course" or "Certification")
+- name
+- provider (issuing organization or training provider)
+- completion_date
+- description
+- duration_hours (course-specific)
+- expiration_date (certification-specific)
+- credential_id (certification-specific)
+- credential_url (certification-specific)
+- display_order (unified 1-6 for entire Advanced Training section)
 - visible_qa_analyst, visible_qa_engineer, visible_data_scientist
 - is_historical
 ```
 
-### Course (Many records)
-```python
-- name, provider
-- completion_date, duration_hours
-- description, skills_acquired
-- credential_url, document_url
-- visible_qa_analyst, visible_qa_engineer, visible_data_scientist
-- is_historical
-```
+**Benefits:**
+- Single form for courses and certifications
+- Unified display_order for mixed course/certification sections
+- Type field distinguishes between courses and certifications
+- All certification-specific and course-specific fields included
+- Profile visibility applied to both types
 
 ### ITProduct (Many records)
 ```python
