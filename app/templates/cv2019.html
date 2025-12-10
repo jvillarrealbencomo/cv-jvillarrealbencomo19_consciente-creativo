@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}CV 2019-2020 - Javier Villarreal Bencomo{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Legacy CV 2019 styling */
+    .cv2019-container {
+        background: linear-gradient(135deg, #8B7500 0%, #A0860D 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .cv2019-menu {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        background: #333;
+        padding: 15px;
+        border-radius: 5px;
+    }
+    
+    .cv2019-menu a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        transition: background 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
+    
+    .cv2019-menu a:hover {
+        background: #555;
+        color: #ffd700;
+    }
+    
+    .cv2019-menu a.active {
+        background: #8B7500;
+        color: #ffd700;
+    }
+    
+    .cv2019-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .cv2019-header h1 {
+        font-size: 2.5rem;
+        margin: 20px 0 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .cv2019-header p {
+        font-size: 1.2rem;
+        color: #ffd700;
+    }
+    
+    .cv2019-content {
+        background: white;
+        color: #333;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .cv2019-content h2 {
+        color: #8B7500;
+        border-bottom: 3px solid #8B7500;
+        padding-bottom: 10px;
+        margin: 20px 0 15px;
+    }
+    
+    .cv2019-item {
+        margin: 15px 0;
+        padding: 15px;
+        border-left: 4px solid #8B7500;
+        background: #f9f9f9;
+    }
+    
+    .cv2019-action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .btn-cv2019 {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: #8B7500;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.3s;
+        font-weight: 500;
+    }
+    
+    .btn-cv2019:hover {
+        background: #A0860D;
+        color: #ffd700;
+        text-decoration: none;
+    }
+    
+    .btn-cv2019.secondary {
+        background: #666;
+    }
+    
+    .btn-cv2019.secondary:hover {
+        background: #888;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-0">
+    <!-- CV 2019 Legacy Version -->
+    <div class="cv2019-container">
+        <div class="cv2019-header">
+            <h1>Javier Villarreal</h1>
+            <p>Curriculum Vitae 2019-2020</p>
+        </div>
+        
+        <!-- Navigation Menu -->
+        <div class="cv2019-menu">
+            <a href="#inicio" class="active" onclick="switchSection('inicio')">
+                <i class="bi bi-house-fill"></i> Inicio
+            </a>
+            <a href="#educacion" onclick="switchSection('educacion')">
+                <i class="bi bi-mortarboard"></i> Educación
+            </a>
+            <a href="#experiencia" onclick="switchSection('experiencia')">
+                <i class="bi bi-briefcase"></i> Experiencia
+            </a>
+            <a href="#productos" onclick="switchSection('productos')">
+                <i class="bi bi-box"></i> Productos
+            </a>
+            <a href="#soporte" onclick="switchSection('soporte')">
+                <i class="bi bi-question-circle"></i> Soporte
+            </a>
+            <a href="#cursos" onclick="switchSection('cursos')">
+                <i class="bi bi-book"></i> Cursos
+            </a>
+            <a href="#datos" onclick="switchSection('datos')">
+                <i class="bi bi-table"></i> Datos
+            </a>
+            <a href="#documentos" onclick="switchSection('documentos')">
+                <i class="bi bi-file-earmark-pdf"></i> Documentos
+            </a>
+        </div>
+    </div>
+    
+    <!-- Content Sections -->
+    <div class="cv2019-content">
+        <!-- Inicio Section -->
+        <div id="inicio-section" class="cv2019-section" style="display:block;">
+            <div class="cv2019-header">
+                <h2 style="border: none; margin: 0; color: #333;">Bienvenido al Curriculum Vitae 2019</h2>
+                <p style="color: #8B7500; font-size: 1rem;">Javier Villarreal Bencomo</p>
+            </div>
+            <p style="margin: 20px 0; font-size: 1.1rem;">
+                Esta es la versión archivada de mi CV del período 2019-2020. Selecciona una sección del menú arriba para navegar entre los diferentes contenidos.
+            </p>
+            <div class="cv2019-action-buttons">
+                <a href="/profile/1/qa_analyst" class="btn-cv2019">
+                    <i class="bi bi-arrow-right"></i> Ver CV 2025 (QA Analyst)
+                </a>
+                <a href="/profile/1/qa_engineer" class="btn-cv2019">
+                    <i class="bi bi-arrow-right"></i> Ver CV 2025 (QA Engineer)
+                </a>
+                <a href="/profile/1/data_scientist" class="btn-cv2019">
+                    <i class="bi bi-arrow-right"></i> Ver CV 2025 (Data Scientist)
+                </a>
+                <a href="/" class="btn-cv2019 secondary">
+                    <i class="bi bi-house"></i> Volver al Inicio
+                </a>
+            </div>
+        </div>
+        
+        <!-- Educación Section -->
+        <div id="educacion-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-mortarboard"></i> Educación</h2>
+            <div class="cv2019-item">
+                <h3>Título de Ingeniero de Sistemas</h3>
+                <p>Universidad de las Fuerzas Armadas ESPE</p>
+                <p><small>2010 - 2014</small></p>
+            </div>
+            <div class="cv2019-item">
+                <h3>Título de Master en Gerencia de Recursos Humanos</h3>
+                <p>Institución</p>
+                <p><small>Año</small></p>
+            </div>
+            <p style="margin-top: 20px; text-align: center;">
+                <small>Para más detalles, consulta el CV 2025 actualizado</small>
+            </p>
+        </div>
+        
+        <!-- Experiencia Section -->
+        <div id="experiencia-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-briefcase"></i> Experiencia Laboral</h2>
+            <div class="cv2019-item">
+                <h3>Análisis de Calidad (QA Analyst)</h3>
+                <p>Diversas empresas del sector tecnológico</p>
+                <p><small>Período 2014 - Presente</small></p>
+            </div>
+            <p style="margin-top: 20px; text-align: center;">
+                <small>Para detalles completos de experiencia, consulta el CV 2025 actualizado</small>
+            </p>
+        </div>
+        
+        <!-- Productos Section -->
+        <div id="productos-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-box"></i> Productos Informáticos</h2>
+            <div class="cv2019-item">
+                <p>Esta sección contiene información sobre productos informáticos desarrollados y utilizados.</p>
+            </div>
+            <p style="margin-top: 20px; text-align: center;">
+                <small>Para detalles actualizados, consulta el CV 2025</small>
+            </p>
+        </div>
+        
+        <!-- Soporte Section -->
+        <div id="soporte-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-question-circle"></i> Soporte en Programación</h2>
+            <div class="cv2019-item">
+                <p>Experiencia en soporte técnico y programación</p>
+            </div>
+            <p style="margin-top: 20px; text-align: center;">
+                <small>Para detalles actualizados, consulta el CV 2025</small>
+            </p>
+        </div>
+        
+        <!-- Cursos Section -->
+        <div id="cursos-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-book"></i> Formación Adicional</h2>
+            <div class="cv2019-item">
+                <p>Diversos cursos en tecnología, certificaciones y formación continua</p>
+            </div>
+            <p style="margin-top: 20px; text-align: center;">
+                <small>Para lista completa de cursos y certificaciones, consulta el CV 2025</small>
+            </p>
+        </div>
+        
+        <!-- Datos Section -->
+        <div id="datos-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-table"></i> Datos Personales</h2>
+            <div class="cv2019-item">
+                <h4>Información de Contacto</h4>
+                <p>Email: <a href="mailto:contact@example.com">contact@example.com</a></p>
+                <p>Teléfono: +1 234 567 8900</p>
+                <p>Ubicación: Ecuador</p>
+            </div>
+            <p style="margin-top: 20px; text-align: center;">
+                <small>Para datos completos y actualizados, consulta el CV 2025</small>
+            </p>
+        </div>
+        
+        <!-- Documentos Section -->
+        <div id="documentos-section" class="cv2019-section" style="display:none;">
+            <h2><i class="bi bi-file-earmark-pdf"></i> Documentos</h2>
+            <div class="cv2019-item">
+                <h4>Documentos Disponibles (2019-2020)</h4>
+                <ul>
+                    <li>Título de Ingeniero de Sistemas</li>
+                    <li>Título de Master en Gerencia de Recursos Humanos</li>
+                    <li>Constancia de trabajo UPTI-IUTET</li>
+                    <li>Constancia laboral en Sílboca</li>
+                    <li>Constancia de trabajo de CIDIAT</li>
+                    <li>Capacitación Docente</li>
+                    <li>Prueba de Suficiencia de inglés técnico</li>
+                </ul>
+            </div>
+            <div class="cv2019-action-buttons" style="margin-top: 20px;">
+                <a href="/profile/1/qa_analyst/pdf/onepage" class="btn-cv2019" target="_blank">
+                    <i class="bi bi-file-pdf"></i> Descargar CV PDF (2025)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchSection(sectionName) {
+    // Hide all sections
+    const sections = document.querySelectorAll('.cv2019-section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show selected section
+    const selectedSection = document.getElementById(sectionName + '-section');
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+    }
+    
+    // Update active menu item
+    const menuLinks = document.querySelectorAll('.cv2019-menu a');
+    menuLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Smooth scroll to content
+    document.querySelector('.cv2019-content').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+{% endblock %}
