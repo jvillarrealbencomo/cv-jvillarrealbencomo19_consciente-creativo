@@ -5,6 +5,7 @@ Version 2025 - Generate professional one-page CVs with auto-trimming
 from io import BytesIO
 from datetime import datetime
 from copy import deepcopy
+import os
 
 
 class PDFGenerator:
@@ -41,6 +42,8 @@ class PDFGenerator:
             'section_margin': 15,
         }
 
+        base_dir = os.getcwd()
+
         def render_and_measure(data, styles):
             html_content = PDFGenerator._generate_html(data, profile_name)
             css = CSS(string=PDFGenerator._get_pdf_css(
@@ -49,7 +52,7 @@ class PDFGenerator:
                 margin_in=styles['margin_in'],
                 section_margin=styles['section_margin'],
             ))
-            document = HTML(string=html_content).render(stylesheets=[css])
+            document = HTML(string=html_content, base_url=base_dir).render(stylesheets=[css])
             return document, html_content, css
 
         try:
@@ -89,13 +92,25 @@ class PDFGenerator:
             # If optimization fails, fall back to a single render
             html_content = PDFGenerator._generate_html(profile_data, profile_name)
             pdf_css = CSS(string=PDFGenerator._get_pdf_css())
-            return HTML(string=html_content).write_pdf(stylesheets=[pdf_css])
+            return HTML(string=html_content, base_url=base_dir).write_pdf(stylesheets=[pdf_css])
     
     @staticmethod
     def _generate_html(profile_data, profile_name):
-        """Generate HTML content for PDF"""
+        """Generate HTML content for PDF - Single page template-based layout"""
         person = profile_data.get('person', {})
         contacts = profile_data.get('visible_contacts', {})
+
+        header_image = ''
+        if person.get('profile_image_url'):
+            img_url = person.get('profile_image_url')
+            if img_url.startswith('/static/'):
+                rel_path = img_url.replace('/static/', '', 1)
+                abs_path = os.path.join(os.getcwd(), 'app', 'static', rel_path)
+                img_src = f"file:///{abs_path.replace(os.sep, '/')}"
+            else:
+                img_src = img_url
+            
+            header_image = f"""<img class="sidebar-avatar" src="{img_src}" alt="Profile photo">"""
         
         html = f"""
         <!DOCTYPE html>
@@ -106,38 +121,76 @@ class PDFGenerator:
         </head>
         <body>
             <div class="cv-page">
-                <!-- Header -->
-                <div class="cv-header">
-                    <h1 class="cv-name">{person.get('first_name', '')} {person.get('last_name', '')}</h1>
-                    <div class="cv-title">{profile_data.get('title', '')}</div>
-                    <div class="cv-contacts">
-                        {PDFGenerator._format_contacts(contacts)}
-                    </div>
-                </div>
-                
-                <!-- Professional Summary -->
-                {PDFGenerator._render_summary(profile_data.get('summary'))}
-                
-                <!-- Work Experience -->
-                {PDFGenerator._render_experiences(profile_data.get('work_experience', []))}
-                
-                <!-- Technical Skills -->
-                {PDFGenerator._render_tools(profile_data.get('technical_tools', {}))}
-                
-                <!-- Education -->
-                {PDFGenerator._render_education(profile_data.get('education', []))}
-                
-                <!-- Advanced Training & Certifications -->
-                {PDFGenerator._render_advanced_training(profile_data.get('advanced_training', []))}
-                
-                <!-- Languages -->
-                {PDFGenerator._render_languages(profile_data.get('languages', []))}
+                <table class="cv-layout-table">
+                    <tr>
+                        <td class="cv-left-column">
+                            {header_image}
+                            {PDFGenerator._render_technical_skills_compact(profile_data.get('technical_tools', {}), profile_name)}
+                            {PDFGenerator._render_languages_compact(profile_data.get('languages', []))}
+                            {PDFGenerator._render_education_compact(profile_data.get('education', []))}
+                            {PDFGenerator._render_references_compact(person)}
+                            {PDFGenerator._render_contact_compact(contacts)}
+                        </td>
+                        <td class="cv-right-column">
+                            <div class="cv-header-block">
+                                <h1 class="cv-name">{person.get('first_name', '')} {person.get('last_name', '')}</h1>
+                                <div class="cv-title" style="color: #0d6efd;">{profile_data.get('title', '')}</div>
+                                {PDFGenerator._render_summary_compact(profile_data.get('summary'))}
+                            </div>
+                            {PDFGenerator._render_work_experience_compact(profile_data.get('work_experience', []))}
+                            {PDFGenerator._render_advanced_training_compact(profile_data.get('advanced_training', []))}
+                        </td>
+                    </tr>
+                </table>
             </div>
         </body>
         </html>
         """
         
         return html
+
+    @staticmethod
+    def _format_date_mmyyyy(date_str):
+        """Format dates as Mon YYYY if possible"""
+        if not date_str:
+            return ''
+        try:
+            # date_str expected ISO YYYY-MM-DD
+            parts = date_str.split('-')
+            if len(parts) >= 2:
+                year = parts[0]
+                month = parts[1]
+                months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+                m_idx = int(month) - 1
+                if 0 <= m_idx < 12:
+                    return f"{months[m_idx]} {year}"
+            return date_str
+        except Exception:
+            return date_str
+
+    @staticmethod
+    def _split_summary_with_list(summary: str):
+        """Split summary into an intro sentence and bullet items if present.
+        Looks for a ':' separator and dash-prefixed items.
+        """
+        if not summary:
+            return summary, []
+
+        intro = summary
+        items = []
+
+        if ':' in summary:
+            intro_part, rest = summary.split(':', 1)
+            intro = intro_part.strip() + ':'
+            rest = rest.strip()
+            if rest:
+                # Split on dash markers
+                for chunk in rest.split('-'):
+                    item = chunk.strip()
+                    if item:
+                        items.append(item)
+
+        return intro, items
     
     @staticmethod
     def _format_contacts(contacts):
@@ -155,6 +208,27 @@ class PDFGenerator:
             parts.append(f"🌐 {contacts['personal_url']}")
         
         return ' | '.join(parts)
+
+    @staticmethod
+    def _render_references(person):
+        """Render reference block if data is present"""
+        name = person.get('reference_name') or ''
+        company = person.get('reference_company') or ''
+        phone = person.get('reference_phone') or ''
+
+        if not any([name, company, phone]):
+            return ''
+
+        ref_parts = []
+        if name:
+            ref_parts.append(name)
+        if company:
+            ref_parts.append(company)
+        if phone:
+            ref_parts.append(f"Tel: {phone}")
+
+        ref_text = ' • '.join(ref_parts)
+        return f"<div class='cv-references'>Reference: {ref_text}</div>"
     
     @staticmethod
     def _render_summary(summary):
@@ -208,8 +282,296 @@ class PDFGenerator:
         """
     
     @staticmethod
+    def _render_technical_skills_compact(tools_by_category, profile_name):
+        """(*) Technical Tools - sorted by display_order, grouped by subcategory for profile"""
+        if not tools_by_category:
+            return ''
+        
+        categories_html = ''
+        for category, tools in tools_by_category.items():
+            tool_names = ', '.join([t.get('name', '') for t in tools])
+            categories_html += f"""<div class="compact-skill"><strong>{category}</strong><br>{tool_names}</div>"""
+        
+        return f"""
+        <div class="compact-section">
+            <h4 class="compact-heading">TECHNICAL SKILLS</h4>
+            {categories_html}
+        </div>
+        """
+    
+    @staticmethod
+    def _render_education_compact(education_list):
+        """(**) Education - degree, year_obtained, institution, country"""
+        if not education_list:
+            return ''
+        
+        items = ''
+        for edu in sorted(education_list, key=lambda e: e.get('display_order', 999)):
+            degree = edu.get('degree', '')
+            year = edu.get('year_obtained', '')
+            institution = edu.get('institution', '')
+            country = edu.get('country', '')
+            
+            parts = [
+                f"<strong style=\"color: #000;\">{degree}</strong>",
+                year,
+                institution,
+                country,
+            ]
+            display = '. '.join([str(p) for p in parts if p])
+            items += f"""<div class="compact-item">{display}</div>"""
+        
+        return f"""
+        <div class="compact-section">
+            <h4 class="compact-heading">EDUCATION</h4>
+            {items}
+        </div>
+        """
+
+    @staticmethod
+    def _render_languages_compact(languages):
+        """Render languages section before education with specified typography"""
+        if not languages:
+            return ''
+
+        items = ''
+        for lang in languages:
+            name = lang.get('name', '')
+            conv = lang.get('level_conversation', '')
+            read = lang.get('level_reading', '')
+            write = lang.get('level_writing', '')
+
+            items += (
+                f"<div class=\"compact-item language-item\" "
+                f"style=\"font-family: Georgia, serif; font-size: 9pt; color: #000;\">"
+                f"{name}. Conversational:{conv}. Reading:{read}. Writing:{write}"
+                f"</div>"
+            )
+
+        return f"""
+        <div class="compact-section">
+            <h4 class="compact-heading">LANGUAGES</h4>
+            {items}
+        </div>
+        """
+    
+    @staticmethod
+    def _render_work_experience_compact(experiences):
+        """(***) Work Experience - formatted by time_block"""
+        if not experiences:
+            return ''
+        
+        items_by_block = {}
+        
+        for exp in experiences:
+            block = exp.get('time_block', 'Other')
+            if block not in items_by_block:
+                items_by_block[block] = []
+            items_by_block[block].append(exp)
+        
+        block_order = ['2021-2025', '2015-2020', '1985-2009']
+        html = '<div class="compact-section"><h4 class="compact-heading">WORK EXPERIENCE</h4>'
+        
+        is_first_overall = True
+        
+        for block in block_order:
+            if block not in items_by_block:
+                continue
+            
+            block_items = items_by_block[block]
+            
+            if block == '2021-2025':
+                first_item = is_first_overall
+                for exp in block_items:
+                    job = exp.get('job_title', '')
+                    start = PDFGenerator._format_date_mmyyyy(exp.get('start_date', ''))
+                    end = PDFGenerator._format_date_mmyyyy(exp.get('end_date', ''))
+                    company = exp.get('company', '')
+                    summary = exp.get('responsibilities_summary', '')
+                    achievements = exp.get('achievements', '')
+                    
+                    dates = f"({start} - {end})" if start else ""
+                    relevant = f"<strong style='color: #000;'>Relevant: {achievements}</strong>" if achievements else ""
+
+                    intro, bullet_items = PDFGenerator._split_summary_with_list(summary)
+                    summary_html = f"<div style='text-align: justify;'>{intro}</div>" if intro else ''
+                    if bullet_items:
+                        bullets = ''.join(f"<li>{item}</li>" for item in bullet_items)
+                        summary_html += f"<ul class='compact-bullets'>{bullets}</ul>"
+                    
+                    entry_class = "compact-item" if first_item else "compact-item work-entry"
+                    html += f"""<div class="{entry_class}"><strong style="color: #0d6efd;">{job}</strong> {dates}<br><strong style="color: #000;">{company}</strong><br>{summary_html}"""
+                    if relevant:
+                        html += f""" {relevant}"""
+                    html += """</div>"""
+                    if first_item:
+                        is_first_overall = False
+                    first_item = False
+            
+            elif block == '2015-2020':
+                first_item = is_first_overall
+                for exp in block_items:
+                    job = exp.get('job_title', '')
+                    start = PDFGenerator._format_date_mmyyyy(exp.get('start_date', ''))
+                    end = PDFGenerator._format_date_mmyyyy(exp.get('end_date', ''))
+                    company = exp.get('company', '')
+                    summary = exp.get('responsibilities_summary', '')
+                    achievements = exp.get('achievements', '')
+                    
+                    dates_str = f"{start} - {end}" if start else ''
+                    
+                    combined = f"<strong style='color: #000;'>{company}</strong>. {summary}. {achievements}" if achievements else f"<strong style='color: #000;'>{company}</strong>. {summary}."
+                    entry_class = "compact-item" if first_item else "compact-item work-entry"
+                    html += f"""<div class="{entry_class}"><strong style="color: #0d6efd;">{job}</strong> ({dates_str})<br>{combined}</div>"""
+                    if first_item:
+                        is_first_overall = False
+                    first_item = False
+            
+            elif block == '1985-2009':
+                first_item = is_first_overall
+                for exp in block_items:
+                    job = exp.get('job_title', '')
+                    start = PDFGenerator._format_date_mmyyyy(exp.get('start_date', ''))
+                    end = PDFGenerator._format_date_mmyyyy(exp.get('end_date', ''))
+                    company = exp.get('company', '')
+                    summary = exp.get('responsibilities_summary', '')
+                    
+                    dates = f"({start} - {end})" if start else ""
+                    
+                    entry_class = "compact-item" if first_item else "compact-item work-entry"
+                    html += f"""<div class="{entry_class}"><strong style="color: #0d6efd;">{job}</strong> {dates}<br><strong style="color: #000;">{company}</strong><br>{summary}</div>"""
+                    if first_item:
+                        is_first_overall = False
+                    first_item = False
+        
+        html += '</div>'
+        return html
+    
+    @staticmethod
+    def _render_advanced_training_compact(training_items):
+        """(****) Advanced Training - name, provider, year only; "Automation" concatenates with description"""
+        if not training_items:
+            return ''
+        
+        sorted_items = sorted(training_items, key=lambda x: x.get('display_order', 999))
+        items_html = ''
+        
+        for item in sorted_items:
+            name = item.get('name', '')
+            provider = item.get('provider', '')
+            year = item.get('completion_date', '')
+            description = item.get('description', '')
+            
+            # Extract year only
+            if year and isinstance(year, str) and '-' in year:
+                year = year.split('-')[0]
+            elif year and isinstance(year, str):
+                year = year[:4]
+            
+            # Handle display name based on description field
+            if description:
+                # If description exists (not None), concatenate name + " " + description
+                display_name = f"<strong style='color: #000;'>{name} {description}</strong>"
+            else:
+                # If description is None, use only name
+                display_name = f"<strong style='color: #000;'>{name}</strong>"
+            
+            items_html += f"""<div class="compact-item">{display_name}, {provider}, {year}</div>"""
+        
+        return f"""
+        <div class="compact-section">
+            <h4 class="compact-heading">ADVANCED TRAINING & CERTIFICATIONS</h4>
+            {items_html}
+        </div>
+        """
+    
+    @staticmethod
+    def _render_references_compact(person):
+        """Render references in compact format for left column"""
+        name = person.get('reference_name') or ''
+        company = person.get('reference_company') or ''
+        phone = person.get('reference_phone') or ''
+
+        if not any([name, company, phone]):
+            return ''
+
+        # Build line 1: Name. Company
+        line1 = ''
+        if name:
+            line1 += name
+        if company:
+            line1 += ('. ' if line1 else '') + company
+        
+        # Line 2: Phone
+        items = line1
+        if phone:
+            items += f"<br>{phone}"
+
+        return f"""
+        <div class="compact-section">
+            <h4 class="compact-heading">REFERENCES</h4>
+            <div class="compact-item">{items}</div>
+        </div>
+        """
+    
+    @staticmethod
+    def _render_contact_compact(contacts):
+        """Render contacts in compact format for left column"""
+        if not contacts:
+            return ''
+        
+        items = ''
+        if contacts.get('email'):
+            items += f"""<div class="compact-item">{contacts['email']}</div>"""
+        if contacts.get('phone'):
+            items += f"""<div class="compact-item">{contacts['phone']}</div>"""
+        if contacts.get('linkedin_url'):
+            items += f"""<div class="compact-item" style="font-size: 8pt; line-height:1.2; word-break: break-all;">{contacts['linkedin_url']}</div>"""
+        if contacts.get('github_url'):
+            items += f"""<div class="compact-item" style="font-size: 8pt; line-height:1.2; word-break: break-all;">{contacts['github_url']}</div>"""
+        if contacts.get('personal_url'):
+            items += f"""<div class="compact-item">{contacts['personal_url']}</div>"""
+        
+        return f"""
+        <div class="compact-section">
+            <h4 class="compact-heading">CONTACT</h4>
+            {items}
+        </div>
+        """
+    
+    @staticmethod
+    def _render_summary_compact(summary):
+        """Render summary in compact format"""
+        if not summary:
+            return ''
+        return f"""<div class="compact-summary">{summary}</div>"""
+    
+    @staticmethod
+    def _render_tools_sidebar(tools_by_category):
+        """Render technical tools section for sidebar"""
+        if not tools_by_category:
+            return ''
+        
+        categories_html = ''
+        for category, tools in tools_by_category.items():
+            tool_names = ', '.join([t.get('name', '') for t in tools])
+            categories_html += f"""
+            <div class="sidebar-skill-group">
+                <strong class="sidebar-skill-category">{category}</strong>
+                <div class="sidebar-skill-items">{tool_names}</div>
+            </div>
+            """
+        
+        return f"""
+        <div class="sidebar-section">
+            <h3 class="sidebar-section-title">Technical Skills</h3>
+            {categories_html}
+        </div>
+        """
+    
+    @staticmethod
     def _render_tools(tools_by_category):
-        """Render technical tools section"""
+        """Render technical tools section (full-width, for non-sidebar layouts)"""
         if not tools_by_category:
             return ''
         
@@ -321,9 +683,9 @@ class PDFGenerator:
         """
     
     @staticmethod
-    def _get_pdf_css(base_font_pt: float = 10.0, line_height: float = 1.4, margin_in: float = 0.5, section_margin: int = 15):
-        """Get CSS for PDF generation with tunable typography and spacing"""
-        return f"""
+    def _get_pdf_css(base_font_pt: float = 9.0, line_height: float = 1.2, margin_in: float = 0.4, section_margin: int = 8):
+        """Get CSS for single-page template layout"""
+        template = """
         @page {{
             size: letter;
             margin: {margin_in}in;
@@ -333,103 +695,123 @@ class PDFGenerator:
             font-family: 'Segoe UI', Arial, sans-serif;
             font-size: {base_font_pt}pt;
             line-height: {line_height};
-            color: #212529;
+            color: #000;
+            margin: 0;
+            padding: 0;
         }}
         
         .cv-page {{
             max-width: 100%;
         }}
         
-        .cv-header {{
-            border-bottom: 3px solid #0d6efd;
-            padding-bottom: 10px;
-            margin-bottom: {section_margin}px;
+        .cv-layout-table {{
+            width: 100%;
+            border-collapse: collapse;
         }}
         
-        .cv-name {{
-            font-size: {base_font_pt * 2.4:.1f}pt;
-            font-weight: bold;
-            margin: 0 0 5px 0;
-            color: #212529;
+        .cv-left-column {{
+            width: 35%;
+            vertical-align: top;
+            padding: 8px 10px 6px 0;
+            font-size: {font_left}pt;
         }}
         
-        .cv-title {{
-            font-size: {base_font_pt * 1.4:.1f}pt;
-            color: #6c757d;
-            margin: 0 0 8px 0;
+        .cv-right-column {{
+            width: 65%;
+            vertical-align: top;
+            padding: 4px 0 6px 6px;
+            font-size: {font_right}pt;
         }}
         
-        .cv-contacts {{
-            font-size: {max(base_font_pt - 1, 8):.1f}pt;
-            color: #495057;
+        .sidebar-avatar {{
+            width: 80%;
+            height: auto;
+            margin: 0 auto 8px auto;
+            display: block;
         }}
         
-        .cv-section {{
-            margin-bottom: {section_margin}px;
+        .compact-section {{
+            margin-bottom: 8px;
             page-break-inside: avoid;
         }}
         
-        .section-title {{
-            font-size: {base_font_pt * 1.3:.1f}pt;
+        .compact-heading {{
+            font-size: 10pt;
             font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin: 0 0 4px 0;
             color: #0d6efd;
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 3px;
-            margin-bottom: 10px;
         }}
         
-        .summary-text {{
-            margin: 0;
+        .compact-item {{
+            font-size: {item_size}pt;
+            margin-bottom: 3px;
+            line-height: 1.15;
+        }}
+
+        .compact-bullets {{
+            margin: 4px 0 0 14px;
+            padding: 0;
+        }}
+        .compact-bullets li {{
+            margin-bottom: 2px;
+        }}
+
+        .work-entry {{
+            margin-top: 10px;
+        }}
+        
+        .compact-skill {{
+            font-size: {item_size}pt;
+            margin-bottom: 2px;
+        }}
+        
+        .compact-summary {{
+            font-size: {summary_size}pt;
+            line-height: 1.3;
+            margin: 0 auto 8px auto;
             text-align: justify;
         }}
         
-        .exp-item, .edu-item {{
-            margin-bottom: 12px;
-            page-break-inside: avoid;
-        }}
-        
-        .exp-header, .edu-header {{
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }}
-        
-        .exp-title, .edu-degree {{
-            font-weight: bold;
-            font-size: {base_font_pt * 1.1:.1f}pt;
-        }}
-        
-        .exp-company, .edu-institution {{
-            color: #6c757d;
-            font-style: italic;
-            font-size: {base_font_pt:.1f}pt;
-        }}
-        
-        .exp-dates, .edu-year {{
-            color: #6c757d;
-            font-size: {max(base_font_pt - 1, 8):.1f}pt;
-            white-space: nowrap;
-        }}
-        
-        .exp-content {{
-            margin: 5px 0;
-            font-size: {max(base_font_pt - 0.5, 8):.1f}pt;
-        }}
-        
-        .tools-category {{
+        .cv-header-block {{
+            text-align: center;
             margin-bottom: 8px;
-            font-size: {max(base_font_pt - 0.5, 8):.1f}pt;
+        }}
+
+        .cv-name {{
+            font-size: {name_size}pt;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+            color: #0d6efd;
+            line-height: 1.05;
         }}
         
-        .cert-item, .lang-item {{
-            margin-bottom: 6px;
-            font-size: {max(base_font_pt - 0.5, 8):.1f}pt;
+        .cv-title {{
+            font-size: {title_size}pt;
+            color: #333;
+            margin: 0 0 4px 0;
+            font-weight: 600;
+            line-height: 1.05;
         }}
         
         strong {{
-            font-weight: 600;
+            font-weight: 700;
         }}
         """
+
+        return template.format(
+            margin_in=margin_in,
+            base_font_pt=base_font_pt,
+            line_height=line_height,
+            font_left=round(base_font_pt * 0.9, 1),
+            font_right=round(base_font_pt, 1),
+            heading_size=round(base_font_pt * 1.1, 1),
+            item_size=round(base_font_pt * 0.85, 1),
+            summary_size=round(base_font_pt, 1),
+            name_size=round(base_font_pt * 3.2, 1),
+            title_size=round(base_font_pt * 2.2, 1),
+        )
 
     # --------- Trimming helpers ---------
     @staticmethod

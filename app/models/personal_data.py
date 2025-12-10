@@ -81,11 +81,12 @@ class Person(BaseModel):
         if self.show_phone and self.phone:
             contacts['phone'] = self.phone
         
+        # Use consistent keys with PDF rendering helpers
         if self.show_linkedin and self.linkedin_url:
-            contacts['linkedin'] = self.linkedin_url
+            contacts['linkedin_url'] = self.linkedin_url
         
         if self.show_github and self.github_url:
-            contacts['github'] = self.github_url
+            contacts['github_url'] = self.github_url
         
         if self.show_personal_url and self.personal_url:
             contacts['personal_url'] = self.personal_url

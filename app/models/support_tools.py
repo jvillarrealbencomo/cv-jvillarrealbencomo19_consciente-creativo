@@ -65,7 +65,10 @@ class TechnicalTool(BaseModel):
         ],
         'data_scientist': [
             'Engineering & Big Data',
-            'Modeling & Core Programming'
+            'Modeling & Core Programming',
+            'Operating Systems & Cloud',
+            'Data Quality & CI/CD',
+            'Test Automation'
         ]
     }
     
@@ -108,7 +111,7 @@ class TechnicalTool(BaseModel):
     def get_tools_by_profile_and_subcategory(cls, profile_name):
         """
         Get all active, usable tools for a profile grouped by subcategory
-        Returns dict: {subcategory: [tools]}
+        Returns dict: {subcategory: [tool_dicts]}
         """
         if profile_name == 'qa_analyst':
             tools = cls.query.filter_by(active=True, usable_qa_analyst=True).order_by(cls.display_order).all()
@@ -122,14 +125,14 @@ class TechnicalTool(BaseModel):
         else:
             return {}
         
-        # Group by subcategory
+        # Group by subcategory and convert to dictionaries
         grouped = {}
         for tool in tools:
             subcategory = getattr(tool, subcategory_field)
             if subcategory:
                 if subcategory not in grouped:
                     grouped[subcategory] = []
-                grouped[subcategory].append(tool)
+                grouped[subcategory].append(tool.to_dict())
         
         return grouped
     

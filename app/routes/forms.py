@@ -36,6 +36,10 @@ def experience_form(exp_id=None):
 @bp.route('/tool/<int:tool_id>')
 def tool_form(tool_id=None):
     """Technical tool form"""
+    # Support both /tool/1 and /tool?tool_id=1
+    if tool_id is None:
+        tool_id = request.args.get('tool_id', type=int)
+    
     tool = None
     if tool_id:
         tool = db.session.get(TechnicalTool, tool_id)

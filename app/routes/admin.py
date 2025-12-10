@@ -256,6 +256,124 @@ def update_experience_batch():
     return Markup(''.join(html))
 
 
+# Hidden: targeted fix for WorkExperience records (Dec 2025)
+# - Record 7: clear achievements
+# - Record 1: update responsibilities_summary with provided text
+# Usage:
+#   /admin/database/update/experience-fix-dec-2025
+@bp.route('/database/update/experience-fix-dec-2025')
+def update_experience_fix_dec_2025():
+    updates = []
+    errors = []
+
+    # Prepare new summary text for record 1
+    new_summary = (
+        "Analysis of DAMA methodology (data governance) and application of reverse engineering "
+        "to document mission-critical systems (PHP-MySQL, Java-SQL server):\n"
+        "- Hoja de Trabajo Normativo\n"
+        "- Hoja de Trabajo Recursos\n"
+        "- Captura de Rendición de Cuentas\n"
+        "- Fiscalización\n"
+        "- Sife\n"
+        "- Tramitación de Documentos"
+    )
+
+    # Update record 7 achievements -> blank
+    exp7 = db.session.get(WorkExperience, 7)
+    if exp7:
+        before = exp7.achievements
+        exp7.achievements = ''
+        updates.append((7, 'achievements', before, exp7.achievements))
+    else:
+        errors.append('WorkExperience id 7 not found')
+
+    # Update record 1 responsibilities_summary -> new text
+    exp1 = db.session.get(WorkExperience, 1)
+    if exp1:
+        before = exp1.responsibilities_summary
+        exp1.responsibilities_summary = new_summary
+        updates.append((1, 'responsibilities_summary', before, exp1.responsibilities_summary))
+    else:
+        errors.append('WorkExperience id 1 not found')
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return Markup(f"<p><strong>Error:</strong> Failed to commit changes: {Markup.escape(str(e))}</p>"), 500
+
+    html = ["<h3>WorkExperience targeted fix completed (Dec 2025)</h3>"]
+    if updates:
+        html.append('<h4>Updated Fields</h4>')
+        html.append('<table border="1" cellpadding="6" style="border-collapse:collapse;">')
+        html.append('<tr><th>Record ID</th><th>Field</th><th>Before</th><th>After</th></tr>')
+        for rid, field, before, after in updates:
+            html.append(f'<tr><td>{rid}</td><td>{field}</td><td>{Markup.escape(str(before))}</td><td>{Markup.escape(str(after))}</td></tr>')
+        html.append('</table>')
+    else:
+        html.append('<p>No fields updated.</p>')
+
+    if errors:
+        html.append('<h4>Warnings</h4>')
+        html.append('<ul>')
+        for err in errors:
+            html.append(f'<li>{Markup.escape(err)}</li>')
+        html.append('</ul>')
+
+    html.append('<p><a href="/admin/database/consulta">Back to database view</a></p>')
+    return Markup(''.join(html))
+
+
+# Hidden: targeted fix for WorkExperience records 4 and 5 achievements
+# Usage:
+#   /admin/database/update/experience-fix-dec-2025b
+@bp.route('/database/update/experience-fix-dec-2025b')
+def update_experience_fix_dec_2025b():
+    updates = []
+    errors = []
+
+    payload = {
+        4: "Python/SQLAlchemy",
+        5: "C++"
+    }
+
+    for exp_id, new_val in payload.items():
+        exp = db.session.get(WorkExperience, exp_id)
+        if exp:
+            before = exp.achievements
+            exp.achievements = new_val
+            updates.append((exp_id, 'achievements', before, exp.achievements))
+        else:
+            errors.append(f'WorkExperience id {exp_id} not found')
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return Markup(f"<p><strong>Error:</strong> Failed to commit changes: {Markup.escape(str(e))}</p>"), 500
+
+    html = ["<h3>WorkExperience targeted fix completed (Dec 2025b)</h3>"]
+    if updates:
+        html.append('<h4>Updated Fields</h4>')
+        html.append('<table border="1" cellpadding="6" style="border-collapse:collapse;">')
+        html.append('<tr><th>Record ID</th><th>Field</th><th>Before</th><th>After</th></tr>')
+        for rid, field, before, after in updates:
+            html.append(f'<tr><td>{rid}</td><td>{field}</td><td>{Markup.escape(str(before))}</td><td>{Markup.escape(str(after))}</td></tr>')
+        html.append('</table>')
+    else:
+        html.append('<p>No fields updated.</p>')
+
+    if errors:
+        html.append('<h4>Warnings</h4>')
+        html.append('<ul>')
+        for err in errors:
+            html.append(f'<li>{Markup.escape(err)}</li>')
+        html.append('</ul>')
+
+    html.append('<p><a href="/admin/database/consulta">Back to database view</a></p>')
+    return Markup(''.join(html))
+
+
 # Hidden: preview WorkExperience in sorted order (as it appears in PDF/profile)
 # Usage:
 #   /admin/database/preview/experience-order
@@ -609,6 +727,34 @@ def update_advanced_training():
         """)
     else:
         html.append('<p style="color: red;">Record 2 not found (name: "English B1")</p>')
+    
+    html.append('<p><a href="/admin/database/consulta">Back to database view</a></p>')
+    return Markup(''.join(html))
+
+
+@bp.route('/database/update/advanced-training-fix-dec-2025c')
+def update_advanced_training_fix_dec_2025c():
+    """
+    Update AdvancedTraining table - December 2025 fix (c)
+    Record 3: Set description to None
+    """
+    html = ['<h2>AdvancedTraining Table Update - December 2025 (c)</h2>']
+    
+    # Update record 3: Set description to None
+    record3 = db.session.get(AdvancedTraining, 3)
+    if record3:
+        old_description = record3.description
+        record3.description = None
+        db.session.commit()
+        html.append(f"""
+        <h3>Record 3 Updated: {Markup.escape(record3.name)}</h3>
+        <table border="1" cellpadding="6" style="border-collapse:collapse;">
+          <tr><th>Field</th><th>Before</th><th>After</th></tr>
+          <tr><td>description</td><td>{Markup.escape(old_description or '(empty)')}</td><td>(empty)</td></tr>
+        </table>
+        """)
+    else:
+        html.append('<p style="color: red;">Record 3 not found</p>')
     
     html.append('<p><a href="/admin/database/consulta">Back to database view</a></p>')
     return Markup(''.join(html))

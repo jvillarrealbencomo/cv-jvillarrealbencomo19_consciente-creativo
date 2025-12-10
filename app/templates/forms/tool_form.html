@@ -94,7 +94,7 @@
                                     <div class="card-header bg-light">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" id="usableQaEngineer" name="usable_qa_engineer" 
-                                                   {{ 'checked' if not tool or tool.usable_qa_engineer else '' }}>
+                                                   {{ 'checked' if tool and tool.usable_qa_engineer else '' }}>
                                             <label class="form-check-label fw-bold" for="usableQaEngineer">
                                                 <i class="bi bi-code-slash"></i> QA Engineer Profile
                                             </label>
@@ -132,8 +132,11 @@
                                             <option value="">Select category...</option>
                                             <option value="Engineering & Big Data" {{ 'selected' if tool and tool.subcategory_data_scientist == 'Engineering & Big Data' else '' }}>Engineering & Big Data</option>
                                             <option value="Modeling & Core Programming" {{ 'selected' if tool and tool.subcategory_data_scientist == 'Modeling & Core Programming' else '' }}>Modeling & Core Programming</option>
+                                            <option value="Operating Systems & Cloud" {{ 'selected' if tool and tool.subcategory_data_scientist == 'Operating Systems & Cloud' else '' }}>Operating Systems & Cloud</option>
+                                            <option value="Data Quality & CI/CD" {{ 'selected' if tool and tool.subcategory_data_scientist == 'Data Quality & CI/CD' else '' }}>Data Quality & CI/CD</option>
+                                            <option value="Test Automation" {{ 'selected' if tool and tool.subcategory_data_scientist == 'Test Automation' else '' }}>Test Automation</option>
                                         </select>
-                                        <small class="form-text text-muted">Data Scientist profile has different categories</small>
+                                        <small class="form-text text-muted">Data Scientist profile has five categories</small>
                                     </div>
                                 </div>
                             </div>

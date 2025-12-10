@@ -2,11 +2,21 @@
 API Routes
 Version 2025 - RESTful API endpoints for data management
 """
-from flask import Blueprint, request, jsonify
+import os
+from flask import Blueprint, request, jsonify, current_app
+from werkzeug.utils import secure_filename
 from app import db
 from app.models import Person, WorkExperience, TechnicalTool, Education, Certification, Course, Language, ITProduct, AdvancedTraining
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
+
+ALLOWED_IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp'}
+
+
+def _allowed_image(filename: str) -> bool:
+    _, ext = os.path.splitext(filename.lower())
+    return ext in ALLOWED_IMAGE_EXTS
 
 
 # Person endpoints
@@ -96,6 +106,45 @@ def person_detail(person_id):
             return jsonify({'error': 'Failed to update person', 'details': str(e)}), 400
     
     return jsonify(person.to_dict())
+
+
+@bp.route('/person/<int:person_id>/image', methods=['POST', 'DELETE'])
+def person_image_upload(person_id):
+    """Upload or clear profile image for a person"""
+    person = db.session.get(Person, person_id)
+    if not person:
+        return jsonify({'error': 'Person not found'}), 404
+
+    if request.method == 'DELETE':
+        person.profile_image_url = None
+        db.session.commit()
+        return '', 204
+
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file part "image" provided'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'Empty filename'}), 400
+
+    if not _allowed_image(file.filename):
+        return jsonify({'error': 'Unsupported file type'}), 400
+
+    filename = secure_filename(file.filename)
+    _, ext = os.path.splitext(filename)
+    # Use deterministic name per person to avoid orphaned files
+    filename = f"person_{person_id}{ext.lower()}"
+
+    upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles')
+    os.makedirs(upload_dir, exist_ok=True)
+
+    filepath = os.path.join(upload_dir, filename)
+    file.save(filepath)
+
+    person.profile_image_url = f"/static/uploads/profiles/{filename}"
+    db.session.commit()
+
+    return jsonify({'profile_image_url': person.profile_image_url}), 200
 
 
 # WorkExperience endpoints

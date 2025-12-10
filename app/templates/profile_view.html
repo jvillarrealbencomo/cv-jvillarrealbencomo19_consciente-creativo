@@ -195,6 +195,9 @@
                     <button class="btn btn-sm btn-success" id="exportPdfBtn">
                         <i class="bi bi-file-pdf"></i> Export PDF
                     </button>
+                    <button class="btn btn-sm btn-info" id="exportOnePagePdfBtn">
+                        <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
+                    </button>
                 </div>
             </div>
             
@@ -279,6 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('refreshBtn').addEventListener('click', loadCVData);
     document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+    document.getElementById('exportOnePagePdfBtn').addEventListener('click', exportOnePagePDF);
     document.getElementById('showAllBtn').addEventListener('click', showAllSections);
     document.getElementById('optimizeBtn').addEventListener('click', optimizeForOnePage);
     
@@ -609,6 +613,32 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error exporting PDF:', error);
             alert('Error generating PDF');
+        }
+    }
+    
+    async function exportOnePagePDF() {
+        try {
+            const response = await fetch(`/profile/${personId}/pdf/${currentProfile}/onepage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CV_${cvData.person.first_name}_${cvData.person.last_name}_${currentProfile}_onepage.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert('Failed to generate one-page PDF');
+            }
+        } catch (error) {
+            console.error('Error exporting one-page PDF:', error);
+            alert('Error generating one-page PDF');
         }
     }
     

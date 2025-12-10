@@ -8,6 +8,8 @@ from app import db
 from app.models import Person, WorkExperience, TechnicalTool, Education, Certification, Course, Language, ITProduct, AdvancedTraining
 from app.services.pdf_generator import PDFGenerator
 from app.services.profile_presets import ProfilePresetService
+import re
+from copy import deepcopy
 
 bp = Blueprint('profiles', __name__, url_prefix='/profile')
 
@@ -36,6 +38,39 @@ def profile_data(person_id, profile_name):
         return jsonify({'error': 'Person not found'}), 404
     
     return jsonify(data)
+
+
+@bp.route('/<int:person_id>/pdf/<profile_name>/onepage', methods=['POST'])
+def generate_one_page_pdf(person_id, profile_name):
+    """Generate one-page optimized PDF CV for a profile"""
+    from flask import make_response
+    from app.services.pdf_generator import PDFGenerator
+    
+    person = db.session.get(Person, person_id)
+    if not person:
+        return "Person not found", 404
+    
+    if profile_name not in ProfilePresetService.get_profile_names():
+        return "Invalid profile", 400
+    
+    # Get profile data
+    profile_data = get_profile_data_dict(person_id, profile_name)
+    
+    try:
+        # Generate one-page PDF with auto-optimization enabled
+        pdf_bytes = PDFGenerator.generate_cv_pdf(profile_data, profile_name, auto_optimize=True)
+        
+        # Create response
+        response = make_response(pdf_bytes)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=CV_{person.first_name}_{person.last_name}_{profile_name}_onepage.pdf'
+        
+        return response
+    except Exception as e:
+        return jsonify({
+            'error': 'PDF generation failed',
+            'details': str(e)
+        }), 500
 
 
 @bp.route('/<int:person_id>/pdf/<profile_name>', methods=['POST'])
