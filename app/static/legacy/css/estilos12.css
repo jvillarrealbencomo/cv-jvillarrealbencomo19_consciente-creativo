@@ -1,0 +1,202 @@
+/* estilos (12) funciona estructura de 3 dispositivos y agregue otra estructura de 4 dispos q no he probado */
+* {
+    margin:0px;
+    padding: 0px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+}
+body{
+    height:100%;
+}
+    h4,h5{
+        text-align: center; 
+        color: white;
+    }
+    
+    p{
+        text-align: center;
+        color: white; 
+    }
+    .color-white {
+        color: white; 
+    }
+    .fotojvb {
+        width:120px;
+        height:120px;
+    }
+    .documento {
+        width:50px;
+        height:50px;
+    }
+    .documentoPag1 {
+        width:50px;
+        height:50px;
+    }
+    .documentoPag2 {
+        width:50px;
+        height:50px;
+    }
+    .titulos {
+        width:350px;
+        height:300px;
+    }
+
+
+    @media screen and (max-width: 576px){
+        * {
+            margin:0p x;
+            padding: 0px;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+        .movil{
+            width:100%;
+            color: #000;        
+        }
+        .bg-nuevo {
+            background-color: #201b52;
+            color:  whitesmoke;
+        }
+        a{
+
+            font-weight: bold;
+            font-size:50%;
+        }
+        section {
+            width:100%;
+        }
+        .principal {
+            position: relative;
+            width: 100%;/* calc(70%-350px); 900px;*/
+            margin: 0px 0px auto;
+            left:0;
+            background-color: #201b52;
+            display: block;
+            text-align: center;
+        }
+    }
+    
+    
+    @media screen and (max-width: 768px){
+        * {
+            margin:0p x;
+            padding: 0px;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+        .movil{
+            width:100%;
+            color: #000;        
+        }
+        .bg-nuevo {
+            background: rgb(59, 1, 59);
+            color:  whitesmoke;
+        }
+        a{
+            font-weight: bold;
+            font-size:50%;
+        }
+        section {
+            width:100%;
+        }
+        .principal {
+            position: relative;
+            width: 100%;/* calc(70%-350px); 900px;*/
+            margin: 0px 0px auto;
+            left:0;
+            background-color: #201b52;
+            display: block;
+            text-align: center;
+        }
+    }
+    
+    
+    @media screen and (max-width: 992px){
+        .bg-nuevo {
+            background-color: #29270c;
+              color:  whitesmoke;
+          }
+        section {
+            width:100%;
+        }
+        a{
+            font-weight: bold;
+            font-size:95%;
+        }
+        .principal {
+            position: relative;
+            width: 80%;/* calc(70%-350px); 900px;*/
+            margin: 0 10% auto;
+            left:0;
+            font-size: 80%;
+            background-color: #201b52;
+            background-color: #29270c;
+            display: block;
+            text-align: center;
+        }
+        .pie {
+            background-color: #29270c;
+            color:  whitesmoke;
+            text-align: center;
+          } 
+          h1 {
+            text-align: center;
+            color: white;
+        }
+    }
+    min-width: 992px
+    @media screen and (min-width: 992px){
+    header {
+        width:100%;
+    }
+    .bg-nuevo {
+        background-color: #0f0c29;
+    
+          color:  whitesmoke;
+    }
+    a{
+        font-weight: bold;
+        font-size:120%;
+    }
+    <nav>.bg-nuevo .nav-justified:hover{
+        background-color: #45d4f8;
+    }
+    section {
+        width:100%;
+        background: #ECE9E6;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+    .principal {
+        position: relative;
+        width:60%; /* calc (80% - 350px);  900px;*/
+        margin: 0 20% auto;
+        left:0;/*width%;*/
+        font-size: 98%;
+        background-color: #201b52;
+        display: inline-block;
+        text-align: center;
+    }
+    .pie {
+        background-color: #0f0c29;     
+        color:  whitesmoke;
+        text-align: center;
+      } 
+      h1 {
+        text-align: center;
+        color: white;
+    }
+    .movil{
+        display:none;
+    }
+    .tablet{
+        display:none;
+    }
+    .nav-link {
+          color: whitesmoke; 
+      } 
+}
+
