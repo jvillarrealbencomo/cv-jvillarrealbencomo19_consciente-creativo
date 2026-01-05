@@ -64,6 +64,7 @@ def register_blueprints(app):
     app.register_blueprint(api.bp)
     app.register_blueprint(presets.bp)
     app.register_blueprint(forms.bp)
+    app.register_blueprint(legacy_bp)
 
 
 def register_error_handlers(app):

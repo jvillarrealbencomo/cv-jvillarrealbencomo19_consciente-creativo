@@ -42,4 +42,4 @@ def about():
 @bp.route('/legacy/cv2019')
 def cv2019():
     """Legacy CV 2019 - Archives the old CV format with full functionality"""
-    return render_template('cv2019.html')
+    return render_template('legacy/inicio2.html')

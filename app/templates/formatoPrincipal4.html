@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">    
-    <link  rel="stylesheet" href = "{{ url_for ('static', filename='legacy/css/estilos.css')}}">
-    <link  rel="stylesheet" href = "{{ url_for ('static', filename='legacy/css/fontello.css')}}"><!--    <img rel="icon" type="image/x-icon" href="{{ url_for ('static', filename='legacy/img/favicon.ico')}}"> -->
-    <link  rel = "icon"  href = "{{ url_for ('static', filename='legacy/img/favicon.png')}}"  type = "image/x-icon" >
+    <link  rel="stylesheet" href = "{{ url_for ('static', filename='css/estilos.css')}}">
+    <link  rel="stylesheet" href = "{{ url_for ('static', filename='css/fontello.css')}}"><!--    <img rel="icon" type="image/x-icon" href="{{ url_for ('static', filename='img/favicon.ico')}}"> -->
+    <link  rel = "icon"  href = "{{ url_for ('static', filename='img/favicon.png')}}"  type = "image/x-icon" >
     {% block content2 %}
 
     {% endblock %}
@@ -22,8 +22,8 @@
     </div>    -->
     <div class="pc">
     <nav class="navbar  navbar-light bg-light nav-justified navbar-toggleable-md">
-        <a class="navbar-brand" href="{{url_for('legacy.fnCargaInicio')}}">
-          <img class="border border-dark rounded" src="{{ url_for ('static', filename='legacy/img/cvDesarrollador.png')}}" width="55" height="42" alt="logo CV de Javier Villarreal">
+        <a class="navbar-brand" href="{{url_for('legacy.cv2019_home')}}">
+          <img class="border border-dark rounded" src="{{ url_for ('static', filename='img/cvDesarrollador.png')}}" width="55" height="42" alt="logo CV de Javier Villarreal">
         </a>
         <h2>Curriculum Vitae</h2>
           <button class="navbar-toggler borderb2" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,48 +35,41 @@
               <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">CV</a>
             </li> -->
             <li class="nav-item">
-              <a class="nav-item nav-link active" href="{{url_for('legacy.fnCargaInicio')}}"><span class="icon-casa"></span>Inicio</a>
+              <a class="nav-item nav-link active" href="{{url_for('legacy.cv2019_home')}}"><span class="icon-casa"></span>Inicio</a>
             </li>
             <li class="nav-item">
-              <a class="nav-item nav-link " href="{{url_for('legacy.educacion')}}"><span class="icon-titulos" ></span>Educación</a>
+              <a class="nav-item nav-link " href="{{url_for('educacion')}}"><span class="icon-titulos" ></span>Educación</a>
             </li>
             <li class="nav-item">
-              <a class="nav-item nav-link" href="{{url_for('legacy.experienciaLaboral')}}"><span class="icon-experiencia-laboral-2 " >Experiencia</a>
+              <a class="nav-item nav-link" href="{{url_for('experienciaLaboral')}}"><span class="icon-experiencia-laboral-2 " >Experiencia</a>
             </li>
             <li class="nav-item">
-              <a class="nav-item nav-link" href="{{url_for('legacy.productosInformaticos')}}"><span class="icon-producto-informatico2" ></span>Productos</a>
+              <a class="nav-item nav-link" href="{{url_for('productosInformaticos')}}"><span class="icon-producto-informatico2" ></span>Productos</a>
             </li>
             <li class="nav-item">
-              <a class="nav-item nav-link" href="{{url_for('legacy.soporteProgramacion')}}"><span class="icon-herramientas-programacion-1" ></span>Soporte</a>
+              <a class="nav-item nav-link" href="{{url_for('soporteProgramacion')}}"><span class="icon-herramientas-programacion-1" ></span>Soporte</a>
             </li>
             <li class="nav-item">
-              <a class="nav-item nav-link" href="{{url_for('legacy.cursosInformatica')}}"><span class="icon-laptop" ></span>Cursos</a>
+              <a class="nav-item nav-link" href="{{url_for('cursosInformatica')}}"><span class="icon-laptop" ></span>Cursos</a>
             </li>
             <li class="nav-item">
-              <a class="nav-item nav-link" href="{{url_for('legacy.datosPersonales')}}"><span class="icon-rut" ></span>Datos</a>
+              <a class="nav-item nav-link" href="{{url_for('datosPersonales')}}"><span class="icon-rut" ></span>Datos</a>
             </li>
             <li class="nav-item dropdown">
                   <a class="nav-item nav-link dropdown-toggle icon-direccion" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Documentos
                   </a>
                   <div class="dropdown-menu navbar-inverse"  aria-labelledby="navbarDropdownMenuLink" style="background-color:whitesmoke;">
-                      <a class="dropdown-item" href="{{url_for('legacy.titulos')}}"><span class="icon-documentos"></span>Titulos</a>
-                      <a class="dropdown-item" href="{{url_for('legacy.constanciasLaborales')}}"><span class="icon-direccion"></span>Constancias laborales</a>
-                      <a class="dropdown-item" href="{{url_for('legacy.certificaciones')}}"><span class="icon-documentos"></span>Certificaciones</a>
-                      <a class="dropdown-item" href="{{url_for('legacy.documentos')}}"><span class="icon-listado-documentos"></span>Listado</a>
+                      <a class="dropdown-item" href="{{url_for('titulos')}}"><span class="icon-documentos"></span>Titulos</a>
+                      <a class="dropdown-item" href="{{url_for('constanciasLaborales')}}"><span class="icon-direccion"></span>Constancias laborales</a>
+                      <a class="dropdown-item" href="{{url_for('certificaciones')}}"><span class="icon-documentos"></span>Certificaciones</a>
+                      <a class="dropdown-item" href="{{url_for('documentos')}}"><span class="icon-listado-documentos"></span>Listado</a>
                   </div>
             </li>
             <!-- <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Links de Aplicaciones</a> -->
           </ul>
         </div>
       </nav>
-      <!-- Back to CV 2025 Button -->
-      <div style="background-color: #f0f0f0; padding: 10px; text-align: center; border-bottom: 2px solid #8B7500;">
-        <a href="/" class="btn btn-primary btn-sm" style="background-color: #007bff; color: white; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-weight: bold;">
-          ← Volver a CV 2025
-        </a>
-        <p style="font-size: 12px; color: #666; margin-top: 5px; margin-bottom: 0;">Versión Histórica 2019 | Haz clic para regresar a la versión actual</p>
-      </div>
     </div>
   </header>
   <section>
@@ -89,7 +82,7 @@
   <footer class="pie">
     <h5>Derechos Reservados Julio 2020</h5>
   </footer> 
-  <script src="{{ url_for ('static', filename='legacy/js/hacer-clic.js')}}"></script>
+  <script src="{{ url_for ('static', filename='js/hacer-clic.js')}}"></script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>         
