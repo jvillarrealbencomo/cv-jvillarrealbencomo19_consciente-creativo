@@ -2,3 +2,9 @@ venv311/
 venv39/
 *.pyc
 __pycache__/
+
+# Uploaded assets (keep structure, ignore files)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+!app/static/uploads/education/.gitkeep
+!app/static/uploads/advanced_training/.gitkeep

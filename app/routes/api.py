@@ -3,10 +3,12 @@ API Routes
 Version 2025 - RESTful API endpoints for data management
 """
 import os
+from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from app import db
 from app.models import Person, WorkExperience, TechnicalTool, Education, Certification, Course, Language, ITProduct, AdvancedTraining
+from app.services.image_service import ImageService
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -17,6 +19,43 @@ ALLOWED_IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp'}
 def _allowed_image(filename: str) -> bool:
     _, ext = os.path.splitext(filename.lower())
     return ext in ALLOWED_IMAGE_EXTS
+
+
+def _get_request_data():
+    """Return request data as dict supporting JSON and multipart forms."""
+    if request.content_type and request.content_type.startswith('multipart/form-data'):
+        return request.form.to_dict()
+    return request.get_json() or {}
+
+
+def _parse_bool_fields(data, fields):
+    for field in fields:
+        if field in data:
+            if isinstance(data[field], str):
+                data[field] = data[field].lower() in ('true', '1', 'yes', 'on')
+            else:
+                data[field] = bool(data[field])
+
+
+def _parse_int_fields(data, fields):
+    for field in fields:
+        if field in data:
+            try:
+                data[field] = int(data[field]) if data[field] not in (None, '') else None
+            except (TypeError, ValueError):
+                data[field] = None
+
+
+def _parse_date_fields(data, fields):
+    for field in fields:
+        if field in data:
+            if data[field] in (None, ''):
+                data[field] = None
+            elif isinstance(data[field], str):
+                try:
+                    data[field] = datetime.strptime(data[field], '%Y-%m-%d').date()
+                except ValueError:
+                    data[field] = None
 
 
 # Person endpoints
@@ -301,6 +340,225 @@ def tool_detail(tool_id):
     return jsonify(tool.to_dict())
 
 
+# Education endpoints (supporting credential images)
+@bp.route('/education', methods=['GET', 'POST'])
+def education_list():
+    if request.method == 'POST':
+        data = _get_request_data()
+        data.pop('id', None)
+
+        _parse_int_fields(data, ['year_obtained', 'start_year', 'end_year', 'display_order'])
+        _parse_bool_fields(data, ['visible_qa_analyst', 'visible_qa_engineer', 'visible_data_scientist', 'is_current', 'is_historical'])
+
+        # Normalize empty strings
+        for field in ['details', 'document_url', 'country']:
+            if field in data and data[field] == '':
+                data[field] = None
+
+        try:
+            edu = Education(**data)
+            db.session.add(edu)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Failed to create education', 'details': str(e)}), 400
+
+        file = request.files.get('credential_image') or request.files.get('image')
+        if file and file.filename:
+            try:
+                saved = ImageService.save_credential_image(file, 'education', edu.id)
+                if saved:
+                    edu.image_path = saved['image_path']
+                    edu.image_thumbnail_path = saved['thumbnail_path']
+                    edu.image_filename = saved['filename']
+                    edu.image_mime_type = saved['mime_type']
+                    db.session.commit()
+            except ValueError as e:
+                db.session.rollback()
+                return jsonify({'error': 'Invalid image', 'details': str(e)}), 400
+
+        return jsonify(edu.to_dict()), 201
+
+    educations = Education.query.filter_by(active=True).order_by(Education.display_order.asc()).all()
+    return jsonify([e.to_dict() for e in educations])
+
+
+@bp.route('/education/<int:edu_id>', methods=['GET', 'PUT', 'DELETE'])
+def education_detail(edu_id):
+    edu = db.session.get(Education, edu_id)
+    if not edu:
+        return jsonify({'error': 'Education not found'}), 404
+
+    if request.method == 'DELETE':
+        edu.active = False
+        db.session.commit()
+        return '', 204
+
+    if request.method == 'PUT':
+        data = _get_request_data()
+        data.pop('id', None)
+
+        _parse_int_fields(data, ['year_obtained', 'start_year', 'end_year', 'display_order'])
+        _parse_bool_fields(data, ['visible_qa_analyst', 'visible_qa_engineer', 'visible_data_scientist', 'is_current', 'is_historical'])
+
+        for field in ['details', 'document_url', 'country']:
+            if field in data and data[field] == '':
+                data[field] = None
+
+        remove_image = False
+        if 'remove_image' in data:
+            val = str(data.pop('remove_image')).lower()
+            remove_image = val in ('true', '1', 'yes', 'on')
+
+        try:
+            for key, value in data.items():
+                if hasattr(edu, key):
+                    setattr(edu, key, value)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Failed to update education', 'details': str(e)}), 400
+
+        old_image = (edu.image_path, edu.image_thumbnail_path)
+
+        file = request.files.get('credential_image') or request.files.get('image')
+        if file and file.filename:
+            try:
+                saved = ImageService.save_credential_image(file, 'education', edu.id)
+                if saved:
+                    edu.image_path = saved['image_path']
+                    edu.image_thumbnail_path = saved['thumbnail_path']
+                    edu.image_filename = saved['filename']
+                    edu.image_mime_type = saved['mime_type']
+                    db.session.commit()
+                    ImageService.delete_credential_image(old_image[0], old_image[1])
+            except ValueError as e:
+                db.session.rollback()
+                return jsonify({'error': 'Invalid image', 'details': str(e)}), 400
+
+        if remove_image and old_image[0]:
+            ImageService.delete_credential_image(old_image[0], old_image[1])
+            edu.image_path = None
+            edu.image_thumbnail_path = None
+            edu.image_filename = None
+            edu.image_mime_type = None
+            db.session.commit()
+
+    return jsonify(edu.to_dict())
+
+
+# Advanced Training endpoints (courses + certifications) with images
+@bp.route('/advanced-training', methods=['GET', 'POST'])
+def advanced_training_list():
+    if request.method == 'POST':
+        data = _get_request_data()
+        data.pop('id', None)
+
+        _parse_date_fields(data, ['completion_date', 'expiration_date'])
+        _parse_int_fields(data, ['duration_hours', 'display_order'])
+        _parse_bool_fields(data, ['visible_qa_analyst', 'visible_qa_engineer', 'visible_data_scientist', 'is_historical'])
+
+        for field in ['credential_id', 'credential_url', 'description']:
+            if field in data and data[field] == '':
+                data[field] = None
+
+        # remove_image can be present from the form but is not a model field; drop it to avoid **kwargs errors
+        if 'remove_image' in data:
+            data.pop('remove_image', None)
+
+        try:
+            training = AdvancedTraining(**data)
+            db.session.add(training)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Failed to create advanced training', 'details': str(e)}), 400
+
+        file = request.files.get('credential_image') or request.files.get('image')
+        if file and file.filename:
+            try:
+                saved = ImageService.save_credential_image(file, 'advanced_training', training.id)
+                if saved:
+                    training.image_path = saved['image_path']
+                    training.image_thumbnail_path = saved['thumbnail_path']
+                    training.image_filename = saved['filename']
+                    training.image_mime_type = saved['mime_type']
+                    db.session.commit()
+            except ValueError as e:
+                db.session.rollback()
+                return jsonify({'error': 'Invalid image', 'details': str(e)}), 400
+
+        return jsonify(training.to_dict()), 201
+
+    trainings = AdvancedTraining.query.filter_by(active=True).order_by(AdvancedTraining.display_order.asc()).all()
+    return jsonify([t.to_dict() for t in trainings])
+
+
+@bp.route('/advanced-training/<int:training_id>', methods=['GET', 'PUT', 'DELETE'])
+def advanced_training_detail(training_id):
+    training = db.session.get(AdvancedTraining, training_id)
+    if not training:
+        return jsonify({'error': 'AdvancedTraining not found'}), 404
+
+    if request.method == 'DELETE':
+        training.active = False
+        db.session.commit()
+        return '', 204
+
+    if request.method == 'PUT':
+        data = _get_request_data()
+        data.pop('id', None)
+
+        _parse_date_fields(data, ['completion_date', 'expiration_date'])
+        _parse_int_fields(data, ['duration_hours', 'display_order'])
+        _parse_bool_fields(data, ['visible_qa_analyst', 'visible_qa_engineer', 'visible_data_scientist', 'is_historical'])
+
+        for field in ['credential_id', 'credential_url', 'description']:
+            if field in data and data[field] == '':
+                data[field] = None
+
+        remove_image = False
+        if 'remove_image' in data:
+            val = str(data.pop('remove_image')).lower()
+            remove_image = val in ('true', '1', 'yes', 'on')
+
+        try:
+            for key, value in data.items():
+                if hasattr(training, key):
+                    setattr(training, key, value)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Failed to update advanced training', 'details': str(e)}), 400
+
+        old_image = (training.image_path, training.image_thumbnail_path)
+
+        file = request.files.get('credential_image') or request.files.get('image')
+        if file and file.filename:
+            try:
+                saved = ImageService.save_credential_image(file, 'advanced_training', training.id)
+                if saved:
+                    training.image_path = saved['image_path']
+                    training.image_thumbnail_path = saved['thumbnail_path']
+                    training.image_filename = saved['filename']
+                    training.image_mime_type = saved['mime_type']
+                    db.session.commit()
+                    ImageService.delete_credential_image(old_image[0], old_image[1])
+            except ValueError as e:
+                db.session.rollback()
+                return jsonify({'error': 'Invalid image', 'details': str(e)}), 400
+
+        if remove_image and old_image[0]:
+            ImageService.delete_credential_image(old_image[0], old_image[1])
+            training.image_path = None
+            training.image_thumbnail_path = None
+            training.image_filename = None
+            training.image_mime_type = None
+            db.session.commit()
+
+    return jsonify(training.to_dict())
+
+
 # Generic CRUD endpoints for other models
 def register_model_endpoints(model_class, endpoint_prefix):
     """Register standard CRUD endpoints with unique endpoint names."""
@@ -410,10 +668,8 @@ def register_model_endpoints(model_class, endpoint_prefix):
     bp.add_url_rule(f'/{endpoint_prefix}/<int:item_id>', view_func=detail, methods=['GET', 'PUT', 'DELETE'], endpoint=f'{endpoint_prefix}_detail')
 
 
-# Register other model endpoints
-register_model_endpoints(Education, 'education')
+# Register remaining model endpoints (education and advanced_training have custom handlers above)
 register_model_endpoints(Certification, 'certification')
 register_model_endpoints(Course, 'course')
-register_model_endpoints(AdvancedTraining, 'advanced-training')
 register_model_endpoints(Language, 'language')
 register_model_endpoints(ITProduct, 'product')

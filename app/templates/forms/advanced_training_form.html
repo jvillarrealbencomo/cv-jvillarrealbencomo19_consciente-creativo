@@ -104,6 +104,50 @@
                             </div>
                         </div>
 
+                        <!-- Credential Image -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Credential Image (optional)</h5>
+                            </div>
+                            <div class="col-12">
+                                <input class="form-control mb-2" type="file" id="credentialImage" name="credential_image" accept="image/png,image/jpeg,application/pdf">
+                                <small class="text-muted">Allowed: PNG, JPG, PDF. Max 5MB. A thumbnail is auto-generated for images.</small>
+                                <div class="mt-2" id="imagePreview">
+                                    {% if training and (training.image_thumbnail_url or training.image_url) %}
+                                        <div class="alert alert-success">
+                                            <strong><i class="bi bi-check-circle"></i> Current credential image:</strong>
+                                            <div class="d-flex align-items-center gap-3 mt-2">
+                                                {% if training.image_thumbnail_url %}
+                                                    <img src="{{ training.image_thumbnail_url }}" alt="Current credential" class="img-thumbnail" style="max-height: 120px; border: 2px solid #198754;">
+                                                {% endif %}
+                                                <div>
+                                                    <div class="mb-2">
+                                                        <a href="{{ training.image_url }}" target="_blank" class="btn btn-sm btn-success">
+                                                            <i class="bi bi-eye"></i> View Full Image
+                                                        </a>
+                                                    </div>
+                                                    {% if training.image_filename %}
+                                                        <div class="small text-muted">
+                                                            <i class="bi bi-file-earmark"></i> {{ training.image_filename }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle"></i> No credential image uploaded yet.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="removeImage">
+                                    <label class="form-check-label" for="removeImage">Remove existing image</label>
+                                    <input type="hidden" id="removeImageFlag" name="remove_image" value="false">
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Profile Visibility -->
                         <div class="row mb-4">
                             <div class="col-12">
@@ -168,8 +212,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show/hide fields based on type
     function updateFieldsVisibility() {
         const type = typeSelect.value;
-        courseFields.style.display = type === 'Course' ? 'block' : 'none';
-        certificationFields.style.display = type === 'Certification' ? 'block' : 'none';
+        const isCourse = type === 'Course';
+        
+        courseFields.style.display = isCourse ? 'block' : 'none';
+        certificationFields.style.display = isCourse ? 'none' : 'block';
+        
+        // Disable hidden fields to prevent validation errors
+        document.getElementById('durationHours').disabled = !isCourse;
+        document.getElementById('expirationDate').disabled = isCourse;
+        document.getElementById('credentialId').disabled = isCourse;
+        document.getElementById('credentialUrl').disabled = isCourse;
     }
     
     typeSelect.addEventListener('change', updateFieldsVisibility);
@@ -179,20 +231,21 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        // Convert checkboxes to boolean
-        data.visible_qa_analyst = document.getElementById('visibleQaAnalyst').checked;
-        data.visible_qa_engineer = document.getElementById('visibleQaEngineer').checked;
-        data.visible_data_scientist = document.getElementById('visibleDataScientist').checked;
-        
-        // Clear type-specific fields based on type
-        if (data.type === 'Course') {
-            data.expiration_date = null;
-            data.credential_id = null;
-            data.credential_url = null;
-        } else if (data.type === 'Certification') {
-            data.duration_hours = null;
+        formData.set('visible_qa_analyst', document.getElementById('visibleQaAnalyst').checked);
+        formData.set('visible_qa_engineer', document.getElementById('visibleQaEngineer').checked);
+        formData.set('visible_data_scientist', document.getElementById('visibleDataScientist').checked);
+        formData.set('remove_image', document.getElementById('removeImageFlag').value);
+
+        // Don't send disabled fields (they're already excluded from FormData when disabled)
+        const type = document.getElementById('type').value;
+        if (type === 'Course') {
+            // Remove certification fields that are disabled
+            formData.delete('expiration_date');
+            formData.delete('credential_id');
+            formData.delete('credential_url');
+        } else if (type === 'Certification') {
+            // Remove course fields that are disabled
+            formData.delete('duration_hours');
         }
         
         const trainingId = document.getElementById('trainingId').value;
@@ -202,8 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch(url, {
                 method: method,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
+                body: formData
             });
             
             if (response.ok) {
@@ -216,6 +268,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     form.reset();
                     document.getElementById('trainingId').value = '';
                     updateFieldsVisibility();
+                    document.getElementById('imagePreview').innerHTML = '<small class="text-muted">No credential image uploaded.</small>';
+                    document.getElementById('removeImageFlag').value = 'false';
+                    document.getElementById('removeImage').checked = false;
                 }
             } else {
                 const err = await response.json().catch(() => null);
@@ -224,6 +279,27 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error saving:', error);
             alert('An error occurred while saving');
+        }
+    });
+
+    const removeCheckbox = document.getElementById('removeImage');
+    const removeFlag = document.getElementById('removeImageFlag');
+    const fileInput = document.getElementById('credentialImage');
+
+    removeCheckbox.addEventListener('change', () => {
+        removeFlag.value = removeCheckbox.checked ? 'true' : 'false';
+        if (removeCheckbox.checked) {
+            document.getElementById('imagePreview').innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> <strong>Image will be removed</strong> when you save this form.</div>';
+            fileInput.value = '';
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            removeCheckbox.checked = false;
+            removeFlag.value = 'false';
+            const fileName = fileInput.files[0].name;
+            document.getElementById('imagePreview').innerHTML = `<div class="alert alert-primary"><i class="bi bi-upload"></i> <strong>New image selected:</strong> ${fileName}<br><small>This will replace the existing image when you save.</small></div>`;
         }
     });
 });

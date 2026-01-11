@@ -14,7 +14,7 @@ class PDFGenerator:
     """
     
     @staticmethod
-    def generate_cv_pdf(profile_data, profile_name, auto_optimize: bool = True):
+    def generate_cv_pdf(profile_data, profile_name, auto_optimize: bool = False):
         """
         Generate a PDF CV from profile data
         
@@ -22,18 +22,30 @@ class PDFGenerator:
             profile_data: Dictionary with all CV data
             profile_name: Profile identifier (qa_analyst, qa_engineer, data_scientist)
             auto_optimize: When True, iteratively trims content/styles to fit one page
+                          When False, shows all content in multi-page extended format
             
         Returns:
             bytes: PDF file content
+        """
+        print(f'>>> PDFGenerator.generate_cv_pdf called')
+        print(f'>>> auto_optimize: {auto_optimize} (type: {type(auto_optimize)})')
+        
+        # Use the 2-column sidebar layout for both, but with/without trimming
+        return PDFGenerator._generate_sidebar_pdf(profile_data, profile_name, auto_optimize)
+    
+    @staticmethod
+    def _generate_sidebar_pdf(profile_data, profile_name, auto_optimize):
+        """Generate 2-column sidebar PDF layout
+        
+        When auto_optimize=False: Shows all content across multiple pages
+        When auto_optimize=True: Trims content to fit ~1 page
         """
         try:
             from weasyprint import HTML, CSS
             from flask import render_template_string
         except ImportError:
-            # WeasyPrint not installed, return placeholder
             return PDFGenerator._generate_placeholder_pdf(profile_data, profile_name)
         
-        # Attempt to render with auto-optimization to guarantee one-page output
         working_data = deepcopy(profile_data)
         style_state = {
             'font_pt': 10.0,
@@ -45,7 +57,11 @@ class PDFGenerator:
         base_dir = os.getcwd()
 
         def render_and_measure(data, styles):
-            html_content = PDFGenerator._generate_html(data, profile_name)
+            html_content = (
+                PDFGenerator._generate_split_export_html(data, profile_name)
+                if not auto_optimize else
+                PDFGenerator._generate_html(data, profile_name)
+            )
             css = CSS(string=PDFGenerator._get_pdf_css(
                 base_font_pt=styles['font_pt'],
                 line_height=styles['line_height'],
@@ -58,9 +74,20 @@ class PDFGenerator:
         try:
             document, html_content, pdf_css = render_and_measure(working_data, style_state)
             page_count = len(document.pages)
+            
+            print(f'>>> Sidebar PDF: {page_count} pages initially', flush=True)
 
-            if not auto_optimize or page_count <= 1:
+            # If NOT optimizing, return all content across multiple pages
+            if not auto_optimize:
+                print(f'>>> Returning full extended PDF with all records (pages={page_count})', flush=True)
                 return document.write_pdf()
+            
+            # If already 1 page or less, no need to optimize
+            if page_count <= 1:
+                print(f'>>> Already 1 page, returning as-is', flush=True)
+                return document.write_pdf()
+            
+            print(f'>>> Starting optimization to fit ~1 page...', flush=True)
 
             # Trimming strategy: progressively reduce low-priority content, then typography
             trim_steps = [
@@ -121,32 +148,105 @@ class PDFGenerator:
         </head>
         <body>
             <div class="cv-page">
-                <table class="cv-layout-table">
-                    <tr>
-                        <td class="cv-left-column">
-                            {header_image}
-                            {PDFGenerator._render_technical_skills_compact(profile_data.get('technical_tools', {}), profile_name)}
-                            {PDFGenerator._render_languages_compact(profile_data.get('languages', []))}
-                            {PDFGenerator._render_education_compact(profile_data.get('education', []))}
-                            {PDFGenerator._render_references_compact(person)}
-                            {PDFGenerator._render_contact_compact(contacts)}
-                        </td>
-                        <td class="cv-right-column">
-                            <div class="cv-header-block">
-                                <h1 class="cv-name">{person.get('first_name', '')} {person.get('last_name', '')}</h1>
-                                <div class="cv-title" style="color: #0d6efd;">{profile_data.get('title', '')}</div>
-                                {PDFGenerator._render_summary_compact(profile_data.get('summary'))}
-                            </div>
-                            {PDFGenerator._render_work_experience_compact(profile_data.get('work_experience', []))}
-                            {PDFGenerator._render_advanced_training_compact(profile_data.get('advanced_training', []))}
-                        </td>
-                    </tr>
-                </table>
+                <div class="cv-row">
+                    <div class="cv-left-column">
+                        {header_image}
+                        {PDFGenerator._render_technical_skills_compact(profile_data.get('technical_tools', {}), profile_name)}
+                        {PDFGenerator._render_languages_compact(profile_data.get('languages', []))}
+                        {PDFGenerator._render_education_compact(profile_data.get('education', []), include_images=False)}
+                        {PDFGenerator._render_references_compact(person)}
+                        {PDFGenerator._render_contact_compact(contacts)}
+                    </div>
+                    <div class="cv-right-column">
+                        <div class="cv-header-block">
+                            <h1 class="cv-name">{person.get('first_name', '')} {person.get('last_name', '')}</h1>
+                            <div class="cv-title" style="color: #0d6efd;">{profile_data.get('title', '')}</div>
+                            {PDFGenerator._render_summary_compact(profile_data.get('summary'))}
+                        </div>
+                        {PDFGenerator._render_work_experience_compact(profile_data.get('work_experience', []))}
+                        {PDFGenerator._render_advanced_training_compact(profile_data.get('advanced_training', []), include_images=False)}
+                    </div>
+                </div>
             </div>
         </body>
         </html>
         """
         
+        return html
+
+    @staticmethod
+    def _generate_split_export_html(profile_data, profile_name):
+        """Generate HTML for export mode with fixed page order:
+        Page 1: Hero + summary
+        Page 2: Sidebar sections (skills, languages, education, references, contact)
+        Page 3: Work experience
+        Page 4: Advanced training & certifications
+        """
+        person = profile_data.get('person', {})
+        contacts = profile_data.get('visible_contacts', {})
+
+        header_image = ''
+        if person.get('profile_image_url'):
+            img_url = person.get('profile_image_url')
+            if img_url.startswith('/static/'):
+                rel_path = img_url.replace('/static/', '', 1)
+                abs_path = os.path.join(os.getcwd(), 'app', 'static', rel_path)
+                img_src = f"file:///{abs_path.replace(os.sep, '/')}"
+            else:
+                img_src = img_url
+            header_image = f"""<img class="sidebar-avatar" src="{img_src}" alt="Profile photo" style="width: 120px; height: auto; margin: 0 auto 8px auto; display: block;">"""
+
+        page1 = f"""
+        <div class="cv-page">
+            <div class="cv-header-block" style="margin-top: 12px; text-align: center;">
+                {header_image}
+                <h1 class="cv-name" style="margin-top: 0;">{person.get('first_name', '')} {person.get('last_name', '')}</h1>
+                <div class="cv-title" style="color: #0d6efd; margin-bottom:8px;">{profile_data.get('title', '')}</div>
+                {PDFGenerator._render_summary_compact(profile_data.get('summary'))}
+            </div>
+        </div>
+        <div class="page-break"></div>
+        """
+
+        page2 = f"""
+        <div class="cv-page">
+            {PDFGenerator._render_technical_skills_compact(profile_data.get('technical_tools', {}), profile_name)}
+            {PDFGenerator._render_languages_compact(profile_data.get('languages', []))}
+            {PDFGenerator._render_education_compact(profile_data.get('education', []), include_images=True)}
+            {PDFGenerator._render_references_compact(person)}
+            {PDFGenerator._render_contact_compact(contacts)}
+        </div>
+        <div class="page-break"></div>
+        """
+
+        page3 = f"""
+        <div class="cv-page">
+            {PDFGenerator._render_work_experience_compact(profile_data.get('work_experience', []))}
+        </div>
+        <div class="page-break"></div>
+        """
+
+        page4 = f"""
+        <div class="cv-page">
+            {PDFGenerator._render_advanced_training_compact(profile_data.get('advanced_training', []), include_images=True)}
+        </div>
+        """
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>CV - {person.get('first_name', '')} {person.get('last_name', '')}</title>
+        </head>
+        <body>
+            {page1}
+            {page2}
+            {page3}
+            {page4}
+        </body>
+        </html>
+        """
         return html
 
     @staticmethod
@@ -194,18 +294,20 @@ class PDFGenerator:
     
     @staticmethod
     def _format_contacts(contacts):
-        """Format contact information"""
+        """Format contact information sorted by international priority"""
         parts = []
+        
+        # Priority order: Email, LinkedIn, GitHub, CV URL, Phone
         if contacts.get('email'):
             parts.append(f"✉ {contacts['email']}")
-        if contacts.get('phone'):
-            parts.append(f"☎ {contacts['phone']}")
         if contacts.get('linkedin_url'):
             parts.append(f"LinkedIn: {contacts['linkedin_url']}")
         if contacts.get('github_url'):
             parts.append(f"GitHub: {contacts['github_url']}")
         if contacts.get('personal_url'):
             parts.append(f"🌐 {contacts['personal_url']}")
+        if contacts.get('phone'):
+            parts.append(f"☎ {contacts['phone']}")
         
         return ' | '.join(parts)
 
@@ -300,8 +402,8 @@ class PDFGenerator:
         """
     
     @staticmethod
-    def _render_education_compact(education_list):
-        """(**) Education - degree, year_obtained, institution, country"""
+    def _render_education_compact(education_list, include_images=False):
+        """(**) Education - degree, year_obtained, institution, country + credential image"""
         if not education_list:
             return ''
         
@@ -319,7 +421,21 @@ class PDFGenerator:
                 country,
             ]
             display = '. '.join([str(p) for p in parts if p])
-            items += f"""<div class="compact-item">{display}</div>"""
+            
+            # Add credential image if available and requested
+            image_html = ''
+            if include_images:
+                thumb = edu.get('image_thumbnail_url') or (
+                    edu.get('image_url') if (edu.get('image_mime_type') or '').startswith('image/') else None
+                )
+                if thumb:
+                    # Convert relative URLs to file:// URLs
+                    if thumb.startswith('/'):
+                        abs_path = os.path.join(os.getcwd(), 'app', thumb.lstrip('/'))
+                        thumb = f"file:///{abs_path.replace(os.sep, '/')}"
+                    image_html = f'<br><img src="{thumb}" alt="Credential" style="max-height: 100px; margin-top: 4px;">'
+            
+            items += f"""<div class="compact-item">{display}{image_html}</div>"""
         
         return f"""
         <div class="compact-section">
@@ -364,12 +480,14 @@ class PDFGenerator:
         items_by_block = {}
         
         for exp in experiences:
-            block = exp.get('time_block', 'Other')
+            block = exp.get('time_block') or 'Other'  # Handle None/empty as 'Other'
+            block = block.strip() if block else 'Other'  # Handle whitespace
             if block not in items_by_block:
                 items_by_block[block] = []
             items_by_block[block].append(exp)
         
-        block_order = ['2021-2025', '2015-2020', '1985-2009']
+        # Include 'Other' at the end to catch records without time_block
+        block_order = ['2021-2025', '2015-2020', '1985-2009', 'Other']
         html = '<div class="compact-section"><h4 class="compact-heading">WORK EXPERIENCE</h4>'
         
         is_first_overall = True
@@ -427,7 +545,8 @@ class PDFGenerator:
                         is_first_overall = False
                     first_item = False
             
-            elif block == '1985-2009':
+            elif block == '1985-2009' or block == 'Other':
+                # Handle both historical block and records without time_block
                 first_item = is_first_overall
                 for exp in block_items:
                     job = exp.get('job_title', '')
@@ -448,8 +567,8 @@ class PDFGenerator:
         return html
     
     @staticmethod
-    def _render_advanced_training_compact(training_items):
-        """(****) Advanced Training - name, provider, year only; "Automation" concatenates with description"""
+    def _render_advanced_training_compact(training_items, include_images=False):
+        """(****) Advanced Training - name, provider, year only + credential image"""
         if not training_items:
             return ''
         
@@ -457,10 +576,15 @@ class PDFGenerator:
         items_html = ''
         
         for item in sorted_items:
-            name = item.get('name', '')
-            provider = item.get('provider', '')
-            year = item.get('completion_date', '')
-            description = item.get('description', '')
+            # Coalesce None to empty strings and normalize placeholder values
+            def norm(v):
+                s = (v or '').strip()
+                return '' if s.lower() in {'none', 'n/a', 'na', '-', '--'} else s
+
+            name = norm(item.get('name'))
+            provider = norm(item.get('provider'))
+            year = norm(item.get('completion_date'))
+            description = norm(item.get('description'))
             
             # Extract year only
             if year and isinstance(year, str) and '-' in year:
@@ -469,14 +593,30 @@ class PDFGenerator:
                 year = year[:4]
             
             # Handle display name based on description field
-            if description:
-                # If description exists (not None), concatenate name + " " + description
-                display_name = f"<strong style='color: #000;'>{name} {description}</strong>"
-            else:
-                # If description is None, use only name
-                display_name = f"<strong style='color: #000;'>{name}</strong>"
+            display_name = f"<strong style='color: #000;'>{name}{(' ' + description) if description else ''}</strong>" if name else ''
             
-            items_html += f"""<div class="compact-item">{display_name}, {provider}, {year}</div>"""
+            # Build parts and filter empties to avoid stray commas/None
+            parts = [display_name] if display_name else []
+            if provider:
+                parts.append(provider)
+            if year:
+                parts.append(year)
+            line = ', '.join(parts)
+            
+            # Add credential image if available and requested
+            image_html = ''
+            if include_images:
+                thumb = item.get('image_thumbnail_url') or (
+                    item.get('image_url') if (item.get('image_mime_type') or '').startswith('image/') else None
+                )
+                if thumb:
+                    # Convert relative URLs to file:// URLs
+                    if thumb.startswith('/'):
+                        abs_path = os.path.join(os.getcwd(), 'app', thumb.lstrip('/'))
+                        thumb = f"file:///{abs_path.replace(os.sep, '/')}"
+                    image_html = f'<br><img src="{thumb}" alt="Credential" style="max-height: 100px; margin-top: 4px;">'
+            
+            items_html += f"""<div class="compact-item">{line}{image_html}</div>"""
         
         return f"""
         <div class="compact-section">
@@ -516,21 +656,22 @@ class PDFGenerator:
     
     @staticmethod
     def _render_contact_compact(contacts):
-        """Render contacts in compact format for left column"""
+        """Render contacts in compact format for left column, sorted by international priority"""
         if not contacts:
             return ''
         
         items = ''
+        # Priority order: Email, LinkedIn, GitHub, CV URL, Phone
         if contacts.get('email'):
             items += f"""<div class="compact-item">{contacts['email']}</div>"""
-        if contacts.get('phone'):
-            items += f"""<div class="compact-item">{contacts['phone']}</div>"""
         if contacts.get('linkedin_url'):
             items += f"""<div class="compact-item" style="font-size: 8pt; line-height:1.2; word-break: break-all;">{contacts['linkedin_url']}</div>"""
         if contacts.get('github_url'):
             items += f"""<div class="compact-item" style="font-size: 8pt; line-height:1.2; word-break: break-all;">{contacts['github_url']}</div>"""
         if contacts.get('personal_url'):
             items += f"""<div class="compact-item">{contacts['personal_url']}</div>"""
+        if contacts.get('phone'):
+            items += f"""<div class="compact-item">{contacts['phone']}</div>"""
         
         return f"""
         <div class="compact-section">
@@ -635,14 +776,22 @@ class PDFGenerator:
             
             # Format based on type
             item_type = item.get('type', 'Course')
-            provider = item.get('provider', '')
-            name = item.get('name', '')
-            description = item.get('description', '')
+            def norm(v):
+                s = (v or '').strip()
+                return '' if s.lower() in {'none', 'n/a', 'na', '-', '--'} else s
+            provider = norm(item.get('provider'))
+            name = norm(item.get('name'))
+            description = norm(item.get('description'))
             
+            # Build line avoiding 'None' and stray separators
+            provider_part = f" - {provider}" if provider else ""
+            year_part = f" ({completion_year})" if completion_year else ""
+            description_part = f"<br><span style=\"font-size: 0.9em; color: #666;\">{description}</span>" if description else ""
+
             items_html += f"""
             <div class="training-item">
-                <strong>{name}</strong> - {provider} {f'({completion_year})' if completion_year else ''}
-                {f'<br><span style="font-size: 0.9em; color: #666;">{description}</span>' if description else ''}
+                <strong>{name}</strong>{provider_part}{year_part}
+                {description_part}
             </div>
             """
         
@@ -704,23 +853,40 @@ class PDFGenerator:
             max-width: 100%;
         }}
         
-        .cv-layout-table {{
+        .cv-row {{
+            position: relative;
             width: 100%;
-            border-collapse: collapse;
+            min-height: 100%;
+            clear: both;
         }}
         
         .cv-left-column {{
+            position: absolute;
+            left: 0;
+            top: 90px;
             width: 35%;
-            vertical-align: top;
             padding: 8px 10px 6px 0;
             font-size: {font_left}pt;
+            box-sizing: border-box;
         }}
         
         .cv-right-column {{
+            margin-left: 35%;
             width: 65%;
-            vertical-align: top;
             padding: 4px 0 6px 6px;
             font-size: {font_right}pt;
+            box-sizing: border-box;
+            min-height: 100%;
+        }}
+
+        /* Cap inline images (e.g., education/certifications thumbnails) */
+        .cv-page img {{
+            max-height: 100px;
+            height: auto;
+        }}
+
+        .page-break {{
+            page-break-after: always;
         }}
         
         .sidebar-avatar {{

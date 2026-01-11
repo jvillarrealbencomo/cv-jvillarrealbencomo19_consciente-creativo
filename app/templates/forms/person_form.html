@@ -14,9 +14,9 @@
                     </h4>
                     <div class="btn-group">
                         <select id="profileSelector" class="form-select form-select-sm" style="width: 200px;">
-                            <option value="qa_analyst">QA Analyst</option>
-                            <option value="qa_engineer" selected>QA Engineer</option>
-                            <option value="data_scientist">Data Scientist</option>
+                            <option value="qa_analyst" {{ 'selected' if profile == 'qa_analyst' else '' }}>QA Analyst</option>
+                            <option value="qa_engineer" {{ 'selected' if profile == 'qa_engineer' else '' }}>QA Engineer</option>
+                            <option value="data_scientist" {{ 'selected' if profile == 'data_scientist' else '' }}>Data Scientist</option>
                         </select>
                         <button type="button" class="btn btn-sm btn-light" id="applyPresetBtn">
                             <i class="bi bi-magic"></i> Apply Preset
@@ -531,9 +531,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Preview button
     previewBtn.addEventListener('click', function() {
         const personId = document.getElementById('personId').value;
-        const profile = profileSelector.value;
+        const profile = document.getElementById('profileSelector').value;
         if (personId) {
-            window.open(`/profile/${personId}?profile=${profile}`, '_blank');
+            window.location.href = `/profile/${personId}?profile=${profile}`;
         } else {
             alert('Please save the person first');
         }

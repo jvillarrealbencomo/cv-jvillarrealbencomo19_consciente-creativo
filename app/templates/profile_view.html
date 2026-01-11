@@ -192,10 +192,10 @@
                     <button class="btn btn-sm btn-primary" id="refreshBtn">
                         <i class="bi bi-arrow-clockwise"></i> Refresh
                     </button>
-                    <button class="btn btn-sm btn-success" id="exportPdfBtn">
+                    <button class="btn btn-sm btn-secondary" id="exportPdfBtn">
                         <i class="bi bi-file-pdf"></i> Export PDF
                     </button>
-                    <button class="btn btn-sm btn-info" id="exportOnePagePdfBtn">
+                    <button class="btn btn-sm btn-danger" id="exportOnePagePdfBtn">
                         <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
                     </button>
                 </div>
@@ -347,10 +347,10 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        // Certifications
-        if (cvData.certifications && cvData.certifications.length > 0) {
-            html += renderSection('certifications', 'Certifications',
-                cvData.certifications.map(cert => renderCertification(cert)).join('')
+        // Advanced Training & Certifications
+        if (cvData.advanced_training && cvData.advanced_training.length > 0) {
+            html += renderSection('advanced_training', 'Advanced Training & Certifications',
+                cvData.advanced_training.map(item => renderTraining(item)).join('')
             );
         }
         
@@ -430,6 +430,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return html;
     }
+
+    function renderCredentialBlock(item) {
+        if (!item.image_url && !item.image_thumbnail_url) return '';
+        const isImage = (item.image_mime_type || '').startsWith('image/');
+        const thumb = item.image_thumbnail_url || (isImage ? item.image_url : null);
+        const link = item.image_url ? `<div><a href="${item.image_url}" target="_blank" class="small">View credential</a></div>` : '';
+        const imageTag = thumb ? `<img src="${thumb}" alt="Credential" class="img-thumbnail" style="max-height: 100px;">` : '';
+        return `<div class="mt-2">${imageTag}${link}</div>`;
+    }
     
     function renderEducation(edu) {
         return `
@@ -441,20 +450,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="cv-item-dates">${edu.year_obtained || edu.end_year || ''}</div>
                 </div>
+                ${renderCredentialBlock(edu)}
             </div>
         `;
     }
-    
-    function renderCertification(cert) {
+
+    function renderTraining(item) {
+        const dateText = item.completion_date ? new Date(item.completion_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short'}) : '';
         return `
             <div class="cv-item">
                 <div class="cv-item-header">
                     <div>
-                        <div class="cv-item-title">${cert.name}</div>
-                        <div class="cv-item-subtitle">${cert.issuing_organization}</div>
+                        <div class="cv-item-title">${item.name}</div>
+                        <div class="cv-item-subtitle">${item.provider}${item.type ? ' • ' + item.type : ''}</div>
                     </div>
-                    <div class="cv-item-dates">${cert.issue_date ? new Date(cert.issue_date).getFullYear() : ''}</div>
+                    <div class="cv-item-dates">${dateText}</div>
                 </div>
+                ${item.description ? `<div class="cv-item-content small">${item.description}</div>` : ''}
+                ${renderCredentialBlock(item)}
             </div>
         `;
     }
@@ -479,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {id: 'experience', name: 'Work Experience', icon: 'briefcase-fill'},
             {id: 'tools', name: 'Technical Skills', icon: 'tools'},
             {id: 'education', name: 'Education', icon: 'mortarboard-fill'},
-            {id: 'certifications', name: 'Certifications', icon: 'patch-check-fill'},
+            {id: 'advanced_training', name: 'Advanced Training & Certifications', icon: 'patch-check-fill'},
             {id: 'languages', name: 'Languages', icon: 'translate'}
         ];
         
@@ -564,13 +577,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function optimizeForOnePage() {
         // Auto-hide sections to fit one page
-        // Priority: certifications, languages, then trim experience details
+        // Priority: advanced training, languages, then trim experience details
         sectionStates = {
             'summary': true,
             'experience': true,
             'tools': true,
             'education': true,
-            'certifications': false,
+            'advanced_training': false,
             'languages': false
         };
         renderCV();
@@ -593,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     section_states: sectionStates,
-                    auto_optimize: false  // Show full PDF first, user can manually optimize
+                    one_page: false  // Show full PDF (all records)
                 })
             });
             
@@ -618,9 +631,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     async function exportOnePagePDF() {
         try {
-            const response = await fetch(`/profile/${personId}/pdf/${currentProfile}/onepage`, {
+            const response = await fetch(`/profile/${personId}/pdf/${currentProfile}`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'}
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    one_page: true  // Optimize to fit ~1 page
+                })
             });
             
             if (response.ok) {

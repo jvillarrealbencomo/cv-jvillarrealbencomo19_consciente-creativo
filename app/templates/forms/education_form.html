@@ -57,6 +57,44 @@
                                 <textarea class="form-control" id="details" name="details" rows="3"
                                           placeholder="Additional details, honors, GPA, relevant coursework...">{{ education.details if education else '' }}</textarea>
                             </div>
+                            <div class="col-12 mb-3">
+                                <h6>Credential Image (optional)</h6>
+                                <input class="form-control mb-2" type="file" id="credentialImage" name="credential_image" accept="image/png,image/jpeg,application/pdf">
+                                <small class="text-muted">Allowed: PNG, JPG, PDF. Max 5MB. A thumbnail is auto-generated for images.</small>
+                                <div class="mt-2" id="imagePreview">
+                                    {% if education and (education.image_thumbnail_url or education.image_url) %}
+                                        <div class="alert alert-success">
+                                            <strong><i class="bi bi-check-circle"></i> Current credential image:</strong>
+                                            <div class="d-flex align-items-center gap-3 mt-2">
+                                                {% if education.image_thumbnail_url %}
+                                                    <img src="{{ education.image_thumbnail_url }}" alt="Current credential" class="img-thumbnail" style="max-height: 120px; border: 2px solid #198754;">
+                                                {% endif %}
+                                                <div>
+                                                    <div class="mb-2">
+                                                        <a href="{{ education.image_url }}" target="_blank" class="btn btn-sm btn-success">
+                                                            <i class="bi bi-eye"></i> View Full Image
+                                                        </a>
+                                                    </div>
+                                                    {% if education.image_filename %}
+                                                        <div class="small text-muted">
+                                                            <i class="bi bi-file-earmark"></i> {{ education.image_filename }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle"></i> No credential image uploaded yet.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="removeImage">
+                                    <label class="form-check-label" for="removeImage">Remove existing image</label>
+                                    <input type="hidden" id="removeImageFlag" name="remove_image" value="false">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Profile Visibility -->
@@ -121,13 +159,11 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        // Convert checkboxes to boolean
-        data.visible_qa_analyst = document.getElementById('visibleQaAnalyst').checked;
-        data.visible_qa_engineer = document.getElementById('visibleQaEngineer').checked;
-        data.visible_data_scientist = document.getElementById('visibleDataScientist').checked;
-        
+        formData.set('visible_qa_analyst', document.getElementById('visibleQaAnalyst').checked);
+        formData.set('visible_qa_engineer', document.getElementById('visibleQaEngineer').checked);
+        formData.set('visible_data_scientist', document.getElementById('visibleDataScientist').checked);
+        formData.set('remove_image', document.getElementById('removeImageFlag').value);
+
         const educationId = document.getElementById('educationId').value;
         const url = educationId ? `/api/education/${educationId}` : '/api/education';
         const method = educationId ? 'PUT' : 'POST';
@@ -135,8 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch(url, {
                 method: method,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
+                body: formData
             });
             
             if (response.ok) {
@@ -148,6 +183,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (addAnother) {
                     form.reset();
                     document.getElementById('educationId').value = '';
+                    document.getElementById('imagePreview').innerHTML = '<small class="text-muted">No credential image uploaded.</small>';
+                    document.getElementById('removeImageFlag').value = 'false';
+                    document.getElementById('removeImage').checked = false;
                 }
             } else {
                 const err = await response.json().catch(() => null);
@@ -156,6 +194,27 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error saving:', error);
             alert('Error saving data');
+        }
+    });
+
+    const removeCheckbox = document.getElementById('removeImage');
+    const removeFlag = document.getElementById('removeImageFlag');
+    const fileInput = document.getElementById('credentialImage');
+
+    removeCheckbox.addEventListener('change', () => {
+        removeFlag.value = removeCheckbox.checked ? 'true' : 'false';
+        if (removeCheckbox.checked) {
+            document.getElementById('imagePreview').innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> <strong>Image will be removed</strong> when you save this form.</div>';
+            fileInput.value = '';
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            removeCheckbox.checked = false;
+            removeFlag.value = 'false';
+            const fileName = fileInput.files[0].name;
+            document.getElementById('imagePreview').innerHTML = `<div class="alert alert-primary"><i class="bi bi-upload"></i> <strong>New image selected:</strong> ${fileName}<br><small>This will replace the existing image when you save.</small></div>`;
         }
     });
 });

@@ -19,7 +19,10 @@ def person_form(person_id=None):
     else:
         # If no person_id provided, load the first active person if exists
         person = Person.query.filter_by(active=True, is_historical=False).first()
-    return render_template('forms/person_form.html', person=person)
+    
+    # Get profile from query parameter, default to qa_engineer
+    profile = request.args.get('profile', 'qa_engineer')
+    return render_template('forms/person_form.html', person=person, profile=profile)
 
 
 @bp.route('/experience')

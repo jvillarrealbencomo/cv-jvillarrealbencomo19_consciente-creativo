@@ -55,7 +55,7 @@ def create_app(config_name=None):
 
 def register_blueprints(app):
     """Register Flask blueprints"""
-    from app.routes import main, admin, profiles, api, presets, forms
+    from app.routes import main, admin, profiles, api, presets, forms, data_management
     from app.routes.legacy import legacy_bp   # <--- aquí importas tu blueprint    
  
     app.register_blueprint(main.bp)
@@ -65,6 +65,9 @@ def register_blueprints(app):
     app.register_blueprint(presets.bp)
     app.register_blueprint(forms.bp)
     app.register_blueprint(legacy_bp)
+    
+    # Register data management routes
+    data_management.init_data_management_routes(app)
 
 
 def register_error_handlers(app):

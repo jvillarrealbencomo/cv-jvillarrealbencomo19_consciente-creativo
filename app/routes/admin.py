@@ -66,6 +66,18 @@ def settings():
     return render_template('admin/settings.html')
 
 
+@bp.route('/education')
+def education_list():
+    """List all education records with edit/delete options"""
+    return render_template('admin/education_list.html')
+
+
+@bp.route('/training')
+def training_list():
+    """List all advanced training records with edit/delete options"""
+    return render_template('admin/training_list.html')
+
+
 # Hidden: update WorkExperience dates via query params
 # Usage:
 #   /admin/database/update/experience-dates?id=1&start=2025-04-14&end=2025-11-13

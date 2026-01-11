@@ -18,9 +18,16 @@
                 <a href="/forms/person" class="btn btn-primary btn-lg">
                     <i class="bi bi-pencil-square"></i> Start Building
                 </a>
-                <a href="/admin" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-gear"></i> Admin Panel
-                </a>
+                <div class="btn-group btn-lg" role="group">
+                    <button id="dataMenuBtn" type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear"></i> Data Entry
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dataMenuBtn">
+                        <li><a class="dropdown-item" href="/admin"><i class="bi bi-sliders"></i> Admin Panel</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/admin/data-management"><i class="bi bi-table"></i> Manage All Records</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -53,6 +60,33 @@
                         <a href="/api/presets/{{ profile.id }}" class="btn btn-outline-secondary btn-sm" target="_blank">
                             <i class="bi bi-info-circle"></i> View Settings
                         </a>
+                        {% if person_id %}
+                        <a href="/profile/{{ person_id }}?profile={{ profile.id }}" class="btn btn-primary btn-sm w-100 mt-2">
+                            <i class="bi bi-eye"></i> Preview CV
+                        </a>
+                        <button class="btn btn-secondary btn-sm w-100 mt-2" onclick="generatePDF({{ person_id }}, '{{ profile.id }}')">
+                            <i class="bi bi-filetype-pdf"></i> Export PDF
+                        </button>
+                        <button class="btn btn-warning btn-sm w-100 mt-2" onclick="generateOnepagePDF({{ person_id }}, '{{ profile.id }}')">
+                            <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
+                        </button>
+                        {% else %}
+                        <div class="mt-2">
+                            <button class="btn btn-primary btn-sm w-100" disabled title="Add a person first to enable preview">
+                                <i class="bi bi-eye"></i> Preview CV
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-secondary btn-sm w-100" disabled title="Add a person first to enable PDF export">
+                                <i class="bi bi-filetype-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-warning btn-sm w-100" disabled title="Add a person first to enable PDF export">
+                                <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -133,4 +167,67 @@
         </div>
     </div>
 </div>
+
+<script>
+function generatePDF(personId, profileName) {
+    const payload = {"one_page": false};
+    console.log('Sending Export PDF request with payload:', payload);
+    fetch(`/profile/${personId}/pdf/${profileName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('PDF generation failed');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CV_${profileName}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        alert('Error generating PDF: ' + error.message);
+        console.error('PDF generation error:', error);
+    });
+}
+
+function generateOnepagePDF(personId, profileName) {
+    const payload = {"one_page": true};
+    console.log('Sending One-Page PDF request with payload:', payload);
+    fetch(`/profile/${personId}/pdf/${profileName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('PDF generation failed');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CV_${profileName}_onepage.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        alert('Error generating PDF: ' + error.message);
+        console.error('PDF generation error:', error);
+    });
+}
+</script>
 {% endblock %}
+

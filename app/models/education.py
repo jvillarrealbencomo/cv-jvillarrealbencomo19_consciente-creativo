@@ -28,9 +28,25 @@ class Education(BaseModel, ProfileVisibilityMixin):
     
     # Document reference
     document_url = db.Column(db.String(500))
+
+    # Credential image paths
+    image_path = db.Column(db.String(500))
+    image_thumbnail_path = db.Column(db.String(500))
+    image_filename = db.Column(db.String(255))
+    image_mime_type = db.Column(db.String(50))
     
     # Display order
     display_order = db.Column(db.Integer, default=0)
+    
+    @property
+    def image_url(self):
+        """Get full URL for image"""
+        return f"/static/{self.image_path}" if self.image_path else None
+    
+    @property
+    def image_thumbnail_url(self):
+        """Get full URL for thumbnail"""
+        return f"/static/{self.image_thumbnail_path}" if self.image_thumbnail_path else None
     
     def to_dict(self):
         """Convert to dictionary"""
@@ -46,6 +62,12 @@ class Education(BaseModel, ProfileVisibilityMixin):
             'details': self.details,
             'document_url': self.document_url,
             'display_order': self.display_order,
+            'image_path': self.image_path,
+            'image_thumbnail_path': self.image_thumbnail_path,
+            'image_filename': self.image_filename,
+            'image_mime_type': self.image_mime_type,
+            'image_url': f"/static/{self.image_path}" if self.image_path else None,
+            'image_thumbnail_url': f"/static/{self.image_thumbnail_path}" if self.image_thumbnail_path else None,
             'visible_qa_analyst': self.visible_qa_analyst,
             'visible_qa_engineer': self.visible_qa_engineer,
             'visible_data_scientist': self.visible_data_scientist

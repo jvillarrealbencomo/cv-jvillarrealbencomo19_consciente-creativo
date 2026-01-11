@@ -3,6 +3,23 @@
 {% block title %}Work Experience - CV Builder{% endblock %}
 
 {% block content %}
+<style>
+    /* Darker blue for header */
+    .card-header.bg-primary {
+        background-color: #0056b3 !important;
+    }
+    
+    /* Vibrant blue for Complete button */
+    .btn.btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn.btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0b5ed7;
+    }
+</style>
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-lg-9">
@@ -66,9 +83,9 @@
                         <!-- Time Block Classification -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">Classification</h5>
+                                <h5 class="border-bottom pb-2 mb-3">Classification & Status</h5>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="timeBlock" class="form-label">Time Period</label>
                                 <select class="form-select" id="timeBlock" name="time_block">
                                     <option value="">Auto-assign from dates</option>
@@ -79,7 +96,18 @@
                                 </select>
                                 <small class="form-text text-muted">Groups experiences by time period for better organization</small>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Record Status</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="activeRecord" name="active" 
+                                           {{ 'checked' if experience is none or experience.active else '' }}>
+                                    <label class="form-check-label" for="activeRecord">
+                                        <strong>Active</strong> (included in One-Page PDF)
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted">Unchecked records appear only in Export PDF</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Historical Data</label>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="isHistorical" name="is_historical" 
@@ -129,7 +157,7 @@
                                     </label>
                                     
                                     <input type="radio" class="btn-check" name="contentLevel" id="levelComplete" value="complete" checked>
-                                    <label class="btn btn-outline-secondary" for="levelComplete">
+                                    <label class="btn btn-primary" for="levelComplete">
                                         <i class="bi bi-files"></i> Complete
                                     </label>
                                 </div>
@@ -428,7 +456,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Convert checkboxes
         ['show_responsibilities_summary', 'show_responsibilities_detailed', 'show_achievements',
-         'visible_qa_analyst', 'visible_qa_engineer', 'visible_data_scientist', 'is_historical'].forEach(field => {
+         'visible_qa_analyst', 'visible_qa_engineer', 'visible_data_scientist', 'is_historical', 'active'].forEach(field => {
             const checkbox = document.querySelector(`input[name="${field}"]`);
             data[field] = checkbox ? checkbox.checked : false;
         });

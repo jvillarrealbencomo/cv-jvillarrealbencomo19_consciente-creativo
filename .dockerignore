@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+venv311/
+venv39/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local development
+*.log
+instance/
+
+# Documentation (optional - comment out if you want docs in container)
+*.md
+!README.md
+
+# Don't copy existing uploads during build (will use volume)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+app/generated_pdfs/*
+!app/generated_pdfs/.gitkeep
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore

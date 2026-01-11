@@ -3,6 +3,8 @@ Main Routes
 Version 2025 - Public-facing pages
 """
 from flask import Blueprint, render_template, jsonify
+from app import db
+from app.models import Person
 from app.services.profile_presets import ProfilePresetService
 
 bp = Blueprint('main', __name__)
@@ -19,8 +21,12 @@ def index():
             'name': info.get('name'),
             'description': info.get('description')
         })
-    
-    return render_template('index.html', profiles=profiles)
+
+    # Get the primary active person (used for direct PDF export buttons)
+    person = Person.query.filter_by(active=True, is_historical=False).first()
+    person_id = person.id if person else None
+
+    return render_template('index.html', profiles=profiles, person_id=person_id)
 
 
 @bp.route('/health')

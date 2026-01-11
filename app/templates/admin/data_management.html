@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management - CV Builder{% endblock %}
+
+{% block content %}
+<style>
+    /* Soft pastel amber for Historical badge */
+    .badge.bg-warning {
+        background-color: #ffd699 !important;
+    }
+</style>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-table"></i> Data Management
+                </h2>
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-house"></i> Back to Home
+                </a>
+            </div>
+            <p class="text-muted">Manage, view, and control visibility of all CV records</p>
+        </div>
+    </div>
+
+    <!-- Tabs for different record types -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="experience-tab" data-bs-toggle="tab" data-bs-target="#experience-pane" type="button" role="tab" aria-controls="experience-pane" aria-selected="true">
+                <i class="bi bi-briefcase"></i> Work Experience ({{ work_experiences|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education-pane" type="button" role="tab" aria-controls="education-pane" aria-selected="false">
+                <i class="bi bi-book"></i> Education ({{ education|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="training-tab" data-bs-toggle="tab" data-bs-target="#training-pane" type="button" role="tab" aria-controls="training-pane" aria-selected="false">
+                <i class="bi bi-award"></i> Advanced Training ({{ advanced_training|length }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Work Experience Tab -->
+        <div class="tab-pane fade show active" id="experience-pane" role="tabpanel" aria-labelledby="experience-tab">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Historical</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exp in work_experiences %}
+                        <tr class="{% if not exp.active %}table-danger{% endif %}">
+                            <td><strong>#{{ exp.id }}</strong></td>
+                            <td>{{ exp.company }}</td>
+                            <td>{{ exp.job_title }}</td>
+                            <td>
+                                <small>
+                                    {{ exp.start_date.strftime('%Y-%m-%d') if exp.start_date else 'N/A' }}
+                                    to
+                                    {{ exp.end_date.strftime('%Y-%m-%d') if exp.end_date else 'Present' }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if exp.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if exp.is_historical %}
+                                    <span class="badge bg-warning text-dark">Historical</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">Current</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('forms.experience_form', exp_id=exp.id) }}" class="btn btn-primary" title="Edit" data-bs-toggle="tooltip">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if exp.active %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('experience', {{ exp.id }}, false)" title="Hide from One-Page PDF">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('experience', {{ exp.id }}, true)" title="Restore">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger" onclick="permanentDelete('experience', {{ exp.id }}, '{{ exp.job_title }}')" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not work_experiences %}
+            <div class="alert alert-info">No work experience records found</div>
+            {% endif %}
+        </div>
+
+        <!-- Education Tab -->
+        <div class="tab-pane fade" id="education-pane" role="tabpanel" aria-labelledby="education-tab">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>School/University</th>
+                            <th>Degree</th>
+                            <th>Graduation</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for edu in education %}
+                        <tr class="{% if not edu.active %}table-danger{% endif %}">
+                            <td><strong>#{{ edu.id }}</strong></td>
+                            <td>{{ edu.school }}</td>
+                            <td>{{ edu.degree }}</td>
+                            <td>
+                                <small>{{ edu.graduation_date.strftime('%Y-%m-%d') if edu.graduation_date else 'N/A' }}</small>
+                            </td>
+                            <td>
+                                {% if edu.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('forms.education_form', edu_id=edu.id) }}" class="btn btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if edu.active %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('education', {{ edu.id }}, false)">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('education', {{ edu.id }}, true)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger" onclick="permanentDelete('education', {{ edu.id }}, '{{ edu.degree }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not education %}
+            <div class="alert alert-info">No education records found</div>
+            {% endif %}
+        </div>
+
+        <!-- Advanced Training Tab -->
+        <div class="tab-pane fade" id="training-pane" role="tabpanel" aria-labelledby="training-tab">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Provider</th>
+                            <th>Completion</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for training in advanced_training %}
+                        <tr class="{% if not training.active %}table-danger{% endif %}">
+                            <td><strong>#{{ training.id }}</strong></td>
+                            <td>
+                                <span class="badge bg-primary">{{ training.type|capitalize }}</span>
+                            </td>
+                            <td>{{ training.name }}</td>
+                            <td>{{ training.provider }}</td>
+                            <td>
+                                <small>{{ training.completion_date.strftime('%Y-%m-%d') if training.completion_date else 'N/A' }}</small>
+                            </td>
+                            <td>
+                                {% if training.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    {% if training.type|lower == 'certification' %}
+                                        <a href="{{ url_for('forms.certification_form', cert_id=training.id) }}" class="btn btn-primary" data-bs-toggle="tooltip" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('forms.course_form', course_id=training.id) }}" class="btn btn-primary" data-bs-toggle="tooltip" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if training.active %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('training', {{ training.id }}, false)">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('training', {{ training.id }}, true)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger" onclick="permanentDelete('training', {{ training.id }}, '{{ training.name }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not advanced_training %}
+            <div class="alert alert-info">No advanced training records found</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">Legend</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="small mb-1"><strong>Status Badges:</strong></p>
+                            <ul class="small list-unstyled">
+                                <li><span class="badge bg-success">Active</span> - Included in One-Page PDF</li>
+                                <li><span class="badge bg-danger">Inactive</span> - Only in Export PDF</li>
+                                <li><span class="badge bg-warning">Historical</span> - Archive data</li>
+                                <li><span class="badge bg-secondary">Current</span> - Recent data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="small mb-1"><strong>Actions:</strong></p>
+                            <ul class="small list-unstyled">
+                                <li><i class="bi bi-pencil"></i> Edit - Modify record details</li>
+                                <li><i class="bi bi-eye-slash"></i> Hide - Exclude from One-Page PDF</li>
+                                <li><i class="bi bi-eye"></i> Restore - Include in One-Page PDF</li>
+                                <li><i class="bi bi-trash"></i> Delete - Permanently remove record</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function toggleRecord(recordType, recordId, activate) {
+    const action = activate ? 'restore' : 'soft-delete';
+    const endpoint = `/api/data-management/record/${recordType}/${recordId}/${action}`;
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to toggle record');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error toggling record');
+    }
+}
+
+async function permanentDelete(recordType, recordId, recordName) {
+    if (!confirm(`Are you sure you want to permanently delete "${recordName}"? This cannot be undone.`)) {
+        return;
+    }
+    
+    const endpoint = `/api/data-management/record/${recordType}/${recordId}/permanent-delete`;
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to delete record');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting record');
+    }
+}
+</script>
+
+{% endblock %}
