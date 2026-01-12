@@ -57,6 +57,7 @@ def register_blueprints(app):
     """Register Flask blueprints"""
     from app.routes import main, admin, profiles, api, presets, forms, data_management
     from app.routes.legacy import legacy_bp   # <--- aquí importas tu blueprint    
+    from app.routes.data_import import data_import_bp  # Temporary import route
  
     app.register_blueprint(main.bp)
     app.register_blueprint(admin.bp)
@@ -65,6 +66,7 @@ def register_blueprints(app):
     app.register_blueprint(presets.bp)
     app.register_blueprint(forms.bp)
     app.register_blueprint(legacy_bp)
+    app.register_blueprint(data_import_bp)  # Temporary - remove after migration
     
     # Register data management routes
     data_management.init_data_management_routes(app)
