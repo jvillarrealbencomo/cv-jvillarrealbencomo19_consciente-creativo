@@ -15,7 +15,12 @@ class Config:
     VERSION = '2025.1.0'
     
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    # Fix Render's DATABASE_URL (postgres:// -> postgresql://)
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url and database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    SQLALCHEMY_DATABASE_URI = database_url or \
         'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'cv_app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {

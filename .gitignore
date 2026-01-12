@@ -3,6 +3,14 @@ venv39/
 *.pyc
 __pycache__/
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Data export files
+cv_data_export.json
+
 # Uploaded assets (keep structure, ignore files)
 app/static/uploads/*
 !app/static/uploads/.gitkeep
