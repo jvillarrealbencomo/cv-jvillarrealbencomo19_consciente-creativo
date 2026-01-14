@@ -4,6 +4,7 @@ REMOVE THIS FILE AFTER MIGRATION IS COMPLETE
 """
 from flask import Blueprint, request, jsonify, render_template_string
 import json
+import os
 from datetime import datetime
 from app import db
 from app.models import Person, WorkExperience, Education, AdvancedTraining, TechnicalTool, Language, ITProduct
@@ -26,6 +27,9 @@ UPLOAD_TEMPLATE = '''
     <h1>🔄 Import CV Data from JSON</h1>
     <div class="upload-box">
         <form method="POST" enctype="multipart/form-data">
+            <p>Admin Password:</p>
+            <input type="password" name="pw" required style="padding: 5px; width: 200px;">
+            <br><br>
             <p>Select cv_data_export.json file:</p>
             <input type="file" name="json_file" accept=".json" required>
             <br><br>
@@ -41,7 +45,14 @@ UPLOAD_TEMPLATE = '''
 
 @data_import_bp.route('/admin/import-data', methods=['GET', 'POST'])
 def import_data():
-    """Upload and import JSON data"""
+    """Upload and import JSON data (admin only)"""
+    # Check admin password
+    admin_pw = os.environ.get('ADMIN_PASSWORD')
+    provided_pw = request.args.get('pw') or request.form.get('pw')
+    
+    if not admin_pw or provided_pw != admin_pw:
+        return render_template_string('<h1>Unauthorized</h1><p>Invalid or missing password.</p>'), 401
+    
     if request.method == 'POST':
         try:
             file = request.files.get('json_file')

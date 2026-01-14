@@ -29,6 +29,9 @@ UPLOAD_TEMPLATE = '''
     <div class="upload-box">
         <h3>Upload Education Images</h3>
         <form method="POST" enctype="multipart/form-data" action="/admin/upload-education-images">
+            <p>Admin Password:</p>
+            <input type="password" name="pw" required style="padding: 5px; width: 200px;">
+            <br><br>
             <p>Select multiple education credential images:</p>
             <input type="file" name="images" accept="image/*" multiple required>
             <br><br>
@@ -39,6 +42,9 @@ UPLOAD_TEMPLATE = '''
     <div class="upload-box">
         <h3>Upload Advanced Training Images</h3>
         <form method="POST" enctype="multipart/form-data" action="/admin/upload-training-images">
+            <p>Admin Password:</p>
+            <input type="password" name="pw" required style="padding: 5px; width: 200px;">
+            <br><br>
             <p>Select multiple advanced training credential images:</p>
             <input type="file" name="images" accept="image/*" multiple required>
             <br><br>
@@ -63,12 +69,26 @@ UPLOAD_TEMPLATE = '''
 
 @image_upload_bp.route('/admin/upload-images', methods=['GET'])
 def upload_images_page():
-    """Display upload interface"""
+    """Display upload interface (admin only)"""
+    # Check admin password
+    admin_pw = os.environ.get('ADMIN_PASSWORD')
+    provided_pw = request.args.get('pw')
+    
+    if not admin_pw or provided_pw != admin_pw:
+        return render_template_string('<h1>Unauthorized</h1><p>Invalid or missing password. Usage: /admin/upload-images?pw=your-password</p>'), 401
+    
     return render_template_string(UPLOAD_TEMPLATE)
 
 @image_upload_bp.route('/admin/upload-education-images', methods=['POST'])
 def upload_education_images():
-    """Upload education credential images"""
+    """Upload education credential images (admin only)"""
+    # Check admin password
+    admin_pw = os.environ.get('ADMIN_PASSWORD')
+    provided_pw = request.args.get('pw') or request.form.get('pw')
+    
+    if not admin_pw or provided_pw != admin_pw:
+        return render_template_string('<h1>Unauthorized</h1><p>Invalid or missing password.</p>'), 401
+    
     try:
         files = request.files.getlist('images')
         if not files:
@@ -94,7 +114,14 @@ def upload_education_images():
 
 @image_upload_bp.route('/admin/upload-training-images', methods=['POST'])
 def upload_training_images():
-    """Upload advanced training credential images"""
+    """Upload advanced training credential images (admin only)"""
+    # Check admin password
+    admin_pw = os.environ.get('ADMIN_PASSWORD')
+    provided_pw = request.args.get('pw') or request.form.get('pw')
+    
+    if not admin_pw or provided_pw != admin_pw:
+        return render_template_string('<h1>Unauthorized</h1><p>Invalid or missing password.</p>'), 401
+    
     try:
         files = request.files.getlist('images')
         if not files:
