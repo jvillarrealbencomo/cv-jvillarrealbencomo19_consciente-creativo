@@ -1,4 +1,4 @@
-# Documentation Index - CV Builder 2025.1
+# Documentation Index - CV Builder 2026.1
 **Quick reference guide to all documentation files**
 
 ---
@@ -375,8 +375,11 @@ A: [ARCHITECTURE_V2.md](ARCHITECTURE_V2.md) → Data Model Summary
 2. Review [DOCUMENTATION_UPDATES.md](DOCUMENTATION_UPDATES.md)
 3. Check [VERSION_2025_1_SUMMARY.md](VERSION_2025_1_SUMMARY.md) → Recent Changes
 
+**Understanding Latest changes:**
+1. Read [ADMIN_ENDPOINTS.md](ADMIN_ENDPOINTS.md)
+
 ---
 
-**Last Updated:** December 2025  
-**Version:** 2025.1  
+**Last Updated:** January 14, 2026  
+**Version:** 2026.1  
 **Status:** ✅ Complete and Maintained
