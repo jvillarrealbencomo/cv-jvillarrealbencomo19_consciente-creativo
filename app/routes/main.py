@@ -1,11 +1,13 @@
 """
 Main Routes
 Version 2025 - Public-facing pages
+Version 2026 - Updated 29-01-2026
 """
 from flask import Blueprint, render_template, jsonify
 from app import db
 from app.models import Person
 from app.services.profile_presets import ProfilePresetService
+from app.models import EvidenceHubEntry
 
 bp = Blueprint('main', __name__)
 
@@ -22,12 +24,19 @@ def index():
             'description': info.get('description')
         })
 
+    # Get Evidence Hub entries
+    evidence_hub_entries = EvidenceHubEntry.query.filter_by(active=True).order_by(EvidenceHubEntry.display_order.asc()).all()
+
     # Get the primary active person (used for direct PDF export buttons)
     person = Person.query.filter_by(active=True, is_historical=False).first()
     person_id = person.id if person else None
 
-    return render_template('index.html', profiles=profiles, person_id=person_id)
-
+    return render_template(
+        'index.html',
+        profiles=profiles,
+        person_id=person_id,
+        evidence_hub_entries=evidence_hub_entries
+    )
 
 @bp.route('/health')
 def health():
@@ -49,3 +58,4 @@ def about():
 def cv2019():
     """Legacy CV 2019 - Archives the old CV format with full functionality"""
     return render_template('legacy/inicio2.html')
+

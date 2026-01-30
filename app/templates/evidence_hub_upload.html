@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Upload Evidence Video - {{ entry.title }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h2 class="mb-1">Upload Video</h2>
+        <div class="text-muted">{{ entry.title }}</div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+            <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Admin Password</label>
+                    <input type="password" name="pw" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Video File (MP4/WEBM/MOV)</label>
+                    <input type="file" name="video_file" class="form-control" accept=".mp4,.webm,.mov" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload Video</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

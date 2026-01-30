@@ -1,6 +1,7 @@
 """
 Flask Application Factory
 Version 2025 - Application initialization and configuration
+Version 2026 - Updated 29-01-2026
 """
 import os
 from flask import Flask
@@ -59,7 +60,9 @@ def register_blueprints(app):
     from app.routes.legacy import legacy_bp   # <--- aquí importas tu blueprint    
     from app.routes.data_import import data_import_bp  # Temporary import route
     from app.routes.image_upload import image_upload_bp  # Temporary image upload route
- 
+    from app.routes.evidence_hub import bp as evidence_hub_bp
+
+    app.register_blueprint(evidence_hub_bp) 
     app.register_blueprint(main.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(profiles.bp)
