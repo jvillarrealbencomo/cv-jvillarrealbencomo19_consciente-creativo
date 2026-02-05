@@ -18,55 +18,38 @@
                 <a href="/forms/person" class="btn btn-primary btn-lg">
                     <i class="bi bi-pencil-square"></i> Start Building
                 </a>
-                <div class="btn-group btn-lg" role="group">
-                    <button id="dataMenuBtn" type="button" class="btn btn-outline-secondary dropdown-toggle"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-gear"></i> Data Entry
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dataMenuBtn">
-                        <li><a class="dropdown-item" href="/admin"><i class="bi bi-sliders"></i> Admin Panel</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="/admin/data-management"><i class="bi bi-table"></i> Manage
-                                All Records</a></li>
-                    </ul>
-                </div>
+                <a href="/admin/data-management" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-table"></i> Data Entry
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Profile Cards Section -->
-    <div class="row mb-5">
+    <div class="row mb-5 section-spacing">
         <div class="col-12">
-            <div class="p-4" style="background: #f8fafc; border: 3px solid #e5e7eb; border-radius: 16px;">
+            <div class="p-4" style="background: #f8fafc; border: 1px solid #0d6efd; border-radius: 16px;">
                 <h2 class="text-center mb-3">Available CV Profiles</h2>
                 <div class="row">
                     {% for profile in profiles %}
                     <div class="col-md-4 mb-4">
                         <div class="card h-100 shadow-sm">
-                            <div class="card-body">
+                            <div class="card-body" style="background: #f8fafc; border: 1px solid #0d6efd; border-radius: 16px;">
                                 <div class="text-center mb-3">
-                                    {% if profile.id == 'qa_analyst' %}
-                                    <i class="bi bi-briefcase-fill text-primary" style="font-size: 3rem;"></i>
-                                    {% elif profile.id == 'qa_engineer' %}
-                                    <i class="bi bi-code-slash text-success" style="font-size: 3rem;"></i>
-                                    {% else %}
-                                    <i class="bi bi-graph-up text-info" style="font-size: 3rem;"></i>
-                                    {% endif %}
+                                    <div class="profile-icon-wrapper">
+                                        {% if profile.id == 'qa_analyst' %}
+                                            <span class="emoji-icon">🧪</span>
+                                        {% elif profile.id == 'qa_engineer' %}
+                                            <i class="bi bi-code-slash"></i>
+                                        {% else %}
+                                            <span class="emoji-icon">🧠</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <h4 class="card-title text-center">{{ profile.name }}</h4>
                                 <p class="card-text text-muted small">{{ profile.description }}</p>
                                 <hr>
                                 <div class="d-grid gap-2">
-                                    <a href="/forms/person?profile={{ profile.id }}"
-                                        class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-pencil"></i> Edit Profile
-                                    </a>
-                                    <a href="/api/presets/{{ profile.id }}" class="btn btn-outline-secondary btn-sm"
-                                        target="_blank">
-                                        <i class="bi bi-info-circle"></i> View Settings
-                                    </a>
                                     {% if person_id %}
                                     <a href="/profile/{{ person_id }}?profile={{ profile.id }}"
                                         class="btn btn-primary btn-sm w-100 mt-2">
@@ -100,6 +83,14 @@
                                         </button>
                                     </div>
                                     {% endif %}
+                                    <a href="/forms/person?profile={{ profile.id }}"
+                                        class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-pencil"></i> Edit Profile
+                                    </a>
+                                    <a href="/api/presets/{{ profile.id }}" class="btn btn-outline-secondary btn-sm"
+                                        target="_blank">
+                                        <i class="bi bi-info-circle"></i> View Settings
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -111,9 +102,9 @@
     </div>
 
     <!-- Evidence Section -->
-    <div class="row mb-5">
+    <div class="row mb-5 section-spacing">
         <div class="col-12">
-            <div class="p-4" style="background: #f5f9ff; border: 3px solid #e5e7eb; border-radius: 16px;">
+            <div class="p-4" style="background: #f5f9ff; border: 1px solid #198754; border-radius: 16px;">
                 <h2 class="text-center mb-3">Technical Evidence: Automated Validation</h2>
                 <p class="text-center text-muted mb-3">
                     This system validates itself through automated testing. Below, you can see actual executions with
@@ -123,14 +114,18 @@
                     {% for entry in evidence_hub_entries %}
                     <div class="col-md-4 mb-3">
                         <div class="card h-100 shadow-sm">
-                            <div class="card-body text-center">
+                            <div class="card-body text-center 
+                                {% if entry.slug == 'qa-ui-automation' %}card-border-ui-section-technical
+                                {% elif entry.slug == 'api-automation' %}card-border-api-section-technical
+                                {% else %}card-border-data-section-technical{% endif %}">
+                                
                                 <div class="fs-2">
-                                    {% if entry.slug == 'qa-ui-automation' %}🧪{% elif entry.slug == 'api-automation'
-                                    %}🔌{% else %}📊{% endif %}
+                                {% if entry.slug == 'qa-ui-automation' %}🖥️{% elif entry.slug == 'api-automation' %}🔌{% else %}📊{% endif %}
                                 </div>
                                 <h5 class="card-title mt-3">{{ entry.title }}</h5>
                                 <div class="small text-muted mb-2">{{ entry.stack }}</div>
                                 <p class="card-text small text-muted">{{ entry.description }}</p>
+                                
                                 {% if entry.slug == 'qa-ui-automation' %}
                                 <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-primary btn-sm mt-2">
                                     ▶ View E2E Evidence (UI)
@@ -156,7 +151,7 @@
     </div>
 
     <!-- Features Section -->
-    <div class="row mb-5">
+    <div class="row mb-5 section-spacing">
         <div class="col-12">
             <div class="p-4" style="background: #f5f9ff; border: 3px solid #e5e7eb; border-radius: 16px;">
                 <h2 class="text-center mb-3">Key Features</h2>
@@ -201,7 +196,7 @@
 
 
     <!-- Quick Start Guide -->
-    <div class="row mb-5">
+    <div class="row mb-5 section-spacing">
         <div class="col-12">
             <div class="p-4" style="background: #f5f9ff; border: 3px solid #e5e7eb; border-radius: 16px;">
                 <div class="row">

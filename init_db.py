@@ -22,6 +22,8 @@ def init_database(confirm=True):
         
         print("Creating all tables from models...")
         db.create_all()
+        from app.models.app_metadata import ensure_app_metadata_defaults
+        ensure_app_metadata_defaults()
         
         print("✓ Database initialized successfully!")
         print(f"Tables created: {', '.join(db.metadata.tables.keys())}")

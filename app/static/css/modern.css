@@ -283,3 +283,49 @@ button:focus, a:focus {
     50% { background-color: rgba(25, 135, 84, 0.1); }
     100% { background-color: transparent; }
 }
+
+.card-border-ui-section-technical {
+  border: 1px solid #0d6efd;
+  border-radius: 16px;
+}
+
+.card-border-api-section-technical {
+  border: 1px solid #094dbf;
+  border-radius: 16px;
+}
+
+.card-border-data-section-technical {
+  border: 1px solid #198754;
+  border-radius: 16px;
+}
+
+.profile-icon {
+    font-size: 3rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+.section-spacing {
+    margin-top: 4rem;
+}
+
+.profile-icon-wrapper {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.profile-icon-wrapper i,
+.profile-icon-wrapper .emoji-icon {
+    font-size: 3rem;
+    line-height: 1;
+    display: block;
+}
+
+    /* Soft pastel amber for Historical badge */
+    .badge.bg-warning {
+        background-color: #ffd699 !important;
+    }
+    

@@ -14,17 +14,17 @@ class ProfilePresetService:
     PROFILES = {
         'qa_analyst': {
             'name': 'QA Analyst',
-            'description': 'Quality Assurance Analyst profile focused on manual testing, test planning, and quality processes',
+            'description': 'QA Analyst profile focused on manual testing, test planning, and quality processes',
             'default_title': 'QA Analyst',
         },
         'qa_engineer': {
             'name': 'QA Engineer',
-            'description': 'QA Engineer profile focused on test automation, CI/CD integration, and technical testing',
+            'description': 'QA Engineer profile focused on test automation, CI/CD, and technical testing',
             'default_title': 'QA Engineer',
         },
         'data_scientist': {
             'name': 'Data Scientist',
-            'description': 'Data Scientist profile focused on machine learning, statistical analysis, and data engineering',
+            'description': 'Data Scientist profile focused on machine learning, statistics, and data engineering',
             'default_title': 'Data Scientist',
         }
     }

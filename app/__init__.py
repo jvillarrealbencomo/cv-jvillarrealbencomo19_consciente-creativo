@@ -50,6 +50,16 @@ def create_app(config_name=None):
     # Create database tables
     with app.app_context():
         db.create_all()
+        from app.models.app_metadata import ensure_app_metadata_defaults
+        ensure_app_metadata_defaults()
+
+    @app.context_processor
+    def inject_app_metadata():
+        from app.models import AppMetadata
+        entries = AppMetadata.query.all()
+        return {
+            'app_metadata': {entry.key: entry.value for entry in entries}
+        }
     
     return app
 

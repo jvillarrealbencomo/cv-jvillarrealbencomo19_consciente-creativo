@@ -41,12 +41,30 @@
                 <i class="bi bi-award"></i> Advanced Training ({{ advanced_training|length }})
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="person-tab" data-bs-toggle="tab" data-bs-target="#person-pane"
+                type="button" role="tab" aria-controls="person-pane" aria-selected="false">
+                Person
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="evidence-tab" data-bs-toggle="tab" data-bs-target="#evidence-pane"
+                type="button" role="tab" aria-controls="evidence-pane" aria-selected="false">
+                Evidence Hub
+            </button>
+        </li>         
     </ul>
 
     <!-- Tab Content -->
     <div class="tab-content">
         <!-- Work Experience Tab -->
         <div class="tab-pane fade show active" id="experience-pane" role="tabpanel" aria-labelledby="experience-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -89,9 +107,12 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ url_for('forms.experience_form', exp_id=exp.id) }}" class="btn btn-primary" title="Edit" data-bs-toggle="tooltip">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    <a href="javascript:void(0)"
+                                    class="btn btn-primary"
+                                    title="Edit"
+                                    data-edit-url="{{ url_for('forms.experience_form', exp_id=exp.id) }}"
+                                    onclick="return requireAdminAndGo('experience', this.dataset.editUrl)">
+                                    <i class="bi bi-pencil"></i>                                    </a>
                                     {% if exp.active %}
                                         <button class="btn btn-secondary" onclick="toggleRecord('experience', {{ exp.id }}, false)" title="Hide from One-Page PDF">
                                             <i class="bi bi-eye-slash"></i>
@@ -118,6 +139,12 @@
 
         <!-- Education Tab -->
         <div class="tab-pane fade" id="education-pane" role="tabpanel" aria-labelledby="education-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -148,7 +175,10 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ url_for('forms.education_form', edu_id=edu.id) }}" class="btn btn-primary">
+                                    <a href="javascript:void(0)" 
+                                       class="btn btn-primary"
+                                       data-edit-url="{{ url_for('forms.education_form', edu_id=edu.id) }}"
+                                       onclick="return requireAdminAndGo('education', this.dataset.editUrl)">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     {% if edu.active %}
@@ -177,6 +207,12 @@
 
         <!-- Advanced Training Tab -->
         <div class="tab-pane fade" id="training-pane" role="tabpanel" aria-labelledby="training-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -212,12 +248,17 @@
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
                                     {% if training.type|lower == 'certification' %}
-                                        <a href="{{ url_for('forms.certification_form', cert_id=training.id) }}" class="btn btn-primary" data-bs-toggle="tooltip" title="Edit">
-                                            <i class="bi bi-pencil"></i>
+                                        <a href="javascript:void(0)" 
+                                            class="btn btn-primary"
+                                            data-edit-url="{{ url_for('forms.certification_form', cert_id=training.id) }}"                     
+                                            onclick="return requireAdminAndGo('training', this.dataset.editUrl)">
                                         </a>
                                     {% else %}
-                                        <a href="{{ url_for('forms.course_form', course_id=training.id) }}" class="btn btn-primary" data-bs-toggle="tooltip" title="Edit">
-                                            <i class="bi bi-pencil"></i>
+                                        <a href="javascript:void(0)" 
+                                            class="btn btn-primary"
+                                            data-edit-url="{{ url_for('forms.course_form', course_id=training.id) }}"
+                                            onclick="return requireAdminAndGo('training', this.dataset.editUrl)">
+                                           <i class="bi bi-pencil"></i>
                                         </a>
                                     {% endif %}
                                     {% if training.active %}
@@ -243,6 +284,143 @@
             <div class="alert alert-info">No advanced training records found</div>
             {% endif %}
         </div>
+
+        <!-- Person Tab -->
+        <div class="tab-pane fade" id="person-pane" role="tabpanel" aria-labelledby="person-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Person Records</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for person_item in persons %}
+                                <tr>
+                                    <td>{{ person_item.id }}</td>
+                                    <td>
+                                        {% if person_item.full_name is defined and person_item.full_name %}
+                                            {{ person_item.full_name }}
+                                        {% elif person_item.name is defined and person_item.name %}
+                                            {{ person_item.name }}
+                                        {% else %}
+                                            {{ (person_item.first_name if person_item.first_name is defined else '') ~ ' ' ~ (person_item.last_name if person_item.last_name is defined else '') }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ person_item.email if person_item.email is defined else '' }}</td>
+                                    <td>{{ person_item.phone if person_item.phone is defined else '' }}</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-outline-primary btn-sm"
+                                            href="javascript:void(0)"
+                                            data-edit-url=""
+                                            onclick="return requireAdminAndGo('person', '/forms/person?person_id={{ person_item.id }}')">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        {% if person_item.active is defined %}
+                                            {% if person_item.active %}
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="toggleRecord('person', {{ person_item.id }}, false)">
+                                                <i class="bi bi-archive"></i> Soft Delete
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="toggleRecord('person', {{ person_item.id }}, true)">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+                                        <button class="btn btn-danger btn-sm"
+                                            onclick="permanentDelete('person', {{ person_item.id }}, 'Person #{{ person_item.id }}')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-muted text-center">No person records found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evidence Hub Tab -->
+        <div class="tab-pane fade" id="evidence-pane" role="tabpanel" aria-labelledby="evidence-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Evidence Hub Entries</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Slug</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in evidence_hub_entries %}
+                                <tr>
+                                    <td>{{ entry.id }}</td>
+                                    <td>{{ entry.title }}</td>
+                                    <td>{{ entry.slug }}</td>
+                                    <td class="text-end">
+                                        {% if entry.active is defined %}
+                                            {% if entry.active %}
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="toggleRecord('evidence', {{ entry.id }}, false)">
+                                                <i class="bi bi-archive"></i> Soft Delete
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="toggleRecord('evidence', {{ entry.id }}, true)">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+                                        <button class="btn btn-danger btn-sm"
+                                            onclick="permanentDelete('evidence', {{ entry.id }}, '{{ entry.title|e }}')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-muted text-center">No evidence entries found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     </div>
 
     <!-- Legend -->
@@ -278,48 +456,76 @@
 </div>
 
 <script>
+const recordTypeToTab = {
+    experience: 'experience-pane',
+    education: 'education-pane',
+    training: 'training-pane',
+    person: 'person-pane',
+    evidence: 'evidence-pane'
+};
+
+function ensureAdminPassword(recordType) {
+    const tabId = recordTypeToTab[recordType];
+    const input = tabId ? document.querySelector(`#${tabId} .admin-password`) : null;
+    let pwd = input ? input.value.trim() : '';
+    if (!pwd) {
+        pwd = prompt('Admin password required:') || '';
+        if (input && pwd) input.value = pwd;
+    }
+    return pwd.trim();
+}
+
+function requireAdminAndGo(recordType, url) {
+    const pwd = ensureAdminPassword(recordType);
+    if (!pwd) return false;
+    window.location.href = url;
+    return false;
+}
+
+function getAdminPassword(recordType) {
+    const tabId = recordTypeToTab[recordType];
+    const input = tabId ? document.querySelector(`#${tabId} .admin-password`) : null;
+    return input ? input.value.trim() : '';
+}
+
 async function toggleRecord(recordType, recordId, activate) {
+    const adminPassword = ensureAdminPassword(recordType);
+    if (!adminPassword) return;
+
     const action = activate ? 'restore' : 'soft-delete';
     const endpoint = `/api/data-management/record/${recordType}/${recordId}/${action}`;
-    
+
     try {
-        const response = await fetch(endpoint, {
+        const res = await fetch(endpoint, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'}
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_password: adminPassword })
         });
-        
-        if (response.ok) {
-            location.reload();
-        } else {
-            alert('Failed to toggle record');
-        }
+        if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+        location.reload();
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error toggling record');
+        alert(error.message);
     }
 }
 
 async function permanentDelete(recordType, recordId, recordName) {
-    if (!confirm(`Are you sure you want to permanently delete "${recordName}"? This cannot be undone.`)) {
-        return;
-    }
-    
+    const adminPassword = ensureAdminPassword(recordType);
+    if (!adminPassword) return;
+
+    if (!confirm(`Are you sure you want to permanently delete "${recordName}"? This cannot be undone.`)) return;
+
     const endpoint = `/api/data-management/record/${recordType}/${recordId}/permanent-delete`;
-    
+
     try {
-        const response = await fetch(endpoint, {
+        const res = await fetch(endpoint, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'}
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_password: adminPassword })
         });
-        
-        if (response.ok) {
-            location.reload();
-        } else {
-            alert('Failed to delete record');
-        }
+        if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+        location.reload();
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error deleting record');
+        alert(error.message);
     }
 }
 </script>

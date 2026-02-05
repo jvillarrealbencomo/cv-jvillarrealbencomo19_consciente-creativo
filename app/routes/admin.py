@@ -1,6 +1,8 @@
 """
 Admin Routes
 Version 2025 - Administrative interface
+Version 2026 - Missing tables have been added, buttons have been reordered, 
+               and the colors in card frames and sections have been updated.
 """
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from markupsafe import Markup
@@ -9,6 +11,10 @@ from app import db
 
 
 from app.models import Person, WorkExperience, TechnicalTool, Education, Certification, Course, Language, ITProduct, AdvancedTraining
+try:
+    from app.models.evidence_hub_entry import EvidenceHubEntry
+except Exception:
+    EvidenceHubEntry = None
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 @bp.route('/database/consulta')
@@ -47,12 +53,14 @@ def index():
         'experiences': WorkExperience.query.count(),
         'tools': TechnicalTool.query.count(),
         'education': Education.query.count(),
-        'advanced_training': AdvancedTraining.query.count(),
+        'certifications': Certification.query.count(),
+        'courses': Course.query.count(),
         'languages': Language.query.count(),
-        'products': ITProduct.query.count()
+        'products': ITProduct.query.count(),
+        'advanced_training': AdvancedTraining.query.count(),
+        'evidence_hub_entries': EvidenceHubEntry.query.count() if EvidenceHubEntry else 0
     }
     return render_template('admin/dashboard.html', stats=stats, generated_at=datetime.utcnow())
-
 
 @bp.route('/data')
 def data():

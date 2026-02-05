@@ -3,6 +3,7 @@ Models Package
 Version 2025 - Enhanced with granular visibility control
 Version 2026 - Updated 29-01-2026
 """
+from app.models.app_metadata import AppMetadata
 from app.models.evidence_hub import EvidenceHubEntry
 from app.models.personal_data import Person
 from app.models.education import Education
@@ -15,6 +16,7 @@ from app.models.support_tools import TechnicalTool
 from app.models.advanced_training import AdvancedTraining
 
 __all__ = [
+    'AppMetadata',
     'EvidenceHubEntry',
     'Person',
     'Education',
