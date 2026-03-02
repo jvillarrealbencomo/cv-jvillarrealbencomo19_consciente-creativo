@@ -329,3 +329,15 @@ button:focus, a:focus {
         background-color: #ffd699 !important;
     }
     
+.fs-2 { 
+        font-size: 3rem !important; 
+}
+
+.brand-logo,
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;   /* opcional: circular */
+  object-fit: cover;
+  vertical-align: middle;
+}

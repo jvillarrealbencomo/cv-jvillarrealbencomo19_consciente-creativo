@@ -20,9 +20,14 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-file-person"></i> CV Builder 2026
-            </a>
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+            {% if navbar_profile_image %}
+            <img src="{{ navbar_profile_image }}" alt="Profile Logo" class="brand-logo me-2">
+            {% else %}
+            <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
+            {% endif %}
+            CV Builder {{ app_metadata.get('release_year', '2026') }}
+        </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -45,6 +50,9 @@
                             <li><a class="dropdown-item" href="/forms/language"><i class="bi bi-translate"></i> Languages</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/data-insights"><i class="bi bi-graph-up-arrow"></i> Data Insights</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-gear"></i> Admin
@@ -56,6 +64,17 @@
                             </li>
                             <li><a class="dropdown-item" href="/admin/data-management"><i class="bi bi-table"></i> Manage
                                     All Records</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="documentationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-file-earmark-text"></i> Documentation
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="documentationDropdown">
+                            <li><a class="dropdown-item" href="/system-overview">
+                                <i class="bi bi-diagram-3"></i> System Overview</a></li>
+                            <li><a class="dropdown-item" href="/platform-overview">
+                                <i class="bi bi-info-circle"></i> Platform Overview</a></li>
                         </ul>
                     </li>
 <!-- 
@@ -79,7 +98,12 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-badge"></i> Profiles
+                            {% if navbar_profile_image %}
+                            <img src="{{ navbar_profile_image }}" class="avatar" alt="Profile">
+                            {% else %}
+                            <i class="bi bi-person-circle me-1"></i>
+                            {% endif %}
+                            Profiles
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#" data-profile="qa_analyst">
@@ -95,6 +119,14 @@
                             <li><a class="dropdown-item" href="/legacy/cv2019">
                                 <i class="bi bi-archive"></i> CV 2019 (Static)
                             </a></li>
+<!-- 
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/profile/close">
+                                    <i class="bi bi-x-circle"></i> Close API
+                                </a>
+                            </li>
+ -->
                         </ul>
                     </li>
                 </ul>
@@ -127,7 +159,12 @@
             <p class="mb-0">
                 <i class="bi bi-c-circle"></i> {{ app_metadata.get('release_year', '2026') }} Javier Villarreal Bencomo - Professional CV Application
             </p>
-            <p class="small text-muted mb-0">Version {{ app_metadata.get('application_version', '2026.1.2') }} - Built with Flask & Bootstrap</p>
+            <p class="small text-muted mb-0">
+                Version {{ app_metadata.get('application_version', '2026.2.0') }} | 
+                API {{ app_metadata.get('api_version', 'v2') }} 
+                ({{ app_metadata.get('api_status', 'production')|capitalize }}) | 
+                Built with Flask & Bootstrap
+            </p>
         </div>
     </footer>
 

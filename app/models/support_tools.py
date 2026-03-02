@@ -2,6 +2,7 @@
 Technical Tool Model with Profile-Specific Subcategories
 Version 2025 - Different subcategories per profile with usability flags
 """
+from sqlalchemy import func
 from app import db
 from app.models.base import BaseModel
 
@@ -64,11 +65,10 @@ class TechnicalTool(BaseModel):
             'Programming Languages'
         ],
         'data_scientist': [
-            'Engineering & Big Data',
-            'Modeling & Core Programming',
-            'Operating Systems & Cloud',
-            'Data Quality & CI/CD',
-            'Test Automation'
+            'Modeling & Data Science',
+            'Data Engineering & Development',
+            'Data Platforms',
+            'QA & CI/CD'
         ]
     }
     
@@ -166,3 +166,130 @@ class TechnicalTool(BaseModel):
     
     def __repr__(self):
         return f'<TechnicalTool {self.name}>'
+
+
+def ensure_data_scientist_tool_defaults():
+    defaults = [
+        {
+            "name": "Machine Learning",
+            "subcategory": "Modeling & Data Science",
+        },
+        {
+            "name": "Statistical Modeling",
+            "subcategory": "Modeling & Data Science",
+        },
+        {
+            "name": "Feature Engineering",
+            "subcategory": "Modeling & Data Science",
+        },
+        {
+            "name": "Data Visualization",
+            "subcategory": "Modeling & Data Science",
+        },
+        {
+            "name": "Data Pipelines",
+            "subcategory": "Data Engineering & Development",
+        },
+        {
+            "name": "API Development",
+            "subcategory": "Data Engineering & Development",
+        },
+    ]
+
+    updated = False
+    for item in defaults:
+        name = item["name"]
+        existing = TechnicalTool.query.filter(func.lower(TechnicalTool.name) == name.lower()).first()
+        if existing:
+            if not existing.usable_data_scientist:
+                existing.usable_data_scientist = True
+                updated = True
+            if not existing.subcategory_data_scientist:
+                existing.subcategory_data_scientist = item["subcategory"]
+                updated = True
+            if existing.display_order == 0:
+                existing.display_order = 999
+                updated = True
+        else:
+            tool = TechnicalTool(
+                name=name,
+                usable_data_scientist=True,
+                subcategory_data_scientist=item["subcategory"],
+                display_order=999,
+            )
+            db.session.add(tool)
+            updated = True
+
+    if updated:
+        db.session.commit()
+
+
+def apply_data_scientist_skill_order():
+    category_order = {
+        "Modeling & Data Science": [
+            "Machine Learning",
+            "Statistical Modeling",
+            "Feature Engineering",
+            "Data Visualization",
+        ],
+        "Data Engineering & Development": [
+            "Python (Flask, Jupyter)",
+            "C++",
+            "Java",
+            "SQLAlchemy",
+            "Data Pipelines",
+            "API Development",
+        ],
+        "Data Platforms": [
+            "BigQuery",
+            "PySpark",
+            "SQL Server",
+            "MySQL",
+            "GCP",
+            "DataStage",
+        ],
+        "QA & CI/CD": [
+            "JIRA",
+            "Xray",
+            "Jenkins",
+            "SonarQube",
+            "Postman",
+            "Selenium",
+            "Cucumber",
+        ],
+    }
+
+    updated = False
+    for category, names in category_order.items():
+        for idx, name in enumerate(names, start=1):
+            existing = TechnicalTool.query.filter(func.lower(TechnicalTool.name) == name.lower()).first()
+            if not existing:
+                existing = TechnicalTool(
+                    name=name,
+                    usable_data_scientist=True,
+                    subcategory_data_scientist=category,
+                    display_order=idx,
+                )
+                db.session.add(existing)
+                updated = True
+                continue
+
+            if not existing.usable_data_scientist:
+                existing.usable_data_scientist = True
+                updated = True
+            if existing.subcategory_data_scientist != category:
+                existing.subcategory_data_scientist = category
+                updated = True
+            if existing.display_order != idx:
+                existing.display_order = idx
+                updated = True
+
+    combined = TechnicalTool.query.filter(
+        func.lower(TechnicalTool.name) == "data pipelines / api development"
+    ).first()
+    if combined and combined.usable_data_scientist:
+        combined.usable_data_scientist = False
+        updated = True
+
+    if updated:
+        db.session.commit()

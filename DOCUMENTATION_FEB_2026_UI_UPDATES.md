@@ -55,6 +55,31 @@ This document summarizes the UI and metadata changes introduced after the Admin 
   - `card-border-data-section-technical`: `1px solid #198754`
   - All include `border-radius: 16px`
 
+### C) Technical Evidence default values (deterministic model alignment)
+**Location:** [populate_evidence_hub.py](populate_evidence_hub.py)
+
+The local API Home page Technical Evidence cards are synchronized through `populate_evidence_hub.py` and aligned with the deterministic analytical model.
+
+Current defaults:
+
+| Slug | Title | Stack | Display Order |
+|------|-------|-------|---------------|
+| `qa-ui-automation` | UI / Automation: Selenium & Cucumber | Java · Selenium · Cucumber · Gherkin · BDD | 1 |
+| `api-automation` | API Automation: Postman & Newman | Postman · Newman · JSON · Contract Validation · Deterministic Testing | 2 |
+| `data-science` | Data & Market Insights (API-driven) | Python · Pandas · REST APIs · Analytical Modeling · Multi-Dataset Evaluation | 3 |
+
+Execution:
+
+```bash
+python populate_evidence_hub.py
+```
+
+Behavior:
+- Upserts entries by `slug`
+- Removes duplicate rows per slug
+- Enforces deterministic ordering using `display_order`
+- Keeps evidence descriptions consistent with the deterministic API model implementation
+
 ---
 
 ## 4) Button order in “Available CV Profiles” cards

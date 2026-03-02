@@ -8,7 +8,7 @@
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto text-center">
             <h1 class="display-4 fw-bold mb-3">
-                <i class="bi bi-file-person-fill text-primary"></i>
+                <i class="bi bi-diagram-3-fill text-primary"></i>
                 Professional CV Builder
             </h1>
             <p class="lead text-muted mb-4">
@@ -17,9 +17,6 @@
             <div class="d-flex gap-3 justify-content-center">
                 <a href="/forms/person" class="btn btn-primary btn-lg">
                     <i class="bi bi-pencil-square"></i> Start Building
-                </a>
-                <a href="/admin/data-management" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-table"></i> Data Entry
                 </a>
             </div>
         </div>
@@ -114,7 +111,7 @@
                     {% for entry in evidence_hub_entries %}
                     <div class="col-md-4 mb-3">
                         <div class="card h-100 shadow-sm">
-                            <div class="card-body text-center 
+                            <div class="card-body text-center d-flex flex-column
                                 {% if entry.slug == 'qa-ui-automation' %}card-border-ui-section-technical
                                 {% elif entry.slug == 'api-automation' %}card-border-api-section-technical
                                 {% else %}card-border-data-section-technical{% endif %}">
@@ -123,8 +120,8 @@
                                 {% if entry.slug == 'qa-ui-automation' %}🖥️{% elif entry.slug == 'api-automation' %}🔌{% else %}📊{% endif %}
                                 </div>
                                 <h5 class="card-title mt-3">{{ entry.title }}</h5>
-                                <div class="small text-muted mb-2">{{ entry.stack }}</div>
-                                <p class="card-text small text-muted">{{ entry.description }}</p>
+                                <div class="small text-muted mb-2" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">{{ entry.stack }}</div>
+                                <p class="card-text small text-muted flex-grow-1">{{ entry.description }}</p>
                                 
                                 {% if entry.slug == 'qa-ui-automation' %}
                                 <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-primary btn-sm mt-2">
@@ -136,9 +133,8 @@
                                     ▶ View Automated API Validation
                                 </a>
                                 {% else %}
-                                <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-success btn-sm mt-2"
-                                    style="box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);">
-                                    ▶ Explore Labor Market Insights
+                                <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-success btn-sm mt-2">
+                                    ▶ Explore Market Insights
                                 </a>
                                 {% endif %}
                             </div>

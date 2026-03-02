@@ -3,6 +3,7 @@ Profile Routes
 Version 2025 - Profile viewing and CV generation
 """
 from flask import Blueprint, render_template, jsonify, send_file, request
+from app.services.profile_images import get_profile_image_url
 from datetime import datetime
 from app import db
 from app.models import Person, WorkExperience, TechnicalTool, Education, Certification, Course, Language, ITProduct, AdvancedTraining
@@ -10,6 +11,8 @@ from app.services.pdf_generator import PDFGenerator
 from app.services.profile_presets import ProfilePresetService
 import re
 from copy import deepcopy
+
+from flask import redirect, session
 
 bp = Blueprint('profiles', __name__, url_prefix='/profile')
 
@@ -71,6 +74,11 @@ def generate_pdf(person_id, profile_name):
     # One-Page PDF (one_page=True): show only active, non-historical records
     include_inactive = not one_page
     profile_data = get_profile_data_dict(person_id, profile_name, include_inactive=include_inactive)
+
+    if one_page:
+        profile_image_url = get_profile_image_url(profile_name)
+        if profile_image_url:
+            profile_data['person']['profile_image_url'] = profile_image_url
     
     # Apply section states to filter data
     if not section_states.get('summary', True):
@@ -123,11 +131,6 @@ def get_profile_data_dict(person_id, profile_name, include_inactive=False):
     if not person:
         return None
     
-    # Collect all data filtered by profile visibility
-    # WorkExperience: apply custom ordering
-    # Block order priority: 2021-2025 first (newest), then 2015-2020, then 1985-2009 (oldest)
-    block_priority = {"2021-2025": 0, "2015-2020": 1, "1985-2009": 2}
-
     # Fetch and filter experiences by visibility
     if include_inactive:
         # Export PDF mode: show ALL records regardless of active/is_historical
@@ -142,16 +145,16 @@ def get_profile_data_dict(person_id, profile_name, include_inactive=False):
             if exp.is_visible_for_profile(profile_name) and not exp.is_historical
         ]
 
-    # Sort experiences: by time_block priority, then display_order, then by end_date desc, start_date desc
+    for exp in exp_models:
+        if exp.end_date is None:
+            exp.is_current = True
+
+    # Sort experiences: current first, then by end_date desc, start_date desc
     def exp_sort_key(exp):
-        block_idx = block_priority.get((exp.time_block or '').strip(), 999)
-        # Use display_order if set, otherwise 0
-        disp = exp.display_order if isinstance(getattr(exp, 'display_order', None), int) else 0
-        # For dates, None means ongoing; treat as far future for descending order
+        current_rank = 0 if exp.is_current or exp.end_date is None else 1
         end = exp.end_date or datetime.max.date()
         start = exp.start_date or datetime.min.date()
-        # Return tuple for sorting: block first, then display_order, then dates desc
-        return (block_idx, disp, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
+        return (current_rank, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
 
     exp_models_sorted = sorted(exp_models, key=exp_sort_key)
 
@@ -164,7 +167,7 @@ def get_profile_data_dict(person_id, profile_name, include_inactive=False):
         'technical_tools': {},
         'education': sorted([
             edu.to_dict() for edu in (
-                Education.query.all() if include_inactive 
+                Education.query.all() if include_inactive
                 else Education.query.filter_by(active=True).all()
             )
             if edu.is_visible_for_profile(profile_name) and (include_inactive or not edu.is_historical)
@@ -196,3 +199,9 @@ def get_profile_data_dict(person_id, profile_name, include_inactive=False):
     data['technical_tools'] = TechnicalTool.get_tools_by_profile_and_subcategory(profile_name)
     
     return data
+
+# @bp.route('/close')
+# def close():
+#    origin = session.get('origin')
+#    session.clear()
+#    return redirect(origin or "https://www.google.com")

@@ -94,7 +94,6 @@ class PDFGenerator:
                 ('hide_advanced_training', lambda d: d.update({'advanced_training': []})),
                 ('hide_languages', lambda d: d.update({'languages': []})),
                 ('reduce_experience_detail', PDFGenerator._trim_experience_detail),
-                ('shorten_summary', PDFGenerator._trim_summary),
                 ('compact_tools', PDFGenerator._trim_tools),
                 ('reduce_education', PDFGenerator._trim_education),
                 ('limit_experiences', PDFGenerator._trim_experience_count),
@@ -115,7 +114,10 @@ class PDFGenerator:
 
             # If still too long, return best-effort last render
             return document.write_pdf()
-        except Exception:
+        except Exception as e: 
+            import traceback 
+            print(">>> PDF generation failed:", e) 
+            traceback.print_exc() # Esto imprime la pila completa en consola
             # If optimization fails, fall back to a single render
             html_content = PDFGenerator._generate_html(profile_data, profile_name)
             pdf_css = CSS(string=PDFGenerator._get_pdf_css())
@@ -389,9 +391,36 @@ class PDFGenerator:
         if not tools_by_category:
             return ''
         
+        category_order = []
+        if profile_name == 'data_scientist':
+            category_order = [
+                'Modeling & Data Science',
+                'Data Engineering & Development',
+                'Data Platforms',
+                'QA & CI/CD'
+            ]
+
         categories_html = ''
-        for category, tools in tools_by_category.items():
-            tool_names = ', '.join([t.get('name', '') for t in tools])
+        items = tools_by_category.items()
+        if category_order:
+            items = [(cat, tools_by_category.get(cat, [])) for cat in category_order if cat in tools_by_category]
+
+        for category, tools in items:
+            names = [t.get('name', '') for t in tools]
+            if profile_name == 'data_scientist' and category == 'Data Engineering & Development':
+                lower = {n.lower(): n for n in names}
+                has_python = any(n.lower() == 'python' for n in names)
+                has_flask = any(n.lower() == 'flask' for n in names)
+                has_jupyter = any(n.lower() in {'jupyter', 'jupyter notebook'} for n in names)
+                if has_python or has_flask or has_jupyter:
+                    names = [
+                        n for n in names
+                        if n.lower() not in {'python', 'flask', 'jupyter', 'jupyter notebook'}
+                    ]
+                    names.insert(0, 'Python (Flask, Jupyter)')
+                names = [n.replace('Data Pipelines / API Development', 'Data Pipelines, API Development') for n in names]
+
+            tool_names = ', '.join([n for n in names if n])
             categories_html += f"""<div class="compact-skill"><strong>{category}</strong><br>{tool_names}</div>"""
         
         return f"""
@@ -408,7 +437,15 @@ class PDFGenerator:
             return ''
         
         items = ''
-        for edu in sorted(education_list, key=lambda e: e.get('display_order', 999)):
+        def edu_sort_key(edu):
+            year = edu.get('year_obtained')
+            try:
+                year_val = int(year) if year not in (None, '') else 0
+            except (TypeError, ValueError):
+                year_val = 0
+            return (-year_val, edu.get('display_order', 999))
+
+        for edu in sorted(education_list, key=edu_sort_key):
             degree = edu.get('degree', '')
             year = edu.get('year_obtained', '')
             institution = edu.get('institution', '')
@@ -476,9 +513,33 @@ class PDFGenerator:
         """(***) Work Experience - formatted by time_block"""
         if not experiences:
             return ''
+
+        # One-page layout: cap work experience to four items
+        experiences = experiences[:4]
+
+        def truncate_after_periods(text, limit=2):
+            if not text:
+                return ''
+            parts = text.split('.')
+            if len(parts) <= limit:
+                return text
+            trimmed = '.'.join(parts[:limit]).strip()
+            return trimmed + '.'
         
         items_by_block = {}
         
+        def parse_date(value):
+            if not value:
+                return None
+            if isinstance(value, datetime):
+                return value.date()
+            if hasattr(value, 'year'):
+                return value
+            try:
+                return datetime.strptime(value, '%Y-%m-%d').date()
+            except (TypeError, ValueError):
+                return None
+
         for exp in experiences:
             block = exp.get('time_block') or 'Other'  # Handle None/empty as 'Other'
             block = block.strip() if block else 'Other'  # Handle whitespace
@@ -486,8 +547,24 @@ class PDFGenerator:
                 items_by_block[block] = []
             items_by_block[block].append(exp)
         
-        # Include 'Other' at the end to catch records without time_block
-        block_order = ['2021-2025', '2015-2020', '1985-2009', 'Other']
+        def block_start_year(block_value):
+            if not block_value or block_value == 'Other':
+                return None
+            parts = block_value.split('-')
+            if len(parts) != 2:
+                return None
+            try:
+                return int(parts[0])
+            except ValueError:
+                return None
+
+        # Build dynamic block order (most recent block first), keep 'Other' last
+        blocks = [b for b in items_by_block.keys() if b != 'Other']
+        blocks_sorted = sorted(
+            blocks,
+            key=lambda b: (block_start_year(b) is None, -(block_start_year(b) or 0))
+        )
+        block_order = blocks_sorted + (['Other'] if 'Other' in items_by_block else [])
         html = '<div class="compact-section"><h4 class="compact-heading">WORK EXPERIENCE</h4>'
         
         is_first_overall = True
@@ -495,10 +572,18 @@ class PDFGenerator:
         for block in block_order:
             if block not in items_by_block:
                 continue
+
+            block_items = sorted(
+                items_by_block[block],
+                key=lambda exp: (
+                    0 if exp.get('end_date') in (None, '') else 1,
+                    -(parse_date(exp.get('end_date')) or datetime.max.date()).toordinal(),
+                    -(parse_date(exp.get('start_date')) or datetime.min.date()).toordinal()
+                )
+            )
             
-            block_items = items_by_block[block]
-            
-            if block == '2021-2025':
+            start_year = block_start_year(block)
+            if start_year and start_year >= 2021:
                 first_item = is_first_overall
                 for exp in block_items:
                     job = exp.get('job_title', '')
@@ -509,13 +594,11 @@ class PDFGenerator:
                     achievements = exp.get('achievements', '')
                     
                     dates = f"({start} - {end})" if start else ""
-                    relevant = f"<strong style='color: #000;'>Relevant: {achievements}</strong>" if achievements else ""
+                    trimmed_achievements = truncate_after_periods(achievements, limit=2)
+                    relevant = f"<strong style='color: #000;'>Relevant: {trimmed_achievements}</strong>" if trimmed_achievements else ""
 
-                    intro, bullet_items = PDFGenerator._split_summary_with_list(summary)
-                    summary_html = f"<div style='text-align: justify;'>{intro}</div>" if intro else ''
-                    if bullet_items:
-                        bullets = ''.join(f"<li>{item}</li>" for item in bullet_items)
-                        summary_html += f"<ul class='compact-bullets'>{bullets}</ul>"
+                    summary_inline = ' '.join(str(summary).split())
+                    summary_html = f"<div style='text-align: justify;'>{summary_inline}</div>" if summary_inline else ''
                     
                     entry_class = "compact-item" if first_item else "compact-item work-entry"
                     html += f"""<div class="{entry_class}"><strong style="color: #0d6efd;">{job}</strong> {dates}<br><strong style="color: #000;">{company}</strong><br>{summary_html}"""
@@ -526,7 +609,7 @@ class PDFGenerator:
                         is_first_overall = False
                     first_item = False
             
-            elif block == '2015-2020':
+            elif start_year and start_year >= 2010:
                 first_item = is_first_overall
                 for exp in block_items:
                     job = exp.get('job_title', '')
@@ -545,7 +628,7 @@ class PDFGenerator:
                         is_first_overall = False
                     first_item = False
             
-            elif block == '1985-2009' or block == 'Other':
+            else:
                 # Handle both historical block and records without time_block
                 first_item = is_first_overall
                 for exp in block_items:
@@ -891,6 +974,7 @@ class PDFGenerator:
         
         .sidebar-avatar {{
             width: 80%;
+            max-height: 100px;
             height: auto;
             margin: 0 auto 8px auto;
             display: block;
@@ -914,14 +998,6 @@ class PDFGenerator:
             font-size: {item_size}pt;
             margin-bottom: 3px;
             line-height: 1.15;
-        }}
-
-        .compact-bullets {{
-            margin: 4px 0 0 14px;
-            padding: 0;
-        }}
-        .compact-bullets li {{
-            margin-bottom: 2px;
         }}
 
         .work-entry {{
@@ -992,7 +1068,7 @@ class PDFGenerator:
         return data
 
     @staticmethod
-    def _trim_experience_count(data: dict, keep: int = 3):
+    def _trim_experience_count(data: dict, keep: int = 4):
         """Keep only the first N experiences, preserving existing sort order."""
         exps = data.get('work_experience') or []
         data['work_experience'] = exps[:keep]
@@ -1023,7 +1099,7 @@ class PDFGenerator:
         return data
 
     @staticmethod
-    def _trim_education(data: dict, keep: int = 2):
+    def _trim_education(data: dict, keep: int = 3):
         """Keep only the most recent education entries."""
         items = data.get('education') or []
         def sort_key(e):

@@ -71,6 +71,37 @@
                             </div>
                         </div>
 
+                        <!-- Per-Profile Image Upload -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Profile Images (Per Profile)</h5>
+                                <p class="text-muted small mb-2">Upload one image for each profile. These images are used on the home cards and in the PDF header for that profile.</p>
+                            </div>
+                            <div class="col-md-4 mb-3 text-center">
+                                <div class="border rounded p-2 bg-light">
+                                    <img id="profileImagePreviewProfile" src="" alt="Profile preview" class="img-fluid rounded d-none">
+                                    <div id="profileImagePlaceholderProfile" class="text-muted small">No image uploaded</div>
+                                </div>
+                                <div class="small text-muted mt-2" id="profileImageStatusProfile"></div>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <div class="d-flex gap-2 align-items-center flex-wrap">
+                                    <select id="profileImageSelector" class="form-select" style="max-width: 220px;">
+                                        <option value="qa_analyst">QA Analyst</option>
+                                        <option value="qa_engineer">QA Engineer</option>
+                                        <option value="data_scientist">Data Scientist</option>
+                                    </select>
+                                    <input class="form-control" type="file" id="profileImageFileProfile" accept="image/png,image/jpeg,image/webp" style="max-width: 260px;">
+                                    <button type="button" class="btn btn-outline-primary" id="uploadImageBtnProfile">
+                                        <i class="bi bi-upload"></i> Upload Profile Image
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" id="removeImageBtnProfile">
+                                        <i class="bi bi-x-circle"></i> Remove Profile Image
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Profile-Specific Titles -->
                         <div class="row mb-4">
                             <div class="col-12">
@@ -320,6 +351,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileImagePreview = document.getElementById('profileImagePreview');
     const profileImagePlaceholder = document.getElementById('profileImagePlaceholder');
     const profileImageStatus = document.getElementById('profileImageStatus');
+    const profileImageSelector = document.getElementById('profileImageSelector');
+    const profileImageFileProfile = document.getElementById('profileImageFileProfile');
+    const profileImagePreviewProfile = document.getElementById('profileImagePreviewProfile');
+    const profileImagePlaceholderProfile = document.getElementById('profileImagePlaceholderProfile');
+    const profileImageStatusProfile = document.getElementById('profileImageStatusProfile');
+    const uploadImageBtnProfile = document.getElementById('uploadImageBtnProfile');
+    const removeImageBtnProfile = document.getElementById('removeImageBtnProfile');
     const personIdInput = document.getElementById('personId');
     
     // Update preview when visibility toggles change
@@ -399,6 +437,66 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Image removal failed:', error);
+            alert('Failed to remove image');
+        }
+    }
+
+    async function uploadProfileImageByProfile() {
+        const profile = profileImageSelector.value;
+        const file = profileImageFileProfile.files[0];
+        if (!file) {
+            alert('Please choose an image file (PNG, JPG, or WEBP).');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        profileImageStatusProfile.textContent = 'Uploading...';
+
+        try {
+            const response = await fetch(`/api/profile-images/${profile}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => null);
+                profileImageStatusProfile.textContent = 'Upload failed';
+                alert('Upload failed' + (err && err.error ? `: ${err.error}` : ''));
+                return;
+            }
+
+            const data = await response.json();
+            if (data.profile_image_url) {
+                profileImagePreviewProfile.src = data.profile_image_url;
+                profileImagePreviewProfile.classList.remove('d-none');
+                profileImagePlaceholderProfile.classList.add('d-none');
+                profileImageStatusProfile.textContent = 'Uploaded';
+            }
+        } catch (error) {
+            console.error('Profile image upload failed:', error);
+            profileImageStatusProfile.textContent = 'Upload failed';
+            alert('Upload failed');
+        }
+    }
+
+    async function removeProfileImageByProfile() {
+        const profile = profileImageSelector.value;
+        if (!confirm('Remove the current profile image?')) return;
+
+        try {
+            const response = await fetch(`/api/profile-images/${profile}`, { method: 'DELETE' });
+            if (response.ok || response.status === 204) {
+                profileImagePreviewProfile.src = '';
+                profileImagePreviewProfile.classList.add('d-none');
+                profileImagePlaceholderProfile.classList.remove('d-none');
+                profileImageStatusProfile.textContent = 'Removed';
+            } else {
+                alert('Failed to remove image');
+            }
+        } catch (error) {
+            console.error('Profile image removal failed:', error);
             alert('Failed to remove image');
         }
     }
@@ -549,6 +647,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     uploadImageBtn.addEventListener('click', uploadProfileImage);
     removeImageBtn.addEventListener('click', removeProfileImage);
+    uploadImageBtnProfile.addEventListener('click', uploadProfileImageByProfile);
+    removeImageBtnProfile.addEventListener('click', removeProfileImageByProfile);
     
     // Initial preview update
     updateVisibilityPreview();

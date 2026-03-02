@@ -50,15 +50,30 @@ def create_app(config_name=None):
     # Create database tables
     with app.app_context():
         db.create_all()
-        from app.models.app_metadata import ensure_app_metadata_defaults
+        from app.models.app_metadata import ensure_app_metadata_defaults, get_app_metadata_value
+        from app.models.app_schema_version import ensure_schema_version
+        from app.models.support_tools import ensure_data_scientist_tool_defaults, apply_data_scientist_skill_order
         ensure_app_metadata_defaults()
+        schema_version = get_app_metadata_value("application_version", "2026.2.0")
+        ensure_schema_version(schema_version)
+        ensure_data_scientist_tool_defaults()
+        apply_data_scientist_skill_order()
 
     @app.context_processor
     def inject_app_metadata():
-        from app.models import AppMetadata
-        entries = AppMetadata.query.all()
+        from app.models.app_metadata import get_app_metadata_dict
+        entries = get_app_metadata_dict()
         return {
-            'app_metadata': {entry.key: entry.value for entry in entries}
+            'app_metadata': entries
+        }
+    
+    @app.context_processor
+    def inject_profile_image():
+        from app.models.personal_data import Person
+        person = Person.query.filter_by(active=True, is_historical=False).first()
+        profile_image_url = person.profile_image_url if person and person.profile_image_url else None
+        return {
+            'navbar_profile_image': profile_image_url
         }
     
     return app
@@ -66,7 +81,7 @@ def create_app(config_name=None):
 
 def register_blueprints(app):
     """Register Flask blueprints"""
-    from app.routes import main, admin, profiles, api, presets, forms, data_management
+    from app.routes import main, admin, profiles, api, presets, forms, data_management, data_insights
     from app.routes.legacy import legacy_bp   # <--- aquí importas tu blueprint    
     from app.routes.data_import import data_import_bp  # Temporary import route
     from app.routes.image_upload import image_upload_bp  # Temporary image upload route
@@ -79,6 +94,7 @@ def register_blueprints(app):
     app.register_blueprint(api.bp)
     app.register_blueprint(presets.bp)
     app.register_blueprint(forms.bp)
+    app.register_blueprint(data_insights.bp)
     app.register_blueprint(legacy_bp)
     app.register_blueprint(data_import_bp)  # Temporary - remove after migration
     app.register_blueprint(image_upload_bp)  # Temporary - remove after migration

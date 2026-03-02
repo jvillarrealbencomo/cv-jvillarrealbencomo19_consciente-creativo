@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+
+{% block title %}Developer Dashboard - Data Insights Debug{% endblock %}
+
+{% block extra_css %}
+<style>
+    .debug-header {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .container {
+        max-width: 1600px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        border-left: 4px solid #dc2626;
+    }
+    
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #2d3748;
+    }
+    
+    .chart-wrapper {
+        position: relative;
+        height: 300px;
+    }
+    
+    .chart-wrapper.donut {
+        height: 400px;
+    }
+    
+    .skill-list {
+        background: #f7fafc;
+        border-radius: 6px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .skill-list h6 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #2d3748;
+    }
+    
+    .skill-badge {
+        display: inline-block;
+        background: #e2e8f0;
+        color: #2d3748;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        margin: 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    .skill-badge.matched {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .skill-badge.missing {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .meta-info {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+    
+    .warning-banner {
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        color: #78350f;
+    }
+    
+    .loading-state {
+        text-align: center;
+        padding: 3rem;
+        color: #a0aec0;
+    }
+    
+    .skill-count {
+        font-weight: 700;
+        color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="debug-header">
+    <div class="container">
+        <h1 class="mb-2"><i class="bi bi-bug-fill"></i> Developer Dashboard - Data Insights Debug</h1>
+        <p class="mb-0">API <span id="headerApiVersion">{{ app_metadata.get('api_version', 'v2') }}</span> | Debug Mode | Internal Use Only</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="warning-banner">
+        <strong><i class="bi bi-exclamation-triangle-fill"></i> Developer Only:</strong> 
+        This dashboard exposes detailed skill breakdowns for debugging purposes. Not visible in production navigation.
+        <strong>Access URL:</strong> <code>/developer/data-insights-debug</code>
+    </div>
+    
+    <div class="meta-info">
+        <strong>Metadata:</strong> 
+        Model: <span id="metaModel">—</span> | 
+        API Version: <span id="metaApiVersion">—</span> | 
+        Generated: <span id="metaGenerated">—</span> | 
+        Status: <span id="metaStatus">—</span> |
+        Debug Mode: <span id="metaDebugMode" class="skill-count">—</span>
+    </div>
+
+    <!-- Chart 1: Profile Readiness -->
+    <div class="chart-container">
+        <div class="chart-title">
+            <i class="bi bi-pie-chart-fill text-success"></i> 
+            Chart 1: Profile Readiness Overview
+        </div>
+        <div class="chart-wrapper donut">
+            <canvas id="chart1Donut"></canvas>
+        </div>
+        
+        <div class="skill-list">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="bi bi-check-circle-fill text-success"></i> Matched Skills (<span id="matchedCount" class="skill-count">0</span>)</h6>
+                    <div id="matchedSkillsList"></div>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="bi bi-x-circle-fill text-danger"></i> Missing Skills (<span id="missingCount" class="skill-count">0</span>)</h6>
+                    <div id="missingSkillsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Market Coverage -->
+    <div class="chart-container">
+        <div class="chart-title">
+            <i class="bi bi-bar-chart-fill text-primary"></i> 
+            Chart 2: Market vs CV Skill Coverage
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="chart2Bar"></canvas>
+        </div>
+        
+        <div class="skill-list">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><i class="bi bi-briefcase-fill text-primary"></i> Market Demand (<span id="marketCount" class="skill-count">0</span>)</h6>
+                    <div id="marketSkillsList"></div>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="bi bi-file-earmark-person-fill text-success"></i> Present in CV (<span id="cvCount" class="skill-count">0</span>)</h6>
+                    <div id="cvSkillsList"></div>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="bi bi-exclamation-triangle-fill text-danger"></i> Gap (<span id="gapCount" class="skill-count">0</span>)</h6>
+                    <div id="gapSkillsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 3: Dataset Alignment -->
+    <div class="chart-container">
+        <div class="chart-title">
+            <i class="bi bi-diagram-3-fill text-info"></i> 
+            Chart 3: Dataset-Specific Skill Alignment (Kaggle vs O*NET)
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="chart3GroupedBar"></canvas>
+        </div>
+        
+        <div class="skill-list">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="bi bi-database-fill" style="color: #f59e0b;"></i> Kaggle Dataset</h6>
+                    <div class="mb-2">
+                        <strong>Matched (<span id="kaggleMatchedCount" class="skill-count">0</span>):</strong>
+                        <div id="kaggleMatchedSkills"></div>
+                    </div>
+                    <div>
+                        <strong>Missing (<span id="kaggleMissingCount" class="skill-count">0</span>):</strong>
+                        <div id="kaggleMissingSkills"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="bi bi-database-fill" style="color: #3b82f6;"></i> O*NET Dataset</h6>
+                    <div class="mb-2">
+                        <strong>Matched (<span id="onetMatchedCount" class="skill-count">0</span>):</strong>
+                        <div id="onetMatchedSkills"></div>
+                    </div>
+                    <div>
+                        <strong>Missing (<span id="onetMissingCount" class="skill-count">0</span>):</strong>
+                        <div id="onetMissingSkills"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- All Skills Detailed -->
+    <div class="chart-container">
+        <div class="chart-title">
+            <i class="bi bi-list-ul"></i> 
+            All Skills Detailed View
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover" id="allSkillsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Skill</th>
+                        <th>In CV</th>
+                        <th>In Market</th>
+                        <th>Datasets</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody id="allSkillsTableBody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let chart1, chart2, chart3;
+
+// Center text plugin for donut chart
+const centerTextPlugin = {
+    id: 'centerText',
+    afterDraw: function(chart) {
+        if (chart.config.type === 'doughnut') {
+            const ctx = chart.ctx;
+            const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+            const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
+            
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const readinessScore = chart.config.options.plugins.centerText?.score || 0;
+            
+            ctx.font = 'bold 48px sans-serif';
+            ctx.fillStyle = '#1f2937';
+            ctx.fillText(readinessScore + '%', centerX, centerY - 10);
+            
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#6b7280';
+            ctx.fillText('Readiness', centerX, centerY + 30);
+            
+            ctx.restore();
+        }
+    }
+};
+
+function renderSkillBadges(skills, containerElement, cssClass = '') {
+    if (!skills || skills.length === 0) {
+        containerElement.innerHTML = '<span class="text-muted">None</span>';
+        return;
+    }
+    
+    containerElement.innerHTML = skills.map(skill => 
+        `<span class="skill-badge ${cssClass}">${skill}</span>`
+    ).join('');
+}
+
+function loadDashboard() {
+    fetch('/api/data_insights/dashboard-debug')
+        .then(response => response.json())
+        .then(data => {
+            // Update metadata
+            document.getElementById('metaModel').textContent = data.meta.model;
+            document.getElementById('metaApiVersion').textContent = data.meta.api_version;
+            document.getElementById('metaGenerated').textContent = new Date(data.meta.generated_at).toLocaleString();
+            document.getElementById('metaStatus').textContent = data.meta.api_status;
+            document.getElementById('metaDebugMode').textContent = data.meta.debug_mode ? 'TRUE' : 'FALSE';
+            
+            // Update header
+            document.getElementById('headerApiVersion').textContent = data.meta.api_version;
+            
+            // Render charts with data
+            renderChart1(data.chart1_profile_readiness);
+            renderChart2(data.chart2_coverage);
+            renderChart3(data.chart3_dataset_alignment);
+            
+            // Render skill lists
+            renderSkillLists(data);
+            
+            // Render detailed table
+            renderAllSkillsTable(data.all_skills_detailed);
+        })
+        .catch(error => {
+            console.error('Error loading dashboard:', error);
+            alert('Failed to load dashboard data');
+        });
+}
+
+function renderSkillLists(data) {
+    // Chart 1 skill lists
+    document.getElementById('matchedCount').textContent = data.chart1_profile_readiness.matched_skill_count;
+    document.getElementById('missingCount').textContent = data.chart1_profile_readiness.missing_skills.length;
+    renderSkillBadges(data.chart1_profile_readiness.matched_skills, document.getElementById('matchedSkillsList'), 'matched');
+    renderSkillBadges(data.chart1_profile_readiness.missing_skills, document.getElementById('missingSkillsList'), 'missing');
+    
+    // Chart 2 skill lists
+    document.getElementById('marketCount').textContent = data.chart2_coverage.market_demand;
+    document.getElementById('cvCount').textContent = data.chart2_coverage.present_in_cv;
+    document.getElementById('gapCount').textContent = data.chart2_coverage.gap;
+    renderSkillBadges(data.chart2_coverage.market_demand_skills, document.getElementById('marketSkillsList'));
+    renderSkillBadges(data.chart2_coverage.present_in_cv_skills, document.getElementById('cvSkillsList'), 'matched');
+    renderSkillBadges(data.chart2_coverage.gap_skills, document.getElementById('gapSkillsList'), 'missing');
+    
+    // Chart 3 skill lists
+    document.getElementById('kaggleMatchedCount').textContent = data.chart3_dataset_alignment.kaggle.matched;
+    document.getElementById('kaggleMissingCount').textContent = data.chart3_dataset_alignment.kaggle.missing;
+    document.getElementById('onetMatchedCount').textContent = data.chart3_dataset_alignment.onet.matched;
+    document.getElementById('onetMissingCount').textContent = data.chart3_dataset_alignment.onet.missing;
+    
+    renderSkillBadges(data.chart3_dataset_alignment.kaggle.matched_skills, document.getElementById('kaggleMatchedSkills'), 'matched');
+    renderSkillBadges(data.chart3_dataset_alignment.kaggle.missing_skills, document.getElementById('kaggleMissingSkills'), 'missing');
+    renderSkillBadges(data.chart3_dataset_alignment.onet.matched_skills, document.getElementById('onetMatchedSkills'), 'matched');
+    renderSkillBadges(data.chart3_dataset_alignment.onet.missing_skills, document.getElementById('onetMissingSkills'), 'missing');
+}
+
+function renderAllSkillsTable(allSkills) {
+    const tbody = document.getElementById('allSkillsTableBody');
+    
+    if (!allSkills || Object.keys(allSkills).length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No skills found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = Object.entries(allSkills).map(([skill, data]) => {
+        const inCvBadge = data.present_in_cv 
+            ? '<span class="badge bg-success">Yes</span>' 
+            : '<span class="badge bg-secondary">No</span>';
+        const inMarketBadge = data.present_in_market 
+            ? '<span class="badge bg-primary">Yes</span>' 
+            : '<span class="badge bg-secondary">No</span>';
+        const datasets = data.datasets.length > 0 
+            ? data.datasets.join(', ') 
+            : '<span class="text-muted">—</span>';
+        
+        return `
+            <tr>
+                <td><strong>${skill}</strong></td>
+                <td>${inCvBadge}</td>
+                <td>${inMarketBadge}</td>
+                <td>${datasets}</td>
+                <td><code>${data.skill_type}</code></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderChart1(data) {
+    if (chart1) chart1.destroy();
+    
+    const ctx = document.getElementById('chart1Donut').getContext('2d');
+    const gapCount = data.market_skill_count - data.matched_skill_count;
+    
+    chart1 = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Matched Skills', 'Skill Gap'],
+            datasets: [{
+                data: [data.matched_skill_count, gapCount],
+                backgroundColor: ['#10b981', '#6b7280'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 15, font: { size: 13 } }
+                },
+                centerText: {
+                    score: data.readiness_score.toFixed(1)
+                }
+            }
+        },
+        plugins: [centerTextPlugin]
+    });
+}
+
+function renderChart2(data) {
+    if (chart2) chart2.destroy();
+    
+    const ctx = document.getElementById('chart2Bar').getContext('2d');
+    
+    chart2 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Market Demand', 'Present in CV', 'Gap'],
+            datasets: [{
+                label: 'Skill Count',
+                data: [data.market_demand, data.present_in_cv, data.gap],
+                backgroundColor: ['#3b82f6', '#10b981', '#f87171'],
+                borderWidth: 0,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+}
+
+function renderChart3(data) {
+    if (chart3) chart3.destroy();
+    
+    const ctx = document.getElementById('chart3GroupedBar').getContext('2d');
+    
+    chart3 = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Kaggle', 'O*NET'],
+            datasets: [
+                {
+                    label: 'Matched',
+                    data: [data.kaggle.matched, data.onet.matched],
+                    backgroundColor: '#10b981',
+                    borderWidth: 0
+                },
+                {
+                    label: 'Missing',
+                    data: [data.kaggle.missing, data.onet.missing],
+                    backgroundColor: '#f87171',
+                    borderWidth: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { padding: 15, font: { size: 13 } }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+}
+
+// Load dashboard on page load
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %}

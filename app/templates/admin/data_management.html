@@ -161,10 +161,10 @@
                         {% for edu in education %}
                         <tr class="{% if not edu.active %}table-danger{% endif %}">
                             <td><strong>#{{ edu.id }}</strong></td>
-                            <td>{{ edu.school }}</td>
+                            <td>{{ edu.institution }}</td>
                             <td>{{ edu.degree }}</td>
                             <td>
-                                <small>{{ edu.graduation_date.strftime('%Y-%m-%d') if edu.graduation_date else 'N/A' }}</small>
+                                <small>{{ edu.year_obtained or edu.end_year or edu.start_year or 'N/A' }}</small>
                             </td>
                             <td>
                                 {% if edu.active %}
@@ -247,20 +247,12 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    {% if training.type|lower == 'certification' %}
-                                        <a href="javascript:void(0)" 
-                                            class="btn btn-primary"
-                                            data-edit-url="{{ url_for('forms.certification_form', cert_id=training.id) }}"                     
-                                            onclick="return requireAdminAndGo('training', this.dataset.editUrl)">
-                                        </a>
-                                    {% else %}
-                                        <a href="javascript:void(0)" 
-                                            class="btn btn-primary"
-                                            data-edit-url="{{ url_for('forms.course_form', course_id=training.id) }}"
-                                            onclick="return requireAdminAndGo('training', this.dataset.editUrl)">
-                                           <i class="bi bi-pencil"></i>
-                                        </a>
-                                    {% endif %}
+                                    <a href="javascript:void(0)" 
+                                        class="btn btn-primary"
+                                        data-edit-url="{{ url_for('forms.advanced_training_form', training_id=training.id) }}"
+                                        onclick="return requireAdminAndGo('training', this.dataset.editUrl)">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                     {% if training.active %}
                                         <button class="btn btn-secondary" onclick="toggleRecord('training', {{ training.id }}, false)">
                                             <i class="bi bi-eye-slash"></i>

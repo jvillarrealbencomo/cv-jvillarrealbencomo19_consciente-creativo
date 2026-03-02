@@ -41,8 +41,8 @@ def ensure_defaults():
         {
             'slug': 'data-science',
             'title': 'Data & Market Insights (API-driven)',
-            'stack': 'Python · Pandas · API Integration',
-            'description': 'Demonstrates how public datasets and CV data are analyzed and exposed via APIs',
+            'stack': 'Python · Pandas · API Integration · Analytical Modeling',
+            'description': 'Demonstrates how public datasets and CV data are cross-referenced using a structured scoring model, exposed through REST APIs, and visualized in an interactive dashboard',
              'display_order': 3
         },
     ]

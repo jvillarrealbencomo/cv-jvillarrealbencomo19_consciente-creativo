@@ -2,6 +2,7 @@
 Data Management UI for viewing and managing CV records
 Version 2026 - Updates to password-protected tables with CI and pw of production
 """
+from datetime import datetime
 from flask import render_template, jsonify, request
 from app import db
 from app.models.work_experience import WorkExperience
@@ -22,8 +23,25 @@ def init_data_management_routes(app):
     def data_management():
         person = db.session.get(Person, 1)
 
-        work_experiences = WorkExperience.query.order_by(WorkExperience.id).all()
-        education = Education.query.order_by(Education.id).all()
+        work_experiences = WorkExperience.query.all()
+        for exp in work_experiences:
+            if exp.end_date is None:
+                exp.is_current = True
+
+        def exp_sort_key(exp):
+            current_rank = 0 if exp.is_current or exp.end_date is None else 1
+            end = exp.end_date or datetime.max.date()
+            start = exp.start_date or datetime.min.date()
+            return (current_rank, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
+
+        work_experiences = sorted(work_experiences, key=exp_sort_key)
+        education = Education.query.all()
+        education.sort(
+            key=lambda edu: (
+                -(edu.year_obtained or edu.end_year or edu.start_year or 0),
+                edu.id
+            )
+        )
         advanced_training = AdvancedTraining.query.order_by(AdvancedTraining.id).all()
         persons = Person.query.order_by(Person.id).all()
         evidence_hub_entries = EvidenceHubEntry.query.order_by(EvidenceHubEntry.id).all() if EvidenceHubEntry else []

@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Platform Overview - Professional CV Builder{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary">
+                    <i class="bi bi-info-circle"></i> Platform Overview
+                </h1>
+                <p class="lead text-muted">Functional Documentation</p>
+                <hr class="my-4">
+            </div>
+
+            <!-- Overview Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-dark mb-3">
+                    <i class="bi bi-flag"></i> Overview
+                </h2>
+                <p class="text-muted">
+                    The <strong>Professional CV Builder</strong> is a structured analytical platform that enables recruiters and professionals 
+                    to create, manage, and analyze curriculum vitae with market intelligence capabilities. The system integrates personal 
+                    data entry with advanced market cross-reference analytics to provide quantitative insights into skill alignment 
+                    and readiness metrics.
+                </p>
+            </section>
+
+            <!-- Core Modules Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-dark mb-4">
+                    <i class="bi bi-grid-3x3-gap"></i> Core Modules
+                </h2>
+                
+                <!-- Home Module -->
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-house-door"></i> Home
+                        </h5>
+                        <p class="card-text text-muted">
+                            Landing page featuring profile selection (QA Analyst, QA Engineer, Data Scientist) and Technical Evidence Hub. 
+                            Provides quick access to video demonstrations and analytical modules for each professional profile.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Data Entry Module -->
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-pencil-square"></i> Data Entry
+                        </h5>
+                        <p class="card-text text-muted">
+                            Comprehensive data collection interface for personal information, professional experience, education, 
+                            certifications, skills, and projects. Supports profile-based presets to streamline data entry for 
+                            QA and Data Science professionals.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Data Insights Module -->
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-graph-up-arrow"></i> Data Insights
+                        </h5>
+                        <p class="card-text text-muted">
+                            <strong>Scope:</strong> Currently available for Data Scientist profile only.<br>
+                            <strong>Functionality:</strong> Market cross-reference analytics engine (v1) that compares CV skills 
+                            against public datasets (Kaggle and O*NET) to generate readiness scores, coverage analysis, and 
+                            dataset-specific alignment metrics. Provides three interactive Chart.js visualizations:
+                        </p>
+                        <ul class="text-muted">
+                            <li><strong>Chart 1 (Donut):</strong> Readiness score KPI centered inside donut chart</li>
+                            <li><strong>Chart 2 (Vertical Bar):</strong> Market demand vs present skills vs coverage gaps</li>
+                            <li><strong>Chart 3 (Grouped Bar):</strong> Kaggle and O*NET dataset alignment (matched/missing skills)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Admin Module -->
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-gear"></i> Admin
+                        </h5>
+                        <p class="card-text text-muted">
+                            Management interface for viewing, editing, and deleting CV records. Provides access to all stored 
+                            personal data, professional history, and CV generation capabilities (PDF export).
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Methodology Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-dark mb-3">
+                    <i class="bi bi-calculator"></i> Methodology
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-secondary">Market Cross-Reference Model v1</h5>
+                        <p class="text-muted mb-3">
+                            The Data Insights module employs a quantitative skill alignment algorithm that normalizes and compares 
+                            CV skills against market-validated datasets. The core readiness metric is calculated as:
+                        </p>
+                        <div class="bg-light p-3 rounded mb-3 text-center">
+                            <code class="fs-5">Readiness Score = (Present Skills / Market Demand) × 100</code>
+                        </div>
+                        <p class="text-muted">
+                            <strong>Dataset Sources:</strong>
+                        </p>
+                        <ul class="text-muted">
+                            <li><strong>Kaggle Roles & Skills:</strong> Industry-validated competencies from data science job postings</li>
+                            <li><strong>O*NET Skills Database:</strong> Standardized occupational skill requirements</li>
+                        </ul>
+                        <p class="text-muted mb-0">
+                            Skills are normalized to lowercase tags for consistent matching. Dataset-specific coverage analysis 
+                            measures alignment independently for each source to identify dataset-specific gaps and strengths.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Design Principles Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-dark mb-3">
+                    <i class="bi bi-palette"></i> Design Principles
+                </h2>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="bi bi-people text-primary fs-1 mb-3"></i>
+                                <h5 class="card-title">Recruiter-Centric</h5>
+                                <p class="card-text text-muted small">
+                                    Interface optimized for professional recruiters with clean layouts and quick-access navigation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="bi bi-bar-chart text-success fs-1 mb-3"></i>
+                                <h5 class="card-title">Data-Driven Insights</h5>
+                                <p class="card-text text-muted small">
+                                    Quantitative analytics backed by industry-standard datasets (Kaggle, O*NET) for objective skill assessment.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <i class="bi bi-lightning text-warning fs-1 mb-3"></i>
+                                <h5 class="card-title">Performance Optimized</h5>
+                                <p class="card-text text-muted small">
+                                    Flask backend with SQLAlchemy ORM, Bootstrap 5 frontend, and Chart.js for responsive visualizations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Stack Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-dark mb-3">
+                    <i class="bi bi-stack"></i> Technical Stack
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-secondary mb-2">Backend</h6>
+                                <ul class="text-muted">
+                                    <li>Flask 2.x with Blueprint architecture</li>
+                                    <li>SQLAlchemy ORM</li>
+                                    <li>SQLite database (cv_app.db)</li>
+                                    <li>Python 3.11</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-secondary mb-2">Frontend</h6>
+                                <ul class="text-muted">
+                                    <li>Bootstrap 5.3.0</li>
+                                    <li>Chart.js 4.4.0</li>
+                                    <li>Bootstrap Icons 1.11.0</li>
+                                    <li>Jinja2 templating</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Version Info Footer -->
+            <div class="text-center mt-5 pt-4 border-top">
+                <p class="text-muted mb-0">
+                    <i class="bi bi-code-square"></i> 
+                    <strong>API Version:</strong> {{ app_metadata.get('api_version', 'v2') }} | 
+                    <strong>Model:</strong> market_cross_reference_v1 | 
+                    <strong>Released:</strong> {{ app_metadata.get('release_year', '2026') }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

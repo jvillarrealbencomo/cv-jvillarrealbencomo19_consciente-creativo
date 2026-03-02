@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from app import db
 from app.models import Person, WorkExperience, TechnicalTool, Education, Certification, Course, Language, ITProduct, AdvancedTraining
 from app.services.image_service import ImageService
+from app.services.profile_images import get_profile_image_url, clear_profile_image
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -186,6 +187,40 @@ def person_image_upload(person_id):
     return jsonify({'profile_image_url': person.profile_image_url}), 200
 
 
+@bp.route('/profile-images/<profile_name>', methods=['POST', 'DELETE'])
+def profile_image_upload(profile_name):
+    normalized = profile_name.strip().lower().replace('-', '_')
+    if normalized not in {'qa_analyst', 'qa_engineer', 'data_scientist'}:
+        return jsonify({'error': 'Invalid profile name'}), 400
+
+    if request.method == 'DELETE':
+        clear_profile_image(normalized)
+        return '', 204
+
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file part "image" provided'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'Empty filename'}), 400
+
+    if not _allowed_image(file.filename):
+        return jsonify({'error': 'Unsupported file type'}), 400
+
+    _, ext = os.path.splitext(secure_filename(file.filename))
+    filename = f"{normalized}{ext.lower()}"
+
+    upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profile_images')
+    os.makedirs(upload_dir, exist_ok=True)
+
+    clear_profile_image(normalized, root_path=current_app.root_path)
+
+    filepath = os.path.join(upload_dir, filename)
+    file.save(filepath)
+
+    return jsonify({'profile_image_url': get_profile_image_url(normalized)}), 200
+
+
 # WorkExperience endpoints
 @bp.route('/experience', methods=['GET', 'POST'])
 def experience_list():
@@ -199,8 +234,10 @@ def experience_list():
         # Convert date strings to date objects (YYYY-MM-DD)
         from datetime import datetime
         for field in ['start_date', 'end_date']:
-            if field in data and data[field]:
-                if isinstance(data[field], str):
+            if field in data:
+                if data[field] in (None, ''):
+                    data[field] = None
+                elif isinstance(data[field], str):
                     try:
                         data[field] = datetime.strptime(data[field], '%Y-%m-%d').date()
                     except ValueError:
@@ -248,8 +285,10 @@ def experience_detail(exp_id):
         # Convert date strings (YYYY-MM-DD)
         from datetime import datetime
         for field in ['start_date', 'end_date']:
-            if field in data and data[field]:
-                if isinstance(data[field], str):
+            if field in data:
+                if data[field] in (None, ''):
+                    data[field] = None
+                elif isinstance(data[field], str):
                     try:
                         data[field] = datetime.strptime(data[field], '%Y-%m-%d').date()
                     except ValueError:

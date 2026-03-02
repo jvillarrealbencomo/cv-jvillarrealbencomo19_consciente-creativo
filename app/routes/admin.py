@@ -401,17 +401,13 @@ def update_experience_fix_dec_2025b():
 def preview_experience_order():
     from datetime import datetime
     
-    # Apply same sorting logic as profiles.py
-    block_priority = {"2021-2025": 0, "2015-2020": 1, "1985-2009": 2}
-    
     experiences = WorkExperience.query.filter_by(active=True).all()
     
     def exp_sort_key(exp):
-        block_idx = block_priority.get((exp.time_block or '').strip(), 999)
-        disp = exp.display_order if isinstance(getattr(exp, 'display_order', None), int) else 0
+        current_rank = 0 if exp.is_current or exp.end_date is None else 1
         end = exp.end_date or datetime.max.date()
         start = exp.start_date or datetime.min.date()
-        return (block_idx, disp, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
+        return (current_rank, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
     
     experiences_sorted = sorted(experiences, key=exp_sort_key)
     
@@ -444,17 +440,13 @@ def preview_experience_order():
 def reorder_experience_physical():
     from datetime import datetime
     
-    # Apply same sorting logic as profiles.py
-    block_priority = {"2021-2025": 0, "2015-2020": 1, "1985-2009": 2}
-    
     experiences = WorkExperience.query.all()
     
     def exp_sort_key(exp):
-        block_idx = block_priority.get((exp.time_block or '').strip(), 999)
-        disp = exp.display_order if isinstance(getattr(exp, 'display_order', None), int) else 0
+        current_rank = 0 if exp.is_current or exp.end_date is None else 1
         end = exp.end_date or datetime.max.date()
         start = exp.start_date or datetime.min.date()
-        return (block_idx, disp, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
+        return (current_rank, -int(end.strftime('%Y%m%d')), -int(start.strftime('%Y%m%d')))
     
     experiences_sorted = sorted(experiences, key=exp_sort_key)
     
