@@ -15,8 +15,11 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    if 'origin' not in session:
-        session['origin'] = request.referrer
+    try:
+        if 'origin' not in session:
+            session['origin'] = request.referrer
+    except RuntimeError:
+        pass
     """Home page"""
     profiles = []
     for profile_name in ProfilePresetService.get_profile_names():
@@ -29,6 +32,10 @@ def index():
 
     # Get Evidence Hub entries
     evidence_hub_entries = EvidenceHubEntry.query.filter_by(active=True).order_by(EvidenceHubEntry.display_order.asc()).all()
+    if not evidence_hub_entries:
+        from app.routes.evidence_hub import ensure_defaults
+        ensure_defaults()
+        evidence_hub_entries = EvidenceHubEntry.query.filter_by(active=True).order_by(EvidenceHubEntry.display_order.asc()).all()
 
     # Get the primary active person (used for direct PDF export buttons)
     person = Person.query.filter_by(active=True, is_historical=False).first()
