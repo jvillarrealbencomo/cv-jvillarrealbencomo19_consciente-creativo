@@ -6,6 +6,29 @@ import os
 from datetime import timedelta
 
 
+def _normalize_database_url(raw_url):
+    if not raw_url:
+        return None
+
+    database_url = raw_url.strip()
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+    # Render Postgres over external URL requires SSL
+    if '.render.com' in database_url and 'sslmode=' not in database_url:
+        separator = '&' if '?' in database_url else '?'
+        database_url = f"{database_url}{separator}sslmode=require"
+
+    return database_url
+
+
+def _get_database_url():
+    # Prefer explicit app variable to avoid collisions with auto-injected DATABASE_URL values
+    return _normalize_database_url(
+        os.environ.get('APP_DATABASE_URL') or os.environ.get('DATABASE_URL')
+    )
+
+
 class Config:
     """Base configuration"""
     
@@ -15,10 +38,7 @@ class Config:
     VERSION = '2025.1.0'
     
     # Database
-    # Fix Render's DATABASE_URL (postgres:// -> postgresql://)
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url and database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    database_url = _get_database_url()
     
     SQLALCHEMY_DATABASE_URI = database_url or \
         'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'cv_app.db')
@@ -82,12 +102,6 @@ class ProductionConfig(Config):
     
     # Must set these in environment
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    
-    # Fix Render's DATABASE_URL (postgres:// -> postgresql://)
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url and database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
-    SQLALCHEMY_DATABASE_URI = database_url
     
     # Production database settings
     SQLALCHEMY_ENGINE_OPTIONS = {
