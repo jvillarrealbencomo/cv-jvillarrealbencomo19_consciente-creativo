@@ -1,0 +1,196 @@
+<!-- formato principal 4 (9) funciona estructura de tablet y pc -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">    
+<!--     <link  rel="stylesheet" href = "css/estilos.css">{{url_for('fnCargaInicio')}} -->
+    <link  rel="stylesheet" href = "{{ url_for ('static', filename='css/estilos.css')}}">
+    <link  rel="stylesheet" href = "{{ url_for ('static', filename='css/fontello.css')}}"><!--    <img rel="icon" type="image/x-icon" href="{{ url_for ('static', filename='img/favicon.ico')}}"> -->
+    <link  rel = "icon"  href = "{{ url_for ('static', filename='img/favicon.png')}}"  type = "image/x-icon" >
+    {% block content2 %}
+
+    {% endblock %}
+</head>
+<body>
+  <div class="movil">
+
+    <h2>celu</h2>
+    
+<!-- -->
+    <header>
+      <div class="menu_bar">
+        <a href="#" class="bt-menu"><span class="icon-menu"></span>Curriculum Vitae</a>
+      </div>
+  
+      <nav>
+        <ul>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link active" href="{{url_for('fnCargaInicio')}}"><span class="icon-casa"></span>Inicio</a>
+                </li>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link " href="educacion2.html"><span class="icon-educacion" ></span>Educación</a>
+                </li>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link" href="{{url_for('experienciaLaboral')}}"><span class="icon-experiencia" ></span></span>Experiencia</a>
+                </li>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link" href="{{url_for('productosInformaticos')}}"><span class="icon-productos" ></span></span>Productos</a>
+                </li>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link" href="{{url_for('soporteProgramacion')}}"></span><span class="icon-soporte" ></span>Soporte</a>
+                </li>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link" href="{{url_for('cursosInformatica')}}"><span class="icon-cursos" ></span>Cursos</a>
+                </li>
+                <li class="nnav-item">
+                  <a class="nnav-item nnav-link" href="{{url_for('datosPersonales')}}"><span class="icon-datos" ></span>Datos</a>
+                </li>
+                <li class="submenu">
+                  <a class="nnav-item nnav-link" href="{{url_for('documentos')}}"><span class="icon-texto-imagen" ></span>Documentos<span class="caret icon-arrow-down6"></span></a>
+                        <ul class="children">
+                          <li><a class="dropdown-item" href="{{url_for('titulos')}}"><span class="icon-documentos"></span>Titulos</a></li>
+                          <li><a class="dropdown-item" href="{{url_for('constanciasLaborales')}}"><span class="icon-direccion"></span>Constancias laborales</a></li>
+                          <li><a class="dropdown-item" href="{{url_for('certificaciones')}}"><span class="icon-documentos"></span>Certificaciones</a></li>
+                          <li><a class="dropdown-item" href="{{url_for('documentos')}}"><span class="icon-listado-documentos"></span>Listado</a></li>
+                        </ul>
+                </li>
+        </ul>
+      </nav>
+    </header>
+
+    
+  </div>
+
+
+  <div class="tablet y PC">
+
+    <div class="tablet">
+      <header>
+        <nav class="navbar  navbar-light bg-light nav-justified navbar-toggleable-md">
+          <a class="navbar-brand" href="{{url_for('fnCargaInicio')}}">
+            <img class="border border-dark rounded" src="{{ url_for ('static', filename='img/cvDesarrollador.png')}}" width="55" height="50" alt="logo CV de Javier Villarreal">
+            Curriculum Vitae
+          </a>
+          <button class="navbar-toggler borderb2" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+           <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+
+            <ul class="nav bg-nuevo nav-justified">
+              <li class="nav-item">
+                <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">CV</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link active" href="{{url_for('fnCargaInicio')}}"><span class="icon-casa"></span>Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link " href="{{url_for('educacion')}}"><span class="icon-titulos" ></span>Educación</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('experienciaLaboral')}}"><span class="icon-experiencia-laboral-2 " >Experiencia</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('productosInformaticos')}}"><span class="icon-producto-informatico2" ></span>Productos</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('soporteProgramacion')}}"><span class="icon-herramientas-programacion-1" ></span>Soporte</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('cursosInformatica')}}"><span class="icon-laptop" ></span>Cursos</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('datosPersonales')}}"><span class="icon-rut" ></span>Datos</a>
+              </li>
+              <li class="nav-item dropdown">
+                    <a class="nav-item nav-link dropdown-toggle icon-direccion" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Documentos
+                    </a>
+                      <a class="dropdown-item" href="{{url_for('titulos')}}"><span class="icon-documentos"></span>Titulos</a>
+                      <a class="dropdown-item" href="{{url_for('constanciasLaborales')}}"><span class="icon-direccion"></span>Constancias laborales</a>
+                      <a class="dropdown-item" href="{{url_for('certificaciones')}}"><span class="icon-documentos"></span>Certificaciones</a>
+                      <a class="dropdown-item" href="{{url_for('documentos')}}"><span class="icon-listado-documentos"></span>Listado</a>
+                    </div>
+                  </li>
+                    <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Links de Aplicaciones </a>
+
+              </ul>
+            </div>
+          </nav>
+        </header>
+    </div>     
+
+    <div class="pc">
+      <header>
+        <nav class="navbar  navbar-light bg-light nav-justified navbar-toggleable-md">
+          <a class="navbar-brand" href="{{url_for('fnCargaInicio')}}">
+            <img class="border border-dark rounded" src="{{ url_for ('static', filename='img/cvDesarrollador.png')}}" width="55" height="50" alt="logo CV de Javier Villarreal">
+            Curriculum Vitae
+          </a>
+          <button class="navbar-toggler borderb2" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+           <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+
+            <ul class="nav bg-nuevo nav-justified">
+              <li class="nav-item">
+                <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">CV</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link active" href="{{url_for('fnCargaInicio')}}"><span class="icon-casa"></span>Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link " href="{{url_for('educacion')}}"><span class="icon-titulos" ></span>Educación</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('experienciaLaboral')}}"><span class="icon-experiencia-laboral-2 " >Experiencia</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('productosInformaticos')}}"><span class="icon-producto-informatico2" ></span>Productos</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('soporteProgramacion')}}"><span class="icon-herramientas-programacion-1" ></span>Soporte</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('cursosInformatica')}}"><span class="icon-laptop" ></span>Cursos</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-item nav-link" href="{{url_for('datosPersonales')}}"><span class="icon-rut" ></span>Datos</a>
+              </li>
+              <li class="nav-item dropdown">
+                    <a class="nav-item nav-link dropdown-toggle icon-direccion" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Documentos
+                    </a>
+                      <a class="dropdown-item" href="{{url_for('titulos')}}"><span class="icon-documentos"></span>Titulos</a>
+                      <a class="dropdown-item" href="{{url_for('constanciasLaborales')}}"><span class="icon-direccion"></span>Constancias laborales</a>
+                      <a class="dropdown-item" href="{{url_for('certificaciones')}}"><span class="icon-documentos"></span>Certificaciones</a>
+                      <a class="dropdown-item" href="{{url_for('documentos')}}"><span class="icon-listado-documentos"></span>Listado</a>
+                    </div>
+                  </li>
+                    <a class="nav-item nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Links de Aplicaciones </a>
+                </div>
+              </ul>
+          </nav>
+        </div>
+      </header>
+    </div>
+
+    <section>
+      <div class="principal"> 
+          <h1>Javier Villarreal</h1>
+            {% block content %}
+            {% endblock %}
+      </div>
+    </section>
+    <footer class="pie">
+          <h5>Derechos Reservados Julio 2020</h5>
+    </footer> 
+</div>
+      <script src="{{ url_for ('static', filename='js/hacer-clic.js')}}"></script>
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+          
+</body>
+</html>

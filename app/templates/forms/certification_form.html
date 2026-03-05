@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Certification - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-award"></i> Professional Certification
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="certificationForm">
+                        <input type="hidden" id="certificationId" name="id" value="{{ certification.id if certification else '' }}">
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Certification Details</h5>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label for="name" class="form-label">Certification Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ certification.name if certification else '' }}" required
+                                       placeholder="e.g., AWS Certified Solutions Architect">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="issuingOrganization" class="form-label">Issuing Organization <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="issuingOrganization" name="issuing_organization" 
+                                       value="{{ certification.issuing_organization if certification else '' }}" required
+                                       placeholder="e.g., Amazon Web Services">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="issueDate" class="form-label">Issue Date</label>
+                                <input type="date" class="form-control" id="issueDate" name="issue_date" 
+                                       value="{{ certification.issue_date.isoformat() if certification and certification.issue_date else '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="expirationDate" class="form-label">Expiration Date</label>
+                                <input type="date" class="form-control" id="expirationDate" name="expiration_date" 
+                                       value="{{ certification.expiration_date.isoformat() if certification and certification.expiration_date else '' }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="credentialId" class="form-label">Credential ID</label>
+                                <input type="text" class="form-control" id="credentialId" name="credential_id" 
+                                       value="{{ certification.credential_id if certification else '' }}"
+                                       placeholder="e.g., ABC123XYZ">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="credentialUrl" class="form-label">Credential URL</label>
+                                <input type="url" class="form-control" id="credentialUrl" name="credential_url" 
+                                       value="{{ certification.credential_url if certification else '' }}"
+                                       placeholder="https://...">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                          placeholder="Brief description...">{{ certification.description if certification else '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Profile Visibility -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Profile Visibility</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaAnalyst" name="visible_qa_analyst" 
+                                           {{ 'checked' if not certification or certification.visible_qa_analyst else '' }}>
+                                    <label class="form-check-label" for="visibleQaAnalyst">
+                                        <i class="bi bi-briefcase"></i> QA Analyst
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaEngineer" name="visible_qa_engineer" 
+                                           {{ 'checked' if not certification or certification.visible_qa_engineer else '' }}>
+                                    <label class="form-check-label" for="visibleQaEngineer">
+                                        <i class="bi bi-code-slash"></i> QA Engineer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleDataScientist" name="visible_data_scientist" 
+                                           {{ 'checked' if not certification or certification.visible_data_scientist else '' }}>
+                                    <label class="form-check-label" for="visibleDataScientist">
+                                        <i class="bi bi-graph-up"></i> Data Scientist
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                        <i class="bi bi-arrow-left"></i> Back
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('certificationForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Convert checkboxes to boolean
+        data.visible_qa_analyst = document.getElementById('visibleQaAnalyst').checked;
+        data.visible_qa_engineer = document.getElementById('visibleQaEngineer').checked;
+        data.visible_data_scientist = document.getElementById('visibleDataScientist').checked;
+        
+        const certificationId = document.getElementById('certificationId').value;
+        const url = certificationId ? `/api/certification/${certificationId}` : '/api/certification';
+        const method = certificationId ? 'PUT' : 'POST';
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (!certificationId) {
+                    document.getElementById('certificationId').value = result.id;
+                }
+                const addAnother = confirm('Saved successfully!\n\nWould you like to add another certification?');
+                if (addAnother) {
+                    form.reset();
+                    document.getElementById('certificationId').value = '';
+                }
+            } else {
+                const err = await response.json().catch(() => null);
+                alert('Failed to save' + (err && err.details ? `: ${err.details}` : ''));
+            }
+        } catch (error) {
+            console.error('Error saving:', error);
+            alert('Error saving data');
+        }
+    });
+});
+</script>
+{% endblock %}

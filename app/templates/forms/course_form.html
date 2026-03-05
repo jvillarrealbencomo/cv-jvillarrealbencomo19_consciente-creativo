@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Course - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-book"></i> Training Course
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="courseForm">
+                        <input type="hidden" id="courseId" name="id" value="{{ course.id if course else '' }}">
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Course Details</h5>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label for="name" class="form-label">Course Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ course.name if course else '' }}" required
+                                       placeholder="e.g., Advanced Python Programming">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="provider" class="form-label">Provider <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="provider" name="provider" 
+                                       value="{{ course.provider if course else '' }}" required
+                                       placeholder="e.g., Coursera, Udemy">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="completionDate" class="form-label">Completion Date</label>
+                                <input type="date" class="form-control" id="completionDate" name="completion_date" 
+                                       value="{{ course.completion_date.isoformat() if course and course.completion_date else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="durationHours" class="form-label">Duration (hours)</label>
+                                <input type="number" class="form-control" id="durationHours" name="duration_hours" 
+                                       value="{{ course.duration_hours if course else '' }}"
+                                       placeholder="40" min="1">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="credentialUrl" class="form-label">Credential URL</label>
+                                <input type="url" class="form-control" id="credentialUrl" name="credential_url" 
+                                       value="{{ course.credential_url if course else '' }}"
+                                       placeholder="https://...">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                          placeholder="Brief description of the course...">{{ course.description if course else '' }}</textarea>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="skillsAcquired" class="form-label">Skills Acquired</label>
+                                <input type="text" class="form-control" id="skillsAcquired" name="skills_acquired" 
+                                       value="{{ course.skills_acquired if course else '' }}"
+                                       placeholder="Comma-separated skills: Python, Data Analysis, Machine Learning">
+                                <small class="form-text text-muted">Separate skills with commas</small>
+                            </div>
+                        </div>
+
+                        <!-- Profile Visibility -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Profile Visibility</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaAnalyst" name="visible_qa_analyst" 
+                                           {{ 'checked' if not course or course.visible_qa_analyst else '' }}>
+                                    <label class="form-check-label" for="visibleQaAnalyst">
+                                        <i class="bi bi-briefcase"></i> QA Analyst
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaEngineer" name="visible_qa_engineer" 
+                                           {{ 'checked' if not course or course.visible_qa_engineer else '' }}>
+                                    <label class="form-check-label" for="visibleQaEngineer">
+                                        <i class="bi bi-code-slash"></i> QA Engineer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleDataScientist" name="visible_data_scientist" 
+                                           {{ 'checked' if not course or course.visible_data_scientist else '' }}>
+                                    <label class="form-check-label" for="visibleDataScientist">
+                                        <i class="bi bi-graph-up"></i> Data Scientist
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                        <i class="bi bi-arrow-left"></i> Back
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('courseForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Convert checkboxes to boolean
+        data.visible_qa_analyst = document.getElementById('visibleQaAnalyst').checked;
+        data.visible_qa_engineer = document.getElementById('visibleQaEngineer').checked;
+        data.visible_data_scientist = document.getElementById('visibleDataScientist').checked;
+        
+        const courseId = document.getElementById('courseId').value;
+        const url = courseId ? `/api/course/${courseId}` : '/api/course';
+        const method = courseId ? 'PUT' : 'POST';
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (!courseId) {
+                    document.getElementById('courseId').value = result.id;
+                }
+                const addAnother = confirm('Saved successfully!\n\nWould you like to add another course?');
+                if (addAnother) {
+                    form.reset();
+                    document.getElementById('courseId').value = '';
+                }
+            } else {
+                const err = await response.json().catch(() => null);
+                alert('Failed to save' + (err && err.details ? `: ${err.details}` : ''));
+            }
+        } catch (error) {
+            console.error('Error saving:', error);
+            alert('Error saving data');
+        }
+    });
+});
+</script>
+{% endblock %}

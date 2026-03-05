@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Education - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-mortarboard"></i> Education
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="educationForm">
+                        <input type="hidden" id="educationId" name="id" value="{{ education.id if education else '' }}">
+                        
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Academic Information</h5>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="degree" class="form-label">Degree <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="degree" name="degree" 
+                                       value="{{ education.degree if education else '' }}" required
+                                       placeholder="e.g., Bachelor of Science in Computer Science">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="institution" class="form-label">Institution <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="institution" name="institution" 
+                                       value="{{ education.institution if education else '' }}" required
+                                       placeholder="e.g., University of Technology">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="country" name="country" 
+                                       value="{{ education.country if education else '' }}"
+                                       placeholder="e.g., USA">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="yearObtained" class="form-label">Year Obtained</label>
+                                <input type="number" class="form-control" id="yearObtained" name="year_obtained" 
+                                       value="{{ education.year_obtained if education else '' }}"
+                                       placeholder="2020" min="1950" max="2050">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="displayOrder" class="form-label">Display Order</label>
+                                <input type="number" class="form-control" id="displayOrder" name="display_order" 
+                                       value="{{ education.display_order if education else '0' }}"
+                                       placeholder="0" min="0">
+                                <small class="form-text text-muted">Lower numbers appear first (0 = default order)</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="details" class="form-label">Details</label>
+                                <textarea class="form-control" id="details" name="details" rows="3"
+                                          placeholder="Additional details, honors, GPA, relevant coursework...">{{ education.details if education else '' }}</textarea>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <h6>Credential Image (optional)</h6>
+                                <input class="form-control mb-2" type="file" id="credentialImage" name="credential_image" accept="image/png,image/jpeg,application/pdf">
+                                <small class="text-muted">Allowed: PNG, JPG, PDF. Max 5MB. A thumbnail is auto-generated for images.</small>
+                                <div class="mt-2" id="imagePreview">
+                                    {% if education and (education.image_thumbnail_url or education.image_url) %}
+                                        <div class="alert alert-success">
+                                            <strong><i class="bi bi-check-circle"></i> Current credential image:</strong>
+                                            <div class="d-flex align-items-center gap-3 mt-2">
+                                                {% if education.image_thumbnail_url %}
+                                                    <img src="{{ education.image_thumbnail_url }}" alt="Current credential" class="img-thumbnail" style="max-height: 120px; border: 2px solid #198754;">
+                                                {% endif %}
+                                                <div>
+                                                    <div class="mb-2">
+                                                        <a href="{{ education.image_url }}" target="_blank" class="btn btn-sm btn-success">
+                                                            <i class="bi bi-eye"></i> View Full Image
+                                                        </a>
+                                                    </div>
+                                                    {% if education.image_filename %}
+                                                        <div class="small text-muted">
+                                                            <i class="bi bi-file-earmark"></i> {{ education.image_filename }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle"></i> No credential image uploaded yet.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="removeImage">
+                                    <label class="form-check-label" for="removeImage">Remove existing image</label>
+                                    <input type="hidden" id="removeImageFlag" name="remove_image" value="false">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Visibility -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Profile Visibility</h5>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaAnalyst" name="visible_qa_analyst" 
+                                           {{ 'checked' if not education or education.visible_qa_analyst else '' }}>
+                                    <label class="form-check-label" for="visibleQaAnalyst">
+                                        <i class="bi bi-briefcase"></i> QA Analyst
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleQaEngineer" name="visible_qa_engineer" 
+                                           {{ 'checked' if not education or education.visible_qa_engineer else '' }}>
+                                    <label class="form-check-label" for="visibleQaEngineer">
+                                        <i class="bi bi-code-slash"></i> QA Engineer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="visibleDataScientist" name="visible_data_scientist" 
+                                           {{ 'checked' if not education or education.visible_data_scientist else '' }}>
+                                    <label class="form-check-label" for="visibleDataScientist">
+                                        <i class="bi bi-graph-up"></i> Data Scientist
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                        <i class="bi bi-arrow-left"></i> Back
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('educationForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        formData.set('visible_qa_analyst', document.getElementById('visibleQaAnalyst').checked);
+        formData.set('visible_qa_engineer', document.getElementById('visibleQaEngineer').checked);
+        formData.set('visible_data_scientist', document.getElementById('visibleDataScientist').checked);
+        formData.set('remove_image', document.getElementById('removeImageFlag').value);
+
+        const educationId = document.getElementById('educationId').value;
+        const url = educationId ? `/api/education/${educationId}` : '/api/education';
+        const method = educationId ? 'PUT' : 'POST';
+        
+        try {
+            const response = await fetch(url, {
+                method: method,
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (!educationId) {
+                    document.getElementById('educationId').value = result.id;
+                }
+                const addAnother = confirm('Saved successfully!\n\nWould you like to add another education record?');
+                if (addAnother) {
+                    form.reset();
+                    document.getElementById('educationId').value = '';
+                    document.getElementById('imagePreview').innerHTML = '<small class="text-muted">No credential image uploaded.</small>';
+                    document.getElementById('removeImageFlag').value = 'false';
+                    document.getElementById('removeImage').checked = false;
+                }
+            } else {
+                const err = await response.json().catch(() => null);
+                alert('Failed to save' + (err && err.details ? `: ${err.details}` : ''));
+            }
+        } catch (error) {
+            console.error('Error saving:', error);
+            alert('Error saving data');
+        }
+    });
+
+    const removeCheckbox = document.getElementById('removeImage');
+    const removeFlag = document.getElementById('removeImageFlag');
+    const fileInput = document.getElementById('credentialImage');
+
+    removeCheckbox.addEventListener('change', () => {
+        removeFlag.value = removeCheckbox.checked ? 'true' : 'false';
+        if (removeCheckbox.checked) {
+            document.getElementById('imagePreview').innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> <strong>Image will be removed</strong> when you save this form.</div>';
+            fileInput.value = '';
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            removeCheckbox.checked = false;
+            removeFlag.value = 'false';
+            const fileName = fileInput.files[0].name;
+            document.getElementById('imagePreview').innerHTML = `<div class="alert alert-primary"><i class="bi bi-upload"></i> <strong>New image selected:</strong> ${fileName}<br><small>This will replace the existing image when you save.</small></div>`;
+        }
+    });
+});
+</script>
+{% endblock %}

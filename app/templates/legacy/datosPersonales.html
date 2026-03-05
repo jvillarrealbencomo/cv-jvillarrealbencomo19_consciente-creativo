@@ -1,0 +1,19 @@
+<!-- datosPersonales -->
+
+
+{% extends "legacy/formatoPrincipal4.html" %}
+
+{% block content2 %}
+<title>CV Datos Personales</title> 
+{% endblock %}
+
+{% block content %}
+<h4>Datos Personales</h4>
+<hr>
+<img class="fotojvb" src="{{ url_for ('static', filename='legacy/img/fotoJvb.png')}}" alt="Foto de Javier Villarreal" title="Foto de Javier Villarreal" >
+<p><br>javiervillarrealbencomo@gmail.com<br><br>
+Fecha Nacimiento: 10/10/1960<br><br>
+San Miguel, Región Metropolitana, Santiago de Chile<br><br>
+(+56) 9 5390 0705<br><br>
+ RUN:  27.102.866-0     (Visa vigente)<br><br></p>
+{% endblock %}

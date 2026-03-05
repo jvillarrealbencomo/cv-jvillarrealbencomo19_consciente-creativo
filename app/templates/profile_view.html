@@ -1,0 +1,670 @@
+{% extends "base.html" %}
+
+{% block title %}CV Preview - {{ person.first_name }} {{ person.last_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* CV Preview Styles */
+    .cv-container {
+        background: white;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        max-width: 8.5in;
+        min-height: 11in;
+        margin: 0 auto;
+        padding: 0.5in;
+        position: relative;
+    }
+    
+    .page-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+    
+    .cv-header {
+        border-bottom: 3px solid #0d6efd;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .cv-name {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #212529;
+        margin-bottom: 5px;
+    }
+    
+    .cv-title {
+        font-size: 1.25rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    
+    .cv-contacts {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+    
+    .cv-contacts i {
+        margin-right: 5px;
+        color: #0d6efd;
+    }
+    
+    .cv-section {
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+    
+    .cv-section.dimmed {
+        opacity: 0.4;
+    }
+    
+    .cv-section-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #0d6efd;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .cv-item {
+        margin-bottom: 15px;
+    }
+    
+    .cv-item-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+    
+    .cv-item-title {
+        font-weight: bold;
+        color: #212529;
+    }
+    
+    .cv-item-subtitle {
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .cv-item-dates {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .cv-item-content {
+        color: #495057;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .cv-tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    
+    .cv-tool-item {
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .section-toggle-btn {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+    }
+    
+    /* Control Panel Styles */
+    .control-panel {
+        position: sticky;
+        top: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .length-indicator {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .length-indicator.safe {
+        color: #198754;
+    }
+    
+    .length-indicator.warning {
+        color: #ffc107;
+    }
+    
+    .length-indicator.danger {
+        color: #dc3545;
+    }
+    
+    .section-control {
+        padding: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .section-control:last-child {
+        border-bottom: none;
+    }
+    
+    /* Print styles */
+    @media print {
+        .control-panel, .navbar, footer, .btn, .page-indicator {
+            display: none !important;
+        }
+        
+        .cv-container {
+            box-shadow: none;
+            margin: 0;
+            padding: 0.5in;
+            max-width: 100%;
+        }
+        
+        .cv-section.dimmed {
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- CV Preview -->
+        <div class="col-lg-8">
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <h2><i class="bi bi-eye"></i> CV Preview</h2>
+                <div class="btn-group">
+                    <select id="profileSelector" class="form-select form-select-sm">
+                        <option value="qa_analyst" {{ 'selected' if profile_name == 'qa_analyst' else '' }}>QA Analyst</option>
+                        <option value="qa_engineer" {{ 'selected' if profile_name == 'qa_engineer' else '' }}>QA Engineer</option>
+                        <option value="data_scientist" {{ 'selected' if profile_name == 'data_scientist' else '' }}>Data Scientist</option>
+                    </select>
+                    <button class="btn btn-sm btn-primary" id="refreshBtn">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-secondary" id="exportPdfBtn">
+                        <i class="bi bi-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="exportOnePagePdfBtn">
+                        <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cv-container" id="cvPreview">
+                <div class="page-indicator">
+                    <span class="badge bg-secondary" id="pageIndicator">Loading...</span>
+                </div>
+                
+                <!-- CV Content will be loaded here -->
+                <div id="cvContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Loading CV data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Control Panel -->
+        <div class="col-lg-4">
+            <div class="control-panel">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-sliders"></i> Preview Controls</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Page Length Indicator -->
+                    <div class="text-center mb-3 pb-3 border-bottom">
+                        <div class="length-indicator safe" id="lengthIndicator">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span id="pageCount">1.0</span> page
+                        </div>
+                        <small class="text-muted" id="lengthMessage">Within one page limit</small>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar" id="lengthProgressBar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Controls -->
+                    <h6 class="fw-bold mb-3">Section Visibility</h6>
+                    <div id="sectionControls">
+                        <!-- Controls will be dynamically loaded -->
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading controls...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" id="showAllBtn">
+                            <i class="bi bi-eye"></i> Show All Sections
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="optimizeBtn">
+                            <i class="bi bi-magic"></i> Auto-Optimize for 1 Page
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const personId = {{ person.id }};
+    let currentProfile = '{{ profile_name }}';
+    let cvData = null;
+    let sectionStates = {};
+    
+    // Load CV data
+    loadCVData();
+    
+    // Event listeners
+    document.getElementById('profileSelector').addEventListener('change', function() {
+        currentProfile = this.value;
+        loadCVData();
+    });
+    
+    document.getElementById('refreshBtn').addEventListener('click', loadCVData);
+    document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+    document.getElementById('exportOnePagePdfBtn').addEventListener('click', exportOnePagePDF);
+    document.getElementById('showAllBtn').addEventListener('click', showAllSections);
+    document.getElementById('optimizeBtn').addEventListener('click', optimizeForOnePage);
+    
+    async function loadCVData() {
+        try {
+            const response = await fetch(`/profile/${personId}/data/${currentProfile}`);
+            if (!response.ok) throw new Error('Failed to load CV data');
+            
+            cvData = await response.json();
+            renderCV();
+            updateSectionControls();
+            estimatePageLength();
+        } catch (error) {
+            console.error('Error loading CV:', error);
+            document.getElementById('cvContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> Failed to load CV data
+                </div>
+            `;
+        }
+    }
+    
+    function renderCV() {
+        if (!cvData) return;
+        
+        let html = '';
+        
+        // Header
+        html += `
+            <div class="cv-header">
+                <div class="cv-name">${cvData.person.first_name} ${cvData.person.last_name}</div>
+                <div class="cv-title">${cvData.title || 'Professional'}</div>
+                <div class="cv-contacts">
+                    ${renderContacts(cvData.visible_contacts)}
+                </div>
+            </div>
+        `;
+        
+        // Professional Summary
+        if (cvData.summary) {
+            html += renderSection('summary', 'Professional Summary', `
+                <div class="cv-item-content">${cvData.summary}</div>
+            `);
+        }
+        
+        // Work Experience
+        if (cvData.work_experience && cvData.work_experience.length > 0) {
+            html += renderSection('experience', 'Work Experience', 
+                cvData.work_experience.map(exp => renderExperience(exp)).join('')
+            );
+        }
+        
+        // Technical Tools
+        if (cvData.technical_tools && Object.keys(cvData.technical_tools).length > 0) {
+            html += renderSection('tools', 'Technical Skills', renderTools(cvData.technical_tools));
+        }
+        
+        // Education
+        if (cvData.education && cvData.education.length > 0) {
+            html += renderSection('education', 'Education',
+                cvData.education.map(edu => renderEducation(edu)).join('')
+            );
+        }
+        
+        // Advanced Training & Certifications
+        if (cvData.advanced_training && cvData.advanced_training.length > 0) {
+            html += renderSection('advanced_training', 'Advanced Training & Certifications',
+                cvData.advanced_training.map(item => renderTraining(item)).join('')
+            );
+        }
+        
+        // Languages
+        if (cvData.languages && cvData.languages.length > 0) {
+            html += renderSection('languages', 'Languages',
+                cvData.languages.map(lang => renderLanguage(lang)).join('')
+            );
+        }
+        
+        document.getElementById('cvContent').innerHTML = html;
+    }
+    
+    function renderSection(id, title, content) {
+        const visible = sectionStates[id] !== false;
+        return `
+            <div class="cv-section ${visible ? '' : 'dimmed'}" data-section="${id}">
+                <div class="cv-section-title">
+                    <span>${title}</span>
+                </div>
+                ${visible ? content : '<div class="text-muted small"><em>Section hidden</em></div>'}
+            </div>
+        `;
+    }
+    
+    function renderContacts(contacts) {
+        if (!contacts) return '';
+        let html = [];
+        if (contacts.email) html.push(`<i class="bi bi-envelope"></i> ${contacts.email}`);
+        if (contacts.phone) html.push(`<i class="bi bi-telephone"></i> ${contacts.phone}`);
+        if (contacts.linkedin_url) html.push(`<i class="bi bi-linkedin"></i> LinkedIn`);
+        if (contacts.github_url) html.push(`<i class="bi bi-github"></i> GitHub`);
+        if (contacts.personal_url) html.push(`<i class="bi bi-globe"></i> Website`);
+        return html.join(' <span class="text-muted">|</span> ');
+    }
+    
+    function renderExperience(exp) {
+        const startDate = exp.start_date ? new Date(exp.start_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short'}) : '';
+        const endDate = exp.end_date ? new Date(exp.end_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short'}) : 'Present';
+        
+        let content = '';
+        if (exp.responsibilities_summary && exp.show_responsibilities_summary) {
+            content += `<div class="cv-item-content mb-2">${exp.responsibilities_summary}</div>`;
+        }
+        if (exp.responsibilities_detailed && exp.show_responsibilities_detailed) {
+            content += `<div class="cv-item-content mb-2">${exp.responsibilities_detailed.replace(/\n/g, '<br>')}</div>`;
+        }
+        if (exp.achievements && exp.show_achievements) {
+            content += `<div class="cv-item-content"><strong>Key Achievements:</strong><br>${exp.achievements.replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        return `
+            <div class="cv-item">
+                <div class="cv-item-header">
+                    <div>
+                        <div class="cv-item-title">${exp.job_title}</div>
+                        <div class="cv-item-subtitle">${exp.company}${exp.location ? ' • ' + exp.location : ''}</div>
+                    </div>
+                    <div class="cv-item-dates">${startDate} - ${endDate}</div>
+                </div>
+                ${content}
+            </div>
+        `;
+    }
+    
+    function renderTools(toolsByCategory) {
+        let html = '';
+        for (const [category, tools] of Object.entries(toolsByCategory)) {
+            html += `
+                <div class="mb-3">
+                    <strong class="d-block mb-2">${category}</strong>
+                    <div class="cv-tools-grid">
+                        ${tools.map(tool => `<div class="cv-tool-item">${tool.name}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    function renderCredentialBlock(item) {
+        if (!item.image_url && !item.image_thumbnail_url) return '';
+        const isImage = (item.image_mime_type || '').startsWith('image/');
+        const thumb = item.image_thumbnail_url || (isImage ? item.image_url : null);
+        const link = item.image_url ? `<div><a href="${item.image_url}" target="_blank" class="small">View credential</a></div>` : '';
+        const imageTag = thumb ? `<img src="${thumb}" alt="Credential" class="img-thumbnail" style="max-height: 100px;">` : '';
+        return `<div class="mt-2">${imageTag}${link}</div>`;
+    }
+    
+    function renderEducation(edu) {
+        return `
+            <div class="cv-item">
+                <div class="cv-item-header">
+                    <div>
+                        <div class="cv-item-title">${edu.degree}</div>
+                        <div class="cv-item-subtitle">${edu.institution}${edu.country ? ' • ' + edu.country : ''}</div>
+                    </div>
+                    <div class="cv-item-dates">${edu.year_obtained || edu.end_year || ''}</div>
+                </div>
+                ${renderCredentialBlock(edu)}
+            </div>
+        `;
+    }
+
+    function renderTraining(item) {
+        const dateText = item.completion_date ? new Date(item.completion_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short'}) : '';
+        return `
+            <div class="cv-item">
+                <div class="cv-item-header">
+                    <div>
+                        <div class="cv-item-title">${item.name}</div>
+                        <div class="cv-item-subtitle">${item.provider}${item.type ? ' • ' + item.type : ''}</div>
+                    </div>
+                    <div class="cv-item-dates">${dateText}</div>
+                </div>
+                ${item.description ? `<div class="cv-item-content small">${item.description}</div>` : ''}
+                ${renderCredentialBlock(item)}
+            </div>
+        `;
+    }
+    
+    function renderLanguage(lang) {
+        const levels = [];
+        if (lang.level_conversation) levels.push(`Speaking: ${lang.level_conversation}`);
+        if (lang.level_reading) levels.push(`Reading: ${lang.level_reading}`);
+        if (lang.level_writing) levels.push(`Writing: ${lang.level_writing}`);
+        
+        return `
+            <div class="cv-item">
+                <div class="cv-item-title">${lang.name}</div>
+                <div class="cv-item-content small">${levels.join(' • ')}</div>
+            </div>
+        `;
+    }
+    
+    function updateSectionControls() {
+        const sections = [
+            {id: 'summary', name: 'Professional Summary', icon: 'person-lines-fill'},
+            {id: 'experience', name: 'Work Experience', icon: 'briefcase-fill'},
+            {id: 'tools', name: 'Technical Skills', icon: 'tools'},
+            {id: 'education', name: 'Education', icon: 'mortarboard-fill'},
+            {id: 'advanced_training', name: 'Advanced Training & Certifications', icon: 'patch-check-fill'},
+            {id: 'languages', name: 'Languages', icon: 'translate'}
+        ];
+        
+        let html = '';
+        sections.forEach(section => {
+            const visible = sectionStates[section.id] !== false;
+            html += `
+                <div class="section-control">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-${section.icon}"></i>
+                            <span class="small">${section.name}</span>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn ${visible ? 'btn-success' : 'btn-outline-secondary'}" 
+                                    onclick="toggleSection('${section.id}', true)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="btn ${!visible ? 'btn-secondary' : 'btn-outline-secondary'}"
+                                    onclick="toggleSection('${section.id}', false)">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        document.getElementById('sectionControls').innerHTML = html;
+    }
+    
+    window.toggleSection = function(sectionId, visible) {
+        sectionStates[sectionId] = visible;
+        renderCV();
+        updateSectionControls();
+        estimatePageLength();
+    };
+    
+    function estimatePageLength() {
+        const container = document.getElementById('cvPreview');
+        const contentHeight = container.scrollHeight;
+        const pageHeight = 11 * 96; // 11 inches at 96 DPI
+        const pages = contentHeight / pageHeight;
+        
+        const pageCount = document.getElementById('pageCount');
+        const indicator = document.getElementById('lengthIndicator');
+        const message = document.getElementById('lengthMessage');
+        const progressBar = document.getElementById('lengthProgressBar');
+        const pageIndicatorBadge = document.getElementById('pageIndicator');
+        
+        pageCount.textContent = pages.toFixed(1);
+        progressBar.style.width = Math.min(pages * 100, 200) + '%';
+        
+        indicator.className = 'length-indicator';
+        if (pages <= 1.0) {
+            indicator.classList.add('safe');
+            progressBar.className = 'progress-bar bg-success';
+            message.textContent = 'Within one page limit ✓';
+            pageIndicatorBadge.className = 'badge bg-success';
+            pageIndicatorBadge.textContent = '1 page';
+        } else if (pages <= 1.3) {
+            indicator.classList.add('warning');
+            progressBar.className = 'progress-bar bg-warning';
+            message.textContent = 'Slightly over - consider trimming';
+            pageIndicatorBadge.className = 'badge bg-warning';
+            pageIndicatorBadge.textContent = pages.toFixed(1) + ' pages';
+        } else {
+            indicator.classList.add('danger');
+            progressBar.className = 'progress-bar bg-danger';
+            message.textContent = 'Too long - trim content!';
+            pageIndicatorBadge.className = 'badge bg-danger';
+            pageIndicatorBadge.textContent = pages.toFixed(1) + ' pages';
+        }
+    }
+    
+    function showAllSections() {
+        sectionStates = {};
+        renderCV();
+        updateSectionControls();
+        estimatePageLength();
+    }
+    
+    function optimizeForOnePage() {
+        // Auto-hide sections to fit one page
+        // Priority: advanced training, languages, then trim experience details
+        sectionStates = {
+            'summary': true,
+            'experience': true,
+            'tools': true,
+            'education': true,
+            'advanced_training': false,
+            'languages': false
+        };
+        renderCV();
+        updateSectionControls();
+        estimatePageLength();
+        
+        // If still too long, would need server-side content trimming
+        setTimeout(() => {
+            const pages = parseFloat(document.getElementById('pageCount').textContent);
+            if (pages > 1.1) {
+                alert('Content is still too long. Consider:\n• Shortening work experience descriptions\n• Removing older positions\n• Using summary instead of detailed descriptions');
+            }
+        }, 500);
+    }
+    
+    async function exportPDF() {
+        try {
+            const response = await fetch(`/profile/${personId}/pdf/${currentProfile}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    section_states: sectionStates,
+                    one_page: false  // Show full PDF (all records)
+                })
+            });
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CV_${cvData.person.first_name}_${cvData.person.last_name}_${currentProfile}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert('Failed to generate PDF');
+            }
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+            alert('Error generating PDF');
+        }
+    }
+    
+    async function exportOnePagePDF() {
+        try {
+            const response = await fetch(`/profile/${personId}/pdf/${currentProfile}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    one_page: true  // Optimize to fit ~1 page
+                })
+            });
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CV_${cvData.person.first_name}_${cvData.person.last_name}_${currentProfile}_onepage.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                alert('Failed to generate one-page PDF');
+            }
+        } catch (error) {
+            console.error('Error exporting one-page PDF:', error);
+            alert('Error generating one-page PDF');
+        }
+    }
+    
+    // Resize observer to update page length when window resizes
+    const resizeObserver = new ResizeObserver(() => {
+        if (cvData) {
+            estimatePageLength();
+        }
+    });
+    resizeObserver.observe(document.getElementById('cvPreview'));
+});
+</script>
+{% endblock %}

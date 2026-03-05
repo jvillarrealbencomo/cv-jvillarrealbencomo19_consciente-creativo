@@ -1,0 +1,37 @@
+{% extends "legacy/formatoPrincipal4.html" %}
+
+{% block content2 %}
+<title>CV Documentos</title> 
+{% endblock %}
+
+{% block content %}
+<h4>Documentos: Certificaciones</h4>
+<hr><h5>Inglés y Capacitación Docente</h5>
+<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="{{ url_for ('static', filename='img/suficienciaIngles.png')}}" alt="Prueba de suficiencia del idioma Ingles" title="Prueba de suficiencia del idioma Ingles" class="titulos">
+          </div>
+          <div class="carousel-item active">
+        <img src="{{ url_for ('static', filename='img/suficienciaIngles.png')}}" alt="Prueba de suficiencia del idioma Ingles" title="Prueba de suficiencia del idioma Ingles" class="titulos">
+      </div>
+      <div class="carousel-item active">
+        <img src="{{ url_for ('static', filename='img/capacitacionDocentePag1.png')}}" alt="Prueba de suficiencia del idioma Ingles" title="Prueba de suficiencia del idioma Ingles" class="titulos">
+      </div>
+    </div>
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon color-nuevo" aria-hidden="true"></span>
+      <span class="sr-only">Anterior</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Próximo</span>
+    </a>
+  </div>
+  <p><br></p>
+{% endblock %}

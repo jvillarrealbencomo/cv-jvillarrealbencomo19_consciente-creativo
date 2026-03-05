@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Home - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-diagram-3-fill text-primary"></i>
+                Professional CV Builder
+            </h1>
+            <p class="lead text-muted mb-4">
+                Create tailored CVs for different professional profiles with granular visibility control
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="/forms/person" class="btn btn-primary btn-lg">
+                    <i class="bi bi-pencil-square"></i> Start Building
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Cards Section -->
+    <div class="row mb-5 section-spacing">
+        <div class="col-12">
+            <div class="p-4" style="background: #f8fafc; border: 1px solid #0d6efd; border-radius: 16px;">
+                <h2 class="text-center mb-3">Available CV Profiles</h2>
+                <div class="row">
+                    {% for profile in profiles %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body" style="background: #f8fafc; border: 1px solid #0d6efd; border-radius: 16px;">
+                                <div class="text-center mb-3">
+                                    <div class="profile-icon-wrapper">
+                                        {% if profile.id == 'qa_analyst' %}
+                                            <span class="emoji-icon">🧪</span>
+                                        {% elif profile.id == 'qa_engineer' %}
+                                            <i class="bi bi-code-slash"></i>
+                                        {% else %}
+                                            <span class="emoji-icon">🧠</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <h4 class="card-title text-center">{{ profile.name }}</h4>
+                                <p class="card-text text-muted small">{{ profile.description }}</p>
+                                <hr>
+                                <div class="d-grid gap-2">
+                                    {% if person_id %}
+                                    <a href="/profile/{{ person_id }}?profile={{ profile.id }}"
+                                        class="btn btn-primary btn-sm w-100 mt-2">
+                                        <i class="bi bi-eye"></i> Preview CV
+                                    </a>
+                                    <button class="btn btn-secondary btn-sm w-100 mt-2"
+                                        onclick="generatePDF({{ person_id }}, '{{ profile.id }}')">
+                                        <i class="bi bi-filetype-pdf"></i> Export PDF
+                                    </button>
+                                    <button class="btn btn-warning btn-sm w-100 mt-2"
+                                        onclick="generateOnepagePDF({{ person_id }}, '{{ profile.id }}')">
+                                        <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
+                                    </button>
+                                    {% else %}
+                                    <div class="mt-2">
+                                        <button class="btn btn-primary btn-sm w-100" disabled
+                                            title="Add a person first to enable preview">
+                                            <i class="bi bi-eye"></i> Preview CV
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-secondary btn-sm w-100" disabled
+                                            title="Add a person first to enable PDF export">
+                                            <i class="bi bi-filetype-pdf"></i> Export PDF
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-warning btn-sm w-100" disabled
+                                            title="Add a person first to enable PDF export">
+                                            <i class="bi bi-file-earmark-pdf"></i> One-Page PDF
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                    <a href="/forms/person?profile={{ profile.id }}"
+                                        class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-pencil"></i> Edit Profile
+                                    </a>
+                                    <a href="/api/presets/{{ profile.id }}" class="btn btn-outline-secondary btn-sm"
+                                        target="_blank">
+                                        <i class="bi bi-info-circle"></i> View Settings
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evidence Section -->
+    <div class="row mb-5 section-spacing">
+        <div class="col-12">
+            <div class="p-4" style="background: #f5f9ff; border: 1px solid #198754; border-radius: 16px;">
+                <h2 class="text-center mb-3">Technical Evidence: Automated Validation</h2>
+                <p class="text-center text-muted mb-3">
+                    This system validates itself through automated testing. Below, you can see actual executions with
+                    the API running.
+                </p>
+                <div class="row">
+                    {% for entry in evidence_hub_entries %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body text-center d-flex flex-column
+                                {% if entry.slug == 'qa-ui-automation' %}card-border-ui-section-technical
+                                {% elif entry.slug == 'api-automation' %}card-border-api-section-technical
+                                {% else %}card-border-data-section-technical{% endif %}">
+                                
+                                <div class="fs-2">
+                                {% if entry.slug == 'qa-ui-automation' %}🖥️{% elif entry.slug == 'api-automation' %}🔌{% else %}📊{% endif %}
+                                </div>
+                                <h5 class="card-title mt-3">{{ entry.title }}</h5>
+                                <div class="small text-muted mb-2" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">{{ entry.stack }}</div>
+                                <p class="card-text small text-muted flex-grow-1">{{ entry.description }}</p>
+                                
+                                {% if entry.slug == 'qa-ui-automation' %}
+                                <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-primary btn-sm mt-2">
+                                    ▶ View E2E Evidence (UI)
+                                </a>
+                                {% elif entry.slug == 'api-automation' %}
+                                <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-sm mt-2"
+                                    style="background-color: #094dbf; color: white; border-color: #083ea3;">
+                                    ▶ View Automated API Validation
+                                </a>
+                                {% else %}
+                                <a href="/evidence-hub/{{ entry.slug }}" class="btn btn-success btn-sm mt-2">
+                                    ▶ Explore Market Insights
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5 section-spacing">
+        <div class="col-12">
+            <div class="p-4" style="background: #f5f9ff; border: 3px solid #e5e7eb; border-radius: 16px;">
+                <h2 class="text-center mb-3">Key Features</h2>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="bi bi-eye-fill text-primary" style="font-size: 2.5rem;"></i>
+                                <h5 class="card-title mt-3">Granular Visibility</h5>
+                                <p class="card-text small text-muted">
+                                    Control visibility of each field independently per profile
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="bi bi-sliders text-success" style="font-size: 2.5rem;"></i>
+                                <h5 class="card-title mt-3">Content Levels</h5>
+                                <p class="card-text small text-muted">
+                                    Choose between none, minimal, summary, detailed, or complete content
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="bi bi-file-pdf-fill text-danger" style="font-size: 2.5rem;"></i>
+                                <h5 class="card-title mt-3">One-Page PDF</h5>
+                                <p class="card-text small text-muted">
+                                    Automatically generates optimized one-page CVs with auto-trimming
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Quick Start Guide -->
+    <div class="row mb-5 section-spacing">
+        <div class="col-12">
+            <div class="p-4" style="background: #f5f9ff; border: 3px solid #e5e7eb; border-radius: 16px;">
+                <div class="row">
+                    <div class="col-lg-10 mx-auto">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="bi bi-book"></i> Quick Start Guide</h5>
+                            </div>
+                            <div class="card-body">
+                                <ol class="mb-0">
+                                    <li class="mb-2">
+                                        <strong>Enter Personal Information:</strong> Add your name, contact details, and
+                                        professional titles for each profile
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Add Work Experiences:</strong> Enter job history with three-level
+                                        content
+                                        visibility control
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Configure Technical Tools:</strong> Add skills with profile-specific
+                                        subcategories
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Add Education & Certifications:</strong> Include academic and
+                                        professional
+                                        credentials
+                                    </li>
+                                    <li class="mb-2">
+                                        <strong>Apply Profile Presets:</strong> Use presets to quickly configure
+                                        visibility
+                                        for different CV types
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong>Generate PDF:</strong> Export your tailored CV as a one-page
+                                        professional
+                                        document
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generatePDF(personId, profileName) {
+        const payload = { "one_page": false };
+        console.log('Sending Export PDF request with payload:', payload);
+        fetch(`/profile/${personId}/pdf/${profileName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('PDF generation failed');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CV_${profileName}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                alert('Error generating PDF: ' + error.message);
+                console.error('PDF generation error:', error);
+            });
+    }
+
+    function generateOnepagePDF(personId, profileName) {
+        const payload = { "one_page": true };
+        console.log('Sending One-Page PDF request with payload:', payload);
+        fetch(`/profile/${personId}/pdf/${profileName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('PDF generation failed');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CV_${profileName}_onepage.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                alert('Error generating PDF: ' + error.message);
+                console.error('PDF generation error:', error);
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Advanced Training - CV Builder{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-award-fill"></i> Manage Advanced Training & Certifications</h2>
+                    <p class="text-muted">View and edit all courses and certifications</p>
+                </div>
+                <a href="/forms/advanced-training" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add New Training
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="trainingTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Provider</th>
+                                    <th>Date</th>
+                                    <th>Display Order</th>
+                                    <th>Image</th>
+                                    <th>Profiles</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="loadingMessage" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading training records...</p>
+                    </div>
+                    <div id="emptyMessage" class="text-center py-4" style="display:none;">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">No training records found. Click "Add New Training" to create one.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadTrainingRecords();
+});
+
+async function loadTrainingRecords() {
+    try {
+        const response = await fetch('/api/advanced-training');
+        if (!response.ok) throw new Error('Failed to load training records');
+        
+        const records = await response.json();
+        const tbody = document.querySelector('#trainingTable tbody');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const emptyMessage = document.getElementById('emptyMessage');
+        
+        loadingMessage.style.display = 'none';
+        
+        if (!records || records.length === 0) {
+            emptyMessage.style.display = 'block';
+            return;
+        }
+        
+        tbody.innerHTML = records.map(record => {
+            const profiles = [];
+            if (record.visible_qa_analyst) profiles.push('<span class="badge bg-primary">QA Analyst</span>');
+            if (record.visible_qa_engineer) profiles.push('<span class="badge bg-success">QA Engineer</span>');
+            if (record.visible_data_scientist) profiles.push('<span class="badge bg-info">Data Scientist</span>');
+            
+            const hasImage = record.image_url || record.image_thumbnail_url;
+            const imageIndicator = hasImage 
+                ? `<a href="${record.image_url}" target="_blank"><i class="bi bi-image-fill text-success" title="Has credential image"></i></a>`
+                : '<i class="bi bi-image text-muted" title="No image"></i>';
+            
+            const typeIcon = record.type === 'Course' 
+                ? '<i class="bi bi-book text-info"></i>' 
+                : '<i class="bi bi-patch-check text-warning"></i>';
+            
+            const dateText = record.completion_date 
+                ? new Date(record.completion_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short'})
+                : '-';
+            
+            return `
+                <tr>
+                    <td>${record.id}</td>
+                    <td>${typeIcon} ${record.type}</td>
+                    <td><strong>${escapeHtml(record.name)}</strong></td>
+                    <td>${escapeHtml(record.provider)}</td>
+                    <td>${dateText}</td>
+                    <td>${record.display_order || 0}</td>
+                    <td class="text-center">${imageIndicator}</td>
+                    <td>${profiles.join(' ') || '<span class="text-muted">None</span>'}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="/forms/advanced-training/${record.id}" class="btn btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button onclick="deleteRecord(${record.id}, '${escapeHtml(record.name)}')" 
+                                    class="btn btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error('Error loading training records:', error);
+        document.getElementById('loadingMessage').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i> Failed to load training records
+            </div>
+        `;
+    }
+}
+
+async function deleteRecord(id, name) {
+    if (!confirm(`Delete "${name}"?\n\nThis will mark the record as inactive (soft delete).`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/advanced-training/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            alert('Training record deleted successfully');
+            loadTrainingRecords();
+        } else {
+            alert('Failed to delete record');
+        }
+    } catch (error) {
+        console.error('Error deleting:', error);
+        alert('Error deleting record');
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+{% endblock %}

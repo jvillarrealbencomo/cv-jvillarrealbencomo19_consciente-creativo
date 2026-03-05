@@ -1,0 +1,9 @@
+version,skill,category,role,weight,synonyms,source
+2026.1.0,python,programming,data_scientist,1.0,py|python3,onet
+2026.1.0,sql,databases,data_scientist,0.9,,onet
+2026.1.0,statistics,analytics,data_scientist,0.9,,onet
+2026.1.0,machine learning,modeling,data_scientist,1.0,ml,onet
+2026.1.0,data visualization,analytics,data_scientist,0.8,dataviz,onet
+2026.1.0,selenium,test automation,qa_engineer,0.7,,onet
+2026.1.0,postman,api testing,qa_engineer,0.7,,onet
+2026.1.0,ci/cd,devops,qa_engineer,0.7,ci cd|cicd,onet

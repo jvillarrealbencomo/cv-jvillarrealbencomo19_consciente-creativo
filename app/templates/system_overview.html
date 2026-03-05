@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}System Overview - Professional CV Builder{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-dark">
+                    System Overview
+                </h1>
+                <h5 class="text-muted mb-0">Professional CV Builder API</h5>
+                <p class="text-muted">({{ app_metadata.get('release_year', '2026') }})</p>
+                <hr class="my-4">
+            </div>
+
+            <!-- Core Purpose Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-3">
+                    <i class="bi bi-flag"></i> Core Purpose
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="text-muted mb-0">
+                            This system was designed to transform descriptive professional data into <strong>structured, 
+                            measurable intelligence</strong>. It integrates normalized skill modeling, cross-dataset benchmarking, 
+                            and <strong>deterministic scoring logic</strong> to generate objective indicators of market alignment.
+                        </p>
+                        <p class="text-muted mt-3 mb-0">
+                            Its primary value lies in producing <strong>reproducible, data-driven intelligence</strong> rather 
+                            than narrative interpretation.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytical & Engineering Foundation Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-3">
+                    <i class="bi bi-cpu"></i> Analytical & Engineering Foundation
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="text-muted">
+                            The conceptual basis of this system is grounded in prior experience designing 
+                            <strong>mathematical transformation models</strong> and implementing computational simulations. 
+                            Earlier engineering research involved the development of multiple mathematical models to simulate 
+                            complex transformation processes, initially implemented in structured programming environments and 
+                            later extended into more advanced computational contexts.
+                        </p>
+                        <p class="text-muted mb-0">
+                            Exposure to modeling paradigms such as the <strong>Hindmarsh–Rose model</strong> reinforced an 
+                            understanding of deterministic systems, nonlinear dynamics, and reproducible simulation logic. 
+                            This research-oriented background informs the system's structured analytical design and emphasis 
+                            on deterministic behavior.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Strategy & Intelligence Generation Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-3">
+                    <i class="bi bi-database"></i> Data Strategy & Intelligence Generation
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            The system operates as a <strong>data intelligence engine</strong> built upon:
+                        </p>
+                        <ul class="text-muted">
+                            <li>Skill normalization into structured entities</li>
+                            <li>Cross-referencing against external market-referenced datasets</li>
+                            <li>Comparative benchmarking across professional profiles</li>
+                            <li>Quantitative readiness score computation</li>
+                            <li>Transparent metric derivation</li>
+                        </ul>
+                        <p class="text-muted mt-3 mb-0">
+                            By transforming qualitative professional attributes into measurable datasets, the system enables 
+                            objective evaluation and consistent cross-profile comparison. The <strong>Profile Readiness Score</strong> 
+                            is not a heuristic estimate, but the result of explicit, reproducible alignment logic.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Validation & Architectural Design Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-3">
+                    <i class="bi bi-shield-check"></i> Validation & Architectural Design
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            The analytical model is supported by a <strong>modular REST-based architecture</strong> designed 
+                            to ensure robustness and traceability:
+                        </p>
+                        <ul class="text-muted">
+                            <li>Clear separation of concerns</li>
+                            <li>Version-controlled analytical endpoints</li>
+                            <li>Deterministic scoring logic</li>
+                            <li>Testable and auditable evaluation mechanisms</li>
+                            <li>Reproducible outputs from identical inputs</li>
+                        </ul>
+                        <p class="text-muted mt-3 mb-0">
+                            This validation-oriented design ensures that intelligence generation remains <strong>stable, 
+                            transparent, and technically verifiable</strong>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Professional Implication Section -->
+            <section class="mb-5">
+                <h2 class="h3 fw-bold text-primary mb-3">
+                    <i class="bi bi-award"></i> Professional Implication
+                </h2>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            This project demonstrates the ability to:
+                        </p>
+                        <ul class="text-muted mb-0">
+                            <li>Integrate model-based reasoning with system architecture</li>
+                            <li>Design analytical frameworks that generate measurable intelligence</li>
+                            <li>Apply quantitative evaluation logic to real-world problems</li>
+                            <li>Incorporate validation principles into system design</li>
+                            <li>Bridge data modeling, engineering discipline, and structured analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Closing Note -->
+            <div class="alert alert-info mt-5" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Note:</strong> This section focuses on the analytical and architectural foundation of the system. Functional behavior is detailed in the Platform Overview.
+            </div>
+
+            <!-- Attribution Footer -->
+            <div class="text-center mt-4 pt-4 border-top">
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-file-earmark-pdf"></i> 
+                    Source: System Overview.pdf | 
+                    <strong>Professional CV Builder API</strong> | 
+                    Version {{ app_metadata.get('application_version', '2026.2.0') }} | 
+                    Released {{ app_metadata.get('release_year', '2026') }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

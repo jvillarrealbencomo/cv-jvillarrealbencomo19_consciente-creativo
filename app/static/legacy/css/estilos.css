@@ -1,0 +1,293 @@
+/* estilos () funciona estructura de 3 dispositivos y agregue otra estructura de 4 dispos q no he probado */
+* {
+    margin:0px;
+    padding: 0px;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+}
+body{
+    height:100%;
+}
+    h4,h5{
+        text-align: center; 
+        color: white;
+    }
+    h4,h5{
+        text-align: center; 
+        color: white;
+    }
+     
+    p{
+        text-align: center;
+        color: white; 
+    }
+    .color-white {
+        color: white; 
+    }
+    .fotojvb {
+        width:120px;
+        height:120px;
+    }
+    .documento {
+        width:50px;
+        height:50px;
+    }
+    .documentoPag1 {
+        width:50px;
+        height:50px;
+    }
+    .documentoPag2 {
+        width:50px;
+        height:50px;
+    }
+    .titulos {
+        width:350px;
+        height:300px;
+    }
+.nav-link {
+    color: whitesmoke; 
+}
+
+@media screen and (max-width:992px){
+        .bg-nuevo {
+            background-color: #0f0c29;
+            background-color: #201b52;
+            /*background: #0f0c29;*/
+            color:  whitesmoke;
+        }
+        img {
+                position:relative;
+                margin-top: 0px; margin-left:0px; margin-right:0px;
+                text-align: left;
+                background-color: #f8f2e6;/**/
+                border-color: 2px solid #221914;
+        }
+        h2{
+            font-weight: bold;
+            font-size:250%;
+            color: #201b52;
+            color: #0f0c29;
+            text-align: center;
+            text-decoration:none;
+        }
+        a{
+            font-weight: bold;
+            font-size:95%;
+        }
+        header nav ul li:hover {
+            background-color: #5465fc;
+        }
+        header nav ul li a:hover {
+            color: #221914;font-weight: bold;
+        }
+        section {
+            width:100%;
+            background: #ECE9E6;  /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+            }
+        .principal {
+            position: relative;
+            width:60%; /* calc (80% - 350px);  900px;*/
+            margin: 0 20% auto;
+            left:0;/*width%;*/
+            font-size: 98%;
+            background-color: #201b52;
+            background-color: #0f0c29;
+            display: inline-block;
+            text-align: center;
+        }
+        .pie {
+            background-color: #0f0c29;
+            background: #221914;     
+            background-color: #201b52;
+            color:  whitesmoke;
+            text-align: center;
+        } 
+        h1 {
+            text-align: center;
+            color: white;
+        }
+    }
+            
+
+@media screen and (min-width:992px){
+/*@media screen and (min-width:992px){*/
+        .bg-nuevo {
+        background-color: #0f0c29;
+        background: #221914;
+        color:  whitesmoke;
+    }
+    img {
+            position:relative;
+            margin-top: 0px; margin-left:0px; margin-right:0px;
+            text-align: left;
+            background-color: #f8f2e6;/**/
+            border-color: 2px solid #221914;
+    }
+    h2{
+        font-weight: bold;
+        font-size:250%;
+        color: #201b52;
+        color: #301201;
+        text-align: center;
+        text-decoration:none;
+    }
+    a{
+        font-weight: bold;
+        font-size:120%;
+    }
+    header nav ul li:hover {
+        background-color: #fc9154;
+    }
+    header nav ul li a:hover {
+        color: #221914;font-weight: bold;
+    }
+    section {
+        width:100%;
+        background: #ECE9E6;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+    .principal {
+        position: relative;
+        width:60%; /* calc (80% - 350px);  900px;*/
+        margin: 0 20% auto;
+        left:0;/*width%;*/
+        font-size: 98%;
+        background-color: #301201;
+        background-color: #9e7503;
+        display: inline-block;
+        text-align: center;
+    }
+    .pie {
+        background-color: #0f0c29;background: #221914;     
+        color:  whitesmoke;
+        text-align: center;
+    } 
+    h1 {
+        text-align: center;
+        color: white;
+    }
+}
+
+@media screen and (max-width:768px){
+    .bg-nuevo {
+        background-color: #0f0f0e;
+        background-color: #29270c;
+        background-color: #555501;
+        color:  whitesmoke;
+      }
+    img {
+            position:relative;
+            margin-top: 0px; margin-left:0px; margin-right:0px;
+            text-align: left;
+            background-color: #f8f2e6;/**/
+            border-color: 2px solid #29270c;}
+    h2{
+        font-weight: bold;
+        font-size:190%;
+        color: #0f0f0e;
+        text-align: center;
+        text-decoration:none;
+    }
+    a{
+        font-weight: bold;
+        font-size:70%;
+    }
+    header nav ul li:hover {
+        background-color: #54fc78;
+    }
+    header nav ul li a:hover {
+        color: #29270c;font-weight: bold;
+    }
+    section {
+        width:100%;
+        background: #ECE9E6;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+    .principal {
+        position: relative;
+        width:70%; /* calc (80% - 350px);  900px;*/
+        margin: 0 15% auto;
+        left:0;/*width%;*/
+        font-size: 85%;
+        background-color: #797900;
+        background-color: #201e01;
+        display: inline-block;
+        text-align: center;
+    }
+    .pie {
+        background-color: #0f0c29;
+        background: #29270c;     
+        background-color: #555501;
+        color:  whitesmoke;
+        text-align: center;
+    } 
+    h1 {
+        text-align: center;
+        color: white;
+    }
+}
+
+
+
+@media screen and (max-width: 576px){
+    .bg-nuevo {
+        background-color: #0f0f0e;
+        background-color: #29270c; 
+        color:  whitesmoke;
+      }
+    img {
+            position:relative;
+            margin-top: 0px; margin-left:0px; margin-right:0px;
+            text-align: left;
+            background-color: #f8f2e6;/**/
+            border-color: 2px solid #29270c;}
+    h2{
+        font-weight: bold;
+        font-size:200%;
+        color: #0f0f0e;
+        text-align: center;
+        text-decoration:none;
+    }
+    a{
+        font-weight: bold;
+        font-size:50%;
+    }
+    header nav ul li:hover {
+        background-color: #54fc78;
+    }
+    header nav ul li a:hover {
+        color: #29270c;font-weight: bold;
+    }
+    section {
+        width:100%;
+        background: #ECE9E6;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #FFFFFF, #ECE9E6); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        }
+    .principal {
+        position: relative;
+        width:90%; /* calc (80% - 350px);  900px;*/
+        margin: 0 5% auto;
+        left:0;/*width%;*/
+        font-size: 80%;
+        background-color: #555501;
+        display: inline-block;
+        text-align: center;
+    }
+    .pie {
+        background-color: #0f0c29;
+        background: #29270c;     
+        color:  whitesmoke;
+        text-align: center;
+    } 
+    h1 {
+        text-align: center;
+        color: white;
+    }
+}
+    

@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management - CV Builder{% endblock %}
+
+{% block content %}
+<style>
+    /* Soft pastel amber for Historical badge */
+    .badge.bg-warning {
+        background-color: #ffd699 !important;
+    }
+</style>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-table"></i> Data Management
+                </h2>
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-house"></i> Back to Home
+                </a>
+            </div>
+            <p class="text-muted">Manage, view, and control visibility of all CV records</p>
+        </div>
+    </div>
+
+    <!-- Tabs for different record types -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="experience-tab" data-bs-toggle="tab" data-bs-target="#experience-pane" type="button" role="tab" aria-controls="experience-pane" aria-selected="true">
+                <i class="bi bi-briefcase"></i> Work Experience ({{ work_experiences|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education-pane" type="button" role="tab" aria-controls="education-pane" aria-selected="false">
+                <i class="bi bi-book"></i> Education ({{ education|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="training-tab" data-bs-toggle="tab" data-bs-target="#training-pane" type="button" role="tab" aria-controls="training-pane" aria-selected="false">
+                <i class="bi bi-award"></i> Advanced Training ({{ advanced_training|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="person-tab" data-bs-toggle="tab" data-bs-target="#person-pane"
+                type="button" role="tab" aria-controls="person-pane" aria-selected="false">
+                Person
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="evidence-tab" data-bs-toggle="tab" data-bs-target="#evidence-pane"
+                type="button" role="tab" aria-controls="evidence-pane" aria-selected="false">
+                Evidence Hub
+            </button>
+        </li>         
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Work Experience Tab -->
+        <div class="tab-pane fade show active" id="experience-pane" role="tabpanel" aria-labelledby="experience-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Dates</th>
+                            <th>Status</th>
+                            <th>Historical</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exp in work_experiences %}
+                        <tr class="{% if not exp.active %}table-danger{% endif %}">
+                            <td><strong>#{{ exp.id }}</strong></td>
+                            <td>{{ exp.company }}</td>
+                            <td>{{ exp.job_title }}</td>
+                            <td>
+                                <small>
+                                    {{ exp.start_date.strftime('%Y-%m-%d') if exp.start_date else 'N/A' }}
+                                    to
+                                    {{ exp.end_date.strftime('%Y-%m-%d') if exp.end_date else 'Present' }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if exp.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if exp.is_historical %}
+                                    <span class="badge bg-warning text-dark">Historical</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">Current</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="javascript:void(0)"
+                                    class="btn btn-primary"
+                                    title="Edit"
+                                    data-edit-url="{{ url_for('forms.experience_form', exp_id=exp.id) }}"
+                                    onclick="return requireAdminAndGo('experience', this.dataset.editUrl)">
+                                    <i class="bi bi-pencil"></i>                                    </a>
+                                    {% if exp.active %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('experience', {{ exp.id }}, false)" title="Hide from One-Page PDF">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('experience', {{ exp.id }}, true)" title="Restore">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger" onclick="permanentDelete('experience', {{ exp.id }}, '{{ exp.job_title }}')" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not work_experiences %}
+            <div class="alert alert-info">No work experience records found</div>
+            {% endif %}
+        </div>
+
+        <!-- Education Tab -->
+        <div class="tab-pane fade" id="education-pane" role="tabpanel" aria-labelledby="education-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>School/University</th>
+                            <th>Degree</th>
+                            <th>Graduation</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for edu in education %}
+                        <tr class="{% if not edu.active %}table-danger{% endif %}">
+                            <td><strong>#{{ edu.id }}</strong></td>
+                            <td>{{ edu.institution }}</td>
+                            <td>{{ edu.degree }}</td>
+                            <td>
+                                <small>{{ edu.year_obtained or edu.end_year or edu.start_year or 'N/A' }}</small>
+                            </td>
+                            <td>
+                                {% if edu.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="javascript:void(0)" 
+                                       class="btn btn-primary"
+                                       data-edit-url="{{ url_for('forms.education_form', edu_id=edu.id) }}"
+                                       onclick="return requireAdminAndGo('education', this.dataset.editUrl)">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if edu.active %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('education', {{ edu.id }}, false)">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('education', {{ edu.id }}, true)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger" onclick="permanentDelete('education', {{ edu.id }}, '{{ edu.degree }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not education %}
+            <div class="alert alert-info">No education records found</div>
+            {% endif %}
+        </div>
+
+        <!-- Advanced Training Tab -->
+        <div class="tab-pane fade" id="training-pane" role="tabpanel" aria-labelledby="training-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Provider</th>
+                            <th>Completion</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for training in advanced_training %}
+                        <tr class="{% if not training.active %}table-danger{% endif %}">
+                            <td><strong>#{{ training.id }}</strong></td>
+                            <td>
+                                <span class="badge bg-primary">{{ training.type|capitalize }}</span>
+                            </td>
+                            <td>{{ training.name }}</td>
+                            <td>{{ training.provider }}</td>
+                            <td>
+                                <small>{{ training.completion_date.strftime('%Y-%m-%d') if training.completion_date else 'N/A' }}</small>
+                            </td>
+                            <td>
+                                {% if training.active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="javascript:void(0)" 
+                                        class="btn btn-primary"
+                                        data-edit-url="{{ url_for('forms.advanced_training_form', training_id=training.id) }}"
+                                        onclick="return requireAdminAndGo('training', this.dataset.editUrl)">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if training.active %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('training', {{ training.id }}, false)">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary" onclick="toggleRecord('training', {{ training.id }}, true)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button class="btn btn-danger" onclick="permanentDelete('training', {{ training.id }}, '{{ training.name }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not advanced_training %}
+            <div class="alert alert-info">No advanced training records found</div>
+            {% endif %}
+        </div>
+
+        <!-- Person Tab -->
+        <div class="tab-pane fade" id="person-pane" role="tabpanel" aria-labelledby="person-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Person Records</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for person_item in persons %}
+                                <tr>
+                                    <td>{{ person_item.id }}</td>
+                                    <td>
+                                        {% if person_item.full_name is defined and person_item.full_name %}
+                                            {{ person_item.full_name }}
+                                        {% elif person_item.name is defined and person_item.name %}
+                                            {{ person_item.name }}
+                                        {% else %}
+                                            {{ (person_item.first_name if person_item.first_name is defined else '') ~ ' ' ~ (person_item.last_name if person_item.last_name is defined else '') }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ person_item.email if person_item.email is defined else '' }}</td>
+                                    <td>{{ person_item.phone if person_item.phone is defined else '' }}</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-outline-primary btn-sm"
+                                            href="javascript:void(0)"
+                                            data-edit-url=""
+                                            onclick="return requireAdminAndGo('person', '/forms/person?person_id={{ person_item.id }}')">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        {% if person_item.active is defined %}
+                                            {% if person_item.active %}
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="toggleRecord('person', {{ person_item.id }}, false)">
+                                                <i class="bi bi-archive"></i> Soft Delete
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="toggleRecord('person', {{ person_item.id }}, true)">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+                                        <button class="btn btn-danger btn-sm"
+                                            onclick="permanentDelete('person', {{ person_item.id }}, 'Person #{{ person_item.id }}')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-muted text-center">No person records found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evidence Hub Tab -->
+        <div class="tab-pane fade" id="evidence-pane" role="tabpanel" aria-labelledby="evidence-tab">
+            <div class="alert alert-light small">
+                Admin password required for actions in this tab.
+                <div class="input-group input-group-sm mt-2" style="max-width: 360px;">
+                    <input type="password" class="form-control admin-password" placeholder="Admin password">
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3">Evidence Hub Entries</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Slug</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in evidence_hub_entries %}
+                                <tr>
+                                    <td>{{ entry.id }}</td>
+                                    <td>{{ entry.title }}</td>
+                                    <td>{{ entry.slug }}</td>
+                                    <td class="text-end">
+                                        {% if entry.active is defined %}
+                                            {% if entry.active %}
+                                            <button class="btn btn-warning btn-sm"
+                                                onclick="toggleRecord('evidence', {{ entry.id }}, false)">
+                                                <i class="bi bi-archive"></i> Soft Delete
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="toggleRecord('evidence', {{ entry.id }}, true)">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                            </button>
+                                            {% endif %}
+                                        {% endif %}
+                                        <button class="btn btn-danger btn-sm"
+                                            onclick="permanentDelete('evidence', {{ entry.id }}, '{{ entry.title|e }}')">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-muted text-center">No evidence entries found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+    <!-- Legend -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title">Legend</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="small mb-1"><strong>Status Badges:</strong></p>
+                            <ul class="small list-unstyled">
+                                <li><span class="badge bg-success">Active</span> - Included in One-Page PDF</li>
+                                <li><span class="badge bg-danger">Inactive</span> - Only in Export PDF</li>
+                                <li><span class="badge bg-warning">Historical</span> - Archive data</li>
+                                <li><span class="badge bg-secondary">Current</span> - Recent data</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="small mb-1"><strong>Actions:</strong></p>
+                            <ul class="small list-unstyled">
+                                <li><i class="bi bi-pencil"></i> Edit - Modify record details</li>
+                                <li><i class="bi bi-eye-slash"></i> Hide - Exclude from One-Page PDF</li>
+                                <li><i class="bi bi-eye"></i> Restore - Include in One-Page PDF</li>
+                                <li><i class="bi bi-trash"></i> Delete - Permanently remove record</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const recordTypeToTab = {
+    experience: 'experience-pane',
+    education: 'education-pane',
+    training: 'training-pane',
+    person: 'person-pane',
+    evidence: 'evidence-pane'
+};
+
+function ensureAdminPassword(recordType) {
+    const tabId = recordTypeToTab[recordType];
+    const input = tabId ? document.querySelector(`#${tabId} .admin-password`) : null;
+    let pwd = input ? input.value.trim() : '';
+    if (!pwd) {
+        pwd = prompt('Admin password required:') || '';
+        if (input && pwd) input.value = pwd;
+    }
+    return pwd.trim();
+}
+
+function requireAdminAndGo(recordType, url) {
+    const pwd = ensureAdminPassword(recordType);
+    if (!pwd) return false;
+    window.location.href = url;
+    return false;
+}
+
+function getAdminPassword(recordType) {
+    const tabId = recordTypeToTab[recordType];
+    const input = tabId ? document.querySelector(`#${tabId} .admin-password`) : null;
+    return input ? input.value.trim() : '';
+}
+
+async function toggleRecord(recordType, recordId, activate) {
+    const adminPassword = ensureAdminPassword(recordType);
+    if (!adminPassword) return;
+
+    const action = activate ? 'restore' : 'soft-delete';
+    const endpoint = `/api/data-management/record/${recordType}/${recordId}/${action}`;
+
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_password: adminPassword })
+        });
+        if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+        location.reload();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function permanentDelete(recordType, recordId, recordName) {
+    const adminPassword = ensureAdminPassword(recordType);
+    if (!adminPassword) return;
+
+    if (!confirm(`Are you sure you want to permanently delete "${recordName}"? This cannot be undone.`)) return;
+
+    const endpoint = `/api/data-management/record/${recordType}/${recordId}/permanent-delete`;
+
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_password: adminPassword })
+        });
+        if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+        location.reload();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+</script>
+
+{% endblock %}

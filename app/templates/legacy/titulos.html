@@ -1,0 +1,34 @@
+{% extends "legacy/formatoPrincipal4.html" %}
+
+{% block content2 %}
+<title>CV Documentos</title> 
+{% endblock %}
+
+{% block content %}
+<h4>Documentos: Títulos</h4> 
+<hr><h5>Ing. de Sistemas y Magister Gerencia RRHH</h5>
+<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{{ url_for ('static', filename='legacy/img/ingeniero_de_sistemas.jpg')}}" alt="Titulo de ingeniero de sistemas" title="Titulo de ingeniero de sistemas" class="titulos">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for ('static', filename='legacy/img/magister_scientaurum.jpg')}}" alt="Titulo de Magister Scientaurum" title="Titulo de Magister Scientaurum"  class="titulos">
+      </div>
+    </div>
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon color-nuevo" aria-hidden="true"></span>
+      <span class="sr-only">Anterior</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Próximo</span>
+    </a>
+  </div>
+  <p><br></p>
+{% endblock %}

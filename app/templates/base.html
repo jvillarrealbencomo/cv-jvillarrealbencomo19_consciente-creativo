@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CV Builder - Javier Villarreal Bencomo{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='uploads/profiles/person_2.png') }}" 
+                    alt="Profile Icon" 
+                    class="me-2" 
+                    style="height: 32px; width: 32px; border-radius: 50%;">
+                CV Builder {{ app_metadata.get('release_year', '2026') }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-pencil-square"></i> Data Entry
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/forms/person"><i class="bi bi-person-circle"></i> Personal Info</a></li>
+                            <li><a class="dropdown-item" href="/forms/experience"><i class="bi bi-briefcase"></i> Work Experience</a></li>
+                            <li><a class="dropdown-item" href="/forms/tool"><i class="bi bi-tools"></i> Technical Tools</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/education"><i class="bi bi-mortarboard"></i> Education</a></li>
+                            <li><a class="dropdown-item" href="/admin/training"><i class="bi bi-award"></i> Advanced Training & Certifications</a></li>
+                            <li><a class="dropdown-item" href="/forms/language"><i class="bi bi-translate"></i> Languages</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/data-insights"><i class="bi bi-graph-up-arrow"></i> Data Insights</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dataDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin"><i class="bi bi-sliders"></i> Admin Panel</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/admin/data-management"><i class="bi bi-table"></i> Manage
+                                    All Records</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="documentationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-file-earmark-text"></i> Documentation
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="documentationDropdown">
+                            <li><a class="dropdown-item" href="/system-overview">
+                                <i class="bi bi-diagram-3"></i> System Overview</a></li>
+                            <li><a class="dropdown-item" href="/platform-overview">
+                                <i class="bi bi-info-circle"></i> Platform Overview</a></li>
+                        </ul>
+                    </li>
+<!-- 
+                    <div class="btn-group btn-lg" role="group">
+                        <button id="dataMenuBtn" type="button" class="btn btn-outline-secondary dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gear"></i> Admin
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dataMenuBtn">
+                            <li><a class="dropdown-item" href="/admin"><i class="bi bi-sliders"></i> Admin Panel</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/admin/data-management"><i class="bi bi-table"></i> Manage
+                                    All Records</a></li>
+                        </ul>
+                    </div>
+-->
+
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                            {% if navbar_profile_image %}
+                            <img src="{{ navbar_profile_image }}" class="avatar" alt="Profile">
+                            {% else %}
+                            <i class="bi bi-person-circle me-1"></i>
+                            {% endif %}
+                            Profiles
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" data-profile="qa_analyst">
+                                <i class="bi bi-briefcase"></i> QA Analyst
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" data-profile="qa_engineer">
+                                <i class="bi bi-code-slash"></i> QA Engineer
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" data-profile="data_scientist">
+                                <i class="bi bi-graph-up"></i> Data Scientist
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/legacy/cv2019">
+                                <i class="bi bi-archive"></i> CV 2019 (Static)
+                            </a></li>
+<!-- 
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="/profile/close">
+                                    <i class="bi bi-x-circle"></i> Close API
+                                </a>
+                            </li>
+ -->
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">
+                <i class="bi bi-c-circle"></i> {{ app_metadata.get('release_year', '2026') }} Javier Villarreal Bencomo - Professional CV Application
+            </p>
+            <p class="small text-muted mb-0">
+                Version {{ app_metadata.get('application_version', '2026.2.0') }} | 
+                API {{ app_metadata.get('api_version', 'v2') }} 
+                ({{ app_metadata.get('api_status', 'production')|capitalize }}) | 
+                Built with Flask & Bootstrap
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

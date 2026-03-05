@@ -1,0 +1,343 @@
+/* Modern CV Builder Styles - Version 2025 */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+    --dark-bg: #212529;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    font-size: 0.98rem;
+    line-height: 1.45;
+}
+
+
+.container {
+    max-width: 1140px;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.navbar {
+    font-size: 0.95rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+/* Form Enhancements */
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Switch Styling */
+.form-check-input:checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.form-switch .form-check-input {
+    cursor: pointer;
+}
+
+/* Button Enhancements */
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Badge Enhancements */
+.badge {
+    padding: 0.4em 0.8em;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+/* Alert Enhancements */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-size: 1.25rem;
+    letter-spacing: -0.5px;
+}
+
+.nav-link {
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--info-color) !important;
+}
+
+/* Preview Panel */
+.sticky-top {
+    z-index: 100;
+}
+
+#visibilityPreview, #contentPreview, #toolPreview {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Content Level Selector */
+.btn-check:checked + .btn-outline-secondary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Profile Configuration Cards */
+.card.border {
+    border: 1px solid #dee2e6 !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card.border:hover {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
+}
+
+/* Icon Styling */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Small Text */
+.small, small {
+    font-size: 0.875rem;
+}
+
+/* Text Colors */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Spacing Utilities */
+.gap-2 {
+    gap: 0.5rem !important;
+}
+
+.gap-3 {
+    gap: 1rem !important;
+}
+
+/* Border Utilities */
+.border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+/* Shadow Utilities */
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .sticky-top {
+        position: relative !important;
+        top: 0 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-header h4 {
+        font-size: 1.25rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .form-select {
+        margin-bottom: 0.5rem;
+        width: 100% !important;
+    }
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Success State */
+.success-feedback {
+    animation: successPulse 0.5s;
+}
+
+@keyframes successPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+footer p {
+    margin-bottom: 0.5rem;
+}
+
+/* Print Styles */
+@media print {
+    .navbar, footer, .btn, .form-check-input, .badge {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Accessibility */
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+button:focus, a:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Animation for form updates */
+.form-updated {
+    animation: highlightUpdate 0.5s;
+}
+
+@keyframes highlightUpdate {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(25, 135, 84, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.card-border-ui-section-technical {
+  border: 1px solid #0d6efd;
+  border-radius: 16px;
+}
+
+.card-border-api-section-technical {
+  border: 1px solid #094dbf;
+  border-radius: 16px;
+}
+
+.card-border-data-section-technical {
+  border: 1px solid #198754;
+  border-radius: 16px;
+}
+
+.profile-icon {
+    font-size: 3rem;
+    line-height: 1;
+    display: inline-block;
+}
+
+.section-spacing {
+    margin-top: 4rem;
+}
+
+.profile-icon-wrapper {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.profile-icon-wrapper i,
+.profile-icon-wrapper .emoji-icon {
+    font-size: 3rem;
+    line-height: 1;
+    display: block;
+}
+
+    /* Soft pastel amber for Historical badge */
+    .badge.bg-warning {
+        background-color: #ffd699 !important;
+    }
+    
+.fs-2 { 
+        font-size: 3rem !important; 
+}
+
+.brand-logo,
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;   /* opcional: circular */
+  object-fit: cover;
+  vertical-align: middle;
+}
