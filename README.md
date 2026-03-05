@@ -60,6 +60,60 @@ The **Professional CV Builder API** is a data-driven platform designed for recru
 - Production-ready configuration
 
 ---
+<!-- ...existing code... -->
+
+## Technical Evidence (orden vigente)
+
+El orden oficial de tarjetas en **Technical Evidence** es:
+
+1. `slug: data-science`
+2. `title: UI / Automation: Selenium & Cucumber`
+3. `title: API Automation: Postman & Newman`
+
+> Nota: este orden debe estar alineado en:
+> - `app/routes/evidence_hub.py` (`ensure_defaults`)
+> - `populate_evidence_hub.py`
+> para evitar que el Home vuelva a mostrar un orden anterior.
+
+## Migración de data SQLite -> Postgres (Render)
+
+Se incluye el script:
+
+- `scripts/migrate_sqlite_to_postgres.py`
+
+### Pre-requisitos
+
+- Tener el esquema ya aplicado en Postgres (ej. `flask db upgrade`).
+- Instalar dependencias:
+
+```bash
+python -m pip install "sqlalchemy>=2.0" "psycopg[binary]>=3.1"
+```
+
+### Variables de entorno
+
+En Windows PowerShell:
+
+```powershell
+$env:SQLITE_URL="sqlite:///instance/app.db"
+$env:POSTGRES_URL="postgresql+psycopg://USER:PASSWORD@HOST:5432/DBNAME?sslmode=require"
+```
+
+> Si Render entrega `postgres://...`, el script lo normaliza automáticamente.
+
+### Ejecución
+
+```powershell
+python scripts\migrate_sqlite_to_postgres.py --reset
+```
+
+### Sobre tablas de versionado / metadata
+
+- `alembic_version` (**versionado de migraciones**) se excluye intencionalmente de la copia de datos.
+- Si existe una tabla de negocio llamada `metadata` (u otra equivalente), sí debe migrarse.
+- Recomendación: ejecutar primero migraciones de esquema y luego migración de data.
+
+<!-- ...existing code... -->
 
 ## � Data Insights Methodology
 
