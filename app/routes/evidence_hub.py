@@ -24,27 +24,26 @@ def ensure_upload_dir() -> str:
 
 def ensure_defaults():
     defaults = [
-        {
-            'slug': 'qa-ui-automation',
-            'title': 'UI Automation: Selenium and Cucumber',
-            'stack': 'Java · Selenium · Cucumber · Maven',
-            'description': 'Comprehensive UI tests that validate real user flows end to end',
-            'display_order': 1
-        },
-        {
-            'slug': 'api-automation',
-            'title': 'API Automation: Postman and Newman',
-            'stack': 'Postman · Newman · JSON · CI Ready',
-            'description': 'Automated validation of critical API endpoints with assertions and reports',
-            'display_order': 2
-        },
-        {
-            'slug': 'data-science',
-            'title': 'Data & Market Insights (API-driven)',
-            'stack': 'Python · Pandas · API Integration · Analytical Modeling',
-            'description': 'Demonstrates how public datasets and CV data are cross-referenced using a structured scoring model, exposed through REST APIs, and visualized in an interactive dashboard',
-             'display_order': 3
-        },
+            {
+                'slug': 'data-science',
+                'title': 'Market Intelligence Engine (API-driven analytics)',
+                'stack': 'Python · Pandas · REST APIs · Analytical Modeling · Multi-Dataset Evaluation',
+                'description': 'Demonstrates how CV data is processed through a deterministic analytical engine that cross-references multiple public market datasets, computes a reproducible readiness score, and exposes structured results via REST APIs',
+                'display_order': 1
+            },            {
+                'slug': 'qa-ui-automation',
+                'title': 'UI / Automation: Selenium & Cucumber',
+                'stack': 'Java · Selenium · Cucumber · Gherkin · BDD',
+                'description': 'Comprehensive UI test validation executed through structured automation suites. Includes reproducible test runs, and documented validation workflows',
+                'display_order': 2
+            },
+            {
+                'slug': 'api-automation',
+                'title': 'API Automation: Postman & Newman',
+                'stack': 'Postman · Newman · JSON · Contract Validation · Deterministic Testing',
+                'description': 'Automated validation of critical API endpoints with assertions, collections, and execution reports via Newman CLI',
+                'display_order': 3
+            }
     ]
 
     for item in defaults:
@@ -60,6 +59,7 @@ def ensure_defaults():
             entry.stack = item['stack']
             entry.description = item['description']
             entry.display_order = item['display_order']
+            entry.active = True
         else:
             db.session.add(EvidenceHubEntry(**item))
     db.session.commit()

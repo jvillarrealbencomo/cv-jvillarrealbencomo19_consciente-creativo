@@ -91,18 +91,18 @@ class PDFGenerator:
 
             # Trimming strategy: progressively reduce low-priority content, then typography
             trim_steps = [
-                ('hide_advanced_training', lambda d: d.update({'advanced_training': []})),
-                ('hide_languages', lambda d: d.update({'languages': []})),
                 ('reduce_experience_detail', PDFGenerator._trim_experience_detail),
                 ('compact_tools', PDFGenerator._trim_tools),
                 ('reduce_education', PDFGenerator._trim_education),
                 ('limit_experiences', PDFGenerator._trim_experience_count),
+                ('hide_languages', lambda d: d.update({'languages': []})),
                 ('shrink_font_9_5', lambda _: style_state.update({'font_pt': 9.5})),
                 ('tighten_line_height', lambda _: style_state.update({'line_height': 1.35})),
                 ('shrink_font_9_0', lambda _: style_state.update({'font_pt': 9.0})),
                 ('tighten_sections', lambda _: style_state.update({'section_margin': 12})),
                 ('reduce_margins', lambda _: style_state.update({'margin_in': 0.45})),
                 ('reduce_margins_more', lambda _: style_state.update({'margin_in': 0.40})),
+                ('hide_advanced_training', lambda d: d.update({'advanced_training': []})),
             ]
 
             for name, apply_step in trim_steps:
@@ -157,7 +157,7 @@ class PDFGenerator:
                         {PDFGenerator._render_languages_compact(profile_data.get('languages', []))}
                         {PDFGenerator._render_education_compact(profile_data.get('education', []), include_images=False)}
                         {PDFGenerator._render_references_compact(person)}
-                        {PDFGenerator._render_contact_compact(contacts)}
+                        {PDFGenerator._render_contact_compact(contacts, person)}
                     </div>
                     <div class="cv-right-column">
                         <div class="cv-header-block">
@@ -196,7 +196,7 @@ class PDFGenerator:
                 img_src = f"file:///{abs_path.replace(os.sep, '/')}"
             else:
                 img_src = img_url
-            header_image = f"""<img class="sidebar-avatar" src="{img_src}" alt="Profile photo" style="width: 120px; height: auto; margin: 0 auto 8px auto; display: block;">"""
+            header_image = f"""<img class="sidebar-avatar" src="{img_src}" alt="Profile photo">"""
 
         page1 = f"""
         <div class="cv-page">
@@ -216,7 +216,7 @@ class PDFGenerator:
             {PDFGenerator._render_languages_compact(profile_data.get('languages', []))}
             {PDFGenerator._render_education_compact(profile_data.get('education', []), include_images=True)}
             {PDFGenerator._render_references_compact(person)}
-            {PDFGenerator._render_contact_compact(contacts)}
+            {PDFGenerator._render_contact_compact(contacts, person)}
         </div>
         <div class="page-break"></div>
         """
@@ -738,10 +738,12 @@ class PDFGenerator:
         """
     
     @staticmethod
-    def _render_contact_compact(contacts):
+    def _render_contact_compact(contacts, person=None):
         """Render contacts in compact format for left column, sorted by international priority"""
         if not contacts:
-            return ''
+            contacts = {}
+        if person is None:
+            person = {}
         
         items = ''
         # Priority order: Email, LinkedIn, GitHub, CV URL, Phone
@@ -752,9 +754,11 @@ class PDFGenerator:
         if contacts.get('github_url'):
             items += f"""<div class="compact-item" style="font-size: 8pt; line-height:1.2; word-break: break-all;">{contacts['github_url']}</div>"""
         if contacts.get('personal_url'):
-            items += f"""<div class="compact-item">{contacts['personal_url']}</div>"""
-        if contacts.get('phone'):
-            items += f"""<div class="compact-item">{contacts['phone']}</div>"""
+            items += f"""<div class="compact-item" style="font-size: 7.8pt; line-height:1.2; white-space: nowrap;">Live API Portfolio: {contacts['personal_url']}</div>"""
+
+        phone_value = contacts.get('phone') or person.get('phone')
+        if phone_value:
+            items += f"""<div class="compact-item">{phone_value}</div>"""
         
         return f"""
         <div class="compact-section">
@@ -962,20 +966,15 @@ class PDFGenerator:
             min-height: 100%;
         }}
 
-        /* Cap inline images (e.g., education/certifications thumbnails) */
-        .cv-page img {{
-            max-height: 100px;
-            height: auto;
-        }}
-
         .page-break {{
             page-break-after: always;
         }}
         
         .sidebar-avatar {{
-            width: 80%;
-            max-height: 100px;
+            width: 74%;
+            max-height: 168px;
             height: auto;
+            object-fit: contain;
             margin: 0 auto 8px auto;
             display: block;
         }}
@@ -1107,7 +1106,7 @@ class PDFGenerator:
         items_sorted = sorted(items, key=sort_key, reverse=True)
         data['education'] = items_sorted[:keep]
         return data
-    
+
     @staticmethod
     def _generate_placeholder_pdf(profile_data, profile_name):
         """Generate a simple placeholder PDF when WeasyPrint is not available"""

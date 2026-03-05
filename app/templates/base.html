@@ -20,14 +20,13 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
         <div class="container-fluid">
-        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-            {% if navbar_profile_image %}
-            <img src="{{ navbar_profile_image }}" alt="Profile Logo" class="brand-logo me-2">
-            {% else %}
-            <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
-            {% endif %}
-            CV Builder {{ app_metadata.get('release_year', '2026') }}
-        </a>
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='uploads/profiles/person_2.png') }}" 
+                    alt="Profile Icon" 
+                    class="me-2" 
+                    style="height: 32px; width: 32px; border-radius: 50%;">
+                CV Builder {{ app_metadata.get('release_year', '2026') }}
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

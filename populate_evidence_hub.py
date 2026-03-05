@@ -11,26 +11,25 @@ def populate_evidence_hub():
     with app.app_context():
         defaults = [
             {
+                'slug': 'data-science',
+                'title': 'Market Intelligence Engine (API-driven analytics)',
+                'stack': 'Python · Pandas · REST APIs · Analytical Modeling · Multi-Dataset Evaluation',
+                'description': 'Demonstrates how CV data is processed through a deterministic analytical engine that cross-references multiple public market datasets, computes a reproducible readiness score, and exposes structured results via REST APIs',
+                'display_order': 1
+            },            {
                 'slug': 'qa-ui-automation',
                 'title': 'UI / Automation: Selenium & Cucumber',
                 'stack': 'Java · Selenium · Cucumber · Gherkin · BDD',
                 'description': 'Comprehensive UI test validation executed through structured automation suites. Includes reproducible test runs, and documented validation workflows',
-                'display_order': 1
+                'display_order': 2
             },
             {
                 'slug': 'api-automation',
                 'title': 'API Automation: Postman & Newman',
                 'stack': 'Postman · Newman · JSON · Contract Validation · Deterministic Testing',
-                'description': 'Demonstrates deterministic contract validation of critical analytical endpoints, ensuring structural integrity, reproducible execution, and reliability of the analytical engine',
-                'display_order': 2
-            },
-            {
-                'slug': 'data-science',
-                'title': 'Data & Market Insights (API-driven)',
-                'stack': 'Python · Pandas · REST APIs · Analytical Modeling · Multi-Dataset Evaluation',
-                'description': 'Demonstrates how CV data is processed through a deterministic analytical engine that cross-references multiple public market datasets, computes a reproducible readiness score, and exposes structured results via REST APIs',
+                'description': 'Automated validation of critical API endpoints with assertions, collections, and execution reports via Newman CLI',
                 'display_order': 3
-            },
+            }
         ]
 
         for item in defaults:
