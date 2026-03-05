@@ -1,0 +1,7 @@
+version,skill,category,role,weight,synonyms,source
+2026.1.0,pandas,data processing,data_scientist,0.9,,kaggle
+2026.1.0,numpy,data processing,data_scientist,0.9,,kaggle
+2026.1.0,scikit-learn,modeling,data_scientist,1.0,scikitlearn|sklearn,kaggle
+2026.1.0,feature engineering,modeling,data_scientist,0.9,feature-engineering,kaggle
+2026.1.0,api integration,engineering,data_scientist,0.7,api-integration,kaggle
+2026.1.0,automation,quality engineering,qa_engineer,0.7,,kaggle
